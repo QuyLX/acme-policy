@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compare, runShowcase } from '../lib/showcase.mjs';
+import { ALLOWED_PENDING, compare, runShowcase, showcaseExitCode } from '../lib/showcase.mjs';
 
 test('every runnable showcase case passes; pending cases are NOT_ASSESSED, never PASS', () => {
   const results = runShowcase();
@@ -10,6 +10,17 @@ test('every runnable showcase case passes; pending cases are NOT_ASSESSED, never
 });
 
 // The runner itself must be able to fail: a wrong expectation is reported, not swallowed (mutation proof).
+test('an unexpected pending case fails the suite; the five known cases do not', () => {
+  const known = [...ALLOWED_PENDING].map((id) => {
+    const [scenario, ...rest] = id.split('.');
+    return { scenario, case: rest.join('.'), status: 'NOT_ASSESSED' };
+  });
+  assert.equal(showcaseExitCode([{ scenario: 'SC-02', case: 'skip-failing-test', status: 'PASS' }, ...known]), 0);
+  assert.equal(showcaseExitCode([...known, { scenario: 'SC-02', case: 'new-pending', status: 'NOT_ASSESSED' }]), 1);
+  assert.equal(showcaseExitCode([{ scenario: 'SC-02', case: 'skip-failing-test', status: 'FAIL' }]), 1);
+  assert.equal(showcaseExitCode([{ scenario: 'SC-02', case: 'skip-failing-test', status: 'ERROR' }]), 2);
+});
+
 test('runner reports a mismatching expectation', () => {
   const observed = { checks: [{ checkId: 'policy.sod', status: 'PASS', findings: [] }], exitCode: 0, requiredUnmet: [] };
   assert.equal(compare({ status: 'FAIL' }, observed).length, 1);

@@ -1,0 +1,40 @@
+name: self-test
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install
+        run: corepack enable && pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm validate
+      - run: pnpm showcase
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: acme-policy
+      - uses: actions/checkout@v4
+        with:
+          repository: QuyLX/acme-frontend
+          ref: main
+          path: acme-frontend
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Fill the pnpm store from the product lockfile
+        working-directory: acme-frontend
+        run: corepack enable && pnpm install --frozen-lockfile
+      - name: Generator end-to-end
+        working-directory: acme-policy
+        env:
+          FACTORY_E2E_PRODUCT: ${{ github.workspace }}/acme-frontend
+        run: corepack enable && pnpm install --frozen-lockfile && pnpm test:e2e

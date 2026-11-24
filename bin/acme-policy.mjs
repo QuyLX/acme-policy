@@ -37,7 +37,7 @@ import { waiverSelfApproval } from '../checks/policy-sod/waiver.mjs';
 import { parse as parseYaml } from 'yaml';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { loadScenarios, runShowcase } from '../lib/showcase.mjs';
+import { loadScenarios, runShowcase, showcaseExitCode } from '../lib/showcase.mjs';
 import { runDiffChecks } from '../lib/fixture-run.mjs';
 import { registryProblems } from '../lib/registry-rules.mjs';
 import { lockfilePackages } from '../lib/lockfile.mjs';
@@ -358,8 +358,7 @@ function commandShowcase(values) {
     const count = (s) => results.filter((r) => r.status === s).length;
     console.log(`\n${count('PASS')} pass · ${count('FAIL')} fail · ${count('ERROR')} error · ${count('NOT_ASSESSED')} pending (NOT_ASSESSED)`);
   }
-  if (results.some((r) => r.status === 'ERROR')) return 2;
-  return results.some((r) => r.status === 'FAIL') ? 1 : 0;
+  return showcaseExitCode(results);
 }
 
 function main() {
