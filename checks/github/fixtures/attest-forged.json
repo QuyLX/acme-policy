@@ -1,0 +1,10 @@
+{
+  "pinnedPolicySha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "headSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "run": {
+    "provenance": { "verifierRef": "acme-policy@ccccccc" },
+    "subject": { "commitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+    "environment": { "executor": "ci" },
+    "summary": { "requiredUnmet": [] }
+  }
+}

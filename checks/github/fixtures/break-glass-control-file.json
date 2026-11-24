@@ -1,0 +1,11 @@
+{
+  "now": "2026-11-24T09:00:00.000Z",
+  "record": {
+    "id": "BG-20261124-04",
+    "reason": "pipeline outage drill on a control file",
+    "activatedBy": ["QuyLX", "quylx1"],
+    "activatedAt": "2026-11-24T08:00:00.000Z",
+    "expiresAt": "2026-11-24T20:00:00.000Z",
+    "paths": ["CODEOWNERS"]
+  }
+}

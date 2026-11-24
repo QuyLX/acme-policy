@@ -868,3 +868,57 @@ checks:
     timeoutSeconds: 900
     fixtures:
       proofTest: test/product-tool-adapters.test.mjs
+  - checkId: meta.workflow-pin
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: tech-design 10-ci-cd §3
+    evidenceLayer: static
+    fixtures:
+      proofTest: test/github-binding.test.mjs
+  - checkId: provenance.attest
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: optional
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: tech-design 10-ci-cd §3
+    evidenceLayer: static
+    fixtures:
+      proofTest: test/github-binding.test.mjs
+  - checkId: policy.waiver-approval
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: tech-design 10-ci-cd §9
+    evidenceLayer: static
+    fixtures:
+      proofTest: test/github-binding.test.mjs

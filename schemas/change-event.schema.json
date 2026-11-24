@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/change-event.schema.json",
+  "title": "ChangeEvent — a pull request normalized once (tech-design 10 §2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provider", "workItemId", "headSha", "baseSha", "event", "actor", "requester", "author", "pushers", "reviews", "files"],
+  "properties": {
+    "provider": { "const": "github" },
+    "workItemId": { "type": "string", "minLength": 1 },
+    "headSha": { "type": "string", "minLength": 7 },
+    "baseSha": { "type": "string", "minLength": 7 },
+    "event": { "enum": ["pull_request", "pull_request_review", "push"] },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["human", "agent", "ci"] }
+      }
+    },
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "source": { "enum": ["ci-dispatch", "issue-command", "cli-login", "automation-owner", "unknown"] }
+      }
+    },
+    "author": { "type": "string" },
+    "pushers": { "type": "array", "items": { "type": "string" } },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["by", "commitSha", "state", "isAgent"],
+        "properties": {
+          "by": { "type": "string" },
+          "commitSha": { "type": "string" },
+          "state": { "enum": ["approved", "changes_requested", "commented"] },
+          "isAgent": { "type": "boolean" }
+        }
+      }
+    },
+    "files": { "type": "array", "items": { "type": "string" } }
+  }
+}

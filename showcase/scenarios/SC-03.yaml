@@ -37,7 +37,9 @@ cases:
     expect: { exitCode: 1, statuses: { policy.sod: FAIL, policy.risk: PASS }, rules: [policy.risk.path] }
   - id: forged-requested-by
     given: A forged `Requested-by:` trailer names someone else as requester
-    pending: requester identity is taken from the triggering event by the GitHub binding in M3
+    run: { kind: binding, op: change-event, fixture: checks/github/fixtures/forged-requested-by.json }
+    expect: { status: PASS, rules: [github.requester-from-event] }
   - id: requester-own-waiver
     given: The requester approves a waiver for their own required check
-    pending: waiver approval flow is delivered with the GitHub binding in M3
+    run: { kind: binding, op: waiver, fixture: checks/github/fixtures/waiver-self.json }
+    expect: { statuses: { policy.sod: FAIL }, rules: [policy.sod.waiver-self] }

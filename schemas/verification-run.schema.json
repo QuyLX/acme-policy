@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/verification-run.schema.json",
+  "title": "VerificationRun — evidence printed by acme-policy run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "workItemId", "channel", "subject", "environment", "checks", "summary", "provenance"],
+  "properties": {
+    "schemaVersion": { "const": "aisf/4.0" },
+    "runId": { "type": "string" },
+    "workItemId": { "type": "string" },
+    "channel": { "const": "code" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "commitSha", "baseSha"],
+      "properties": {
+        "repo": { "type": "string" },
+        "commitSha": { "type": "string" },
+        "baseSha": { "type": "string" }
+      }
+    },
+    "resolvedProfiles": { "type": "array" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executor"],
+      "properties": { "executor": { "type": "string" } }
+    },
+    "adapters": { "type": "array" },
+    "kit": { "type": "object" },
+    "checks": { "type": "array" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byStatus", "requiredUnmet"],
+      "properties": {
+        "byStatus": { "type": "object" },
+        "requiredUnmet": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verifierRef", "producer", "startedAt", "finishedAt"],
+      "properties": {
+        "factoryVersion": { "type": "string" },
+        "verifierRef": { "type": "string" },
+        "producer": { "type": "object" },
+        "startedAt": { "type": "string" },
+        "finishedAt": { "type": "string" }
+      }
+    }
+  }
+}

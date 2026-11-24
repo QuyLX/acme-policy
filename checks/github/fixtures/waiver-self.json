@@ -1,0 +1,13 @@
+{
+  "requesterId": "QuyLX",
+  "waiver": {
+    "id": "WVR-2026-0001",
+    "checkId": "sec.secrets",
+    "scope": "packages/telemetry/test",
+    "reason": "synthetic values in redaction tests",
+    "owner": { "id": "QuyLX" },
+    "approvedBy": { "id": "QuyLX" },
+    "createdAt": "2026-11-24",
+    "expiresAt": "2026-12-24"
+  }
+}

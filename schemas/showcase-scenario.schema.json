@@ -216,6 +216,16 @@
                   "type": "string"
                 }
               }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "op", "fixture"],
+              "properties": {
+                "kind": { "const": "binding" },
+                "op": { "enum": ["change-event", "waiver", "attest", "break-glass", "verify-absent"] },
+                "fixture": { "type": "string" }
+              }
             }
           ]
         },

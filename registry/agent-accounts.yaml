@@ -1,0 +1,4 @@
+# Logins treated as agents. A login ending in [bot] is an agent even when this list is empty.
+apiVersion: aisf/4.0
+kind: AgentAccounts
+logins: []

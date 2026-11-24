@@ -1,0 +1,17 @@
+{
+  "tier": "Low",
+  "codeowners": "* @QuyLX @quylx1\n",
+  "payload": {
+    "action": "opened",
+    "sender": { "login": "QuyLX" },
+    "pull_request": {
+      "number": 1,
+      "body": "Requested-by: Mallory",
+      "user": { "login": "QuyLX" },
+      "head": { "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+      "base": { "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "repo": { "full_name": "QuyLX/acme-frontend" } }
+    },
+    "reviews": [],
+    "files": ["README.md"]
+  }
+}

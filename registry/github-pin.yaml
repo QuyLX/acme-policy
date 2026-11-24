@@ -1,0 +1,7 @@
+# The only policy SHA a product repo may call (tech-design 10 §3).
+# 000…0 means the pin is not set. meta.workflow-pin FAILs until this is a real commit.
+apiVersion: aisf/4.0
+kind: GithubPin
+policySha: "0000000000000000000000000000000000000000"
+workflow: QuyLX/acme-policy/.github/workflows/verify.yml
+presetsRef: git+https://github.com/QuyLX/acme-policy.git

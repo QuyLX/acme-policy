@@ -1,0 +1,34 @@
+# SC-16 — Factory outage (FE §20.3). Slice 0 is the drill: merge stops, break-glass is 24h, control files are rejected.
+# Two GitHub logins of one person do not satisfy the two-person claim (DV-07). The cases still require two distinct login strings.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-16
+title: Factory outage
+demonstrates: [CORE-OPS-05]
+slice: 0
+mode: pilot
+cases:
+  - id: verify-absent
+    given: The verify job produced no VerificationRun, so the required check is unmet
+    run: { kind: binding, op: verify-absent, fixture: checks/github/fixtures/verify-absent.json }
+    expect: { requiredUnmet: [verify] }
+  - id: break-glass-docs
+    given: Two distinct logins activate break-glass for 24 hours on a documentation path
+    run: { kind: binding, op: break-glass, fixture: checks/github/fixtures/break-glass-docs.json }
+    expect: { status: PASS }
+  - id: break-glass-one-login
+    given: One login tries to activate break-glass
+    run: { kind: binding, op: break-glass, fixture: checks/github/fixtures/break-glass-one-login.json }
+    expect: { status: FAIL, rules: [ops.break-glass] }
+  - id: break-glass-same-login-twice
+    given: The same login is listed twice
+    run: { kind: binding, op: break-glass, fixture: checks/github/fixtures/break-glass-same-login.json }
+    expect: { status: FAIL, rules: [ops.break-glass] }
+  - id: break-glass-control-file
+    given: Break-glass is attempted on CODEOWNERS
+    run: { kind: binding, op: break-glass, fixture: checks/github/fixtures/break-glass-control-file.json }
+    expect: { status: FAIL, rules: [ops.break-glass] }
+  - id: break-glass-expired
+    given: The 24 hour window has passed
+    run: { kind: binding, op: break-glass, fixture: checks/github/fixtures/break-glass-expired.json }
+    expect: { status: FAIL, rules: [ops.break-glass] }

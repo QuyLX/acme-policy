@@ -30,6 +30,10 @@ import { checkResult } from '../lib/result.mjs';
 import { configParityCheck, parityProblems } from '../checks/meta/config-parity.mjs';
 import { overrideDirectionCheck } from '../checks/meta/override-direction.mjs';
 import { toolchainPinCheck } from '../checks/meta/toolchain-pin.mjs';
+import { workflowPinCheck } from '../checks/meta/workflow-pin.mjs';
+import { areasFromCodeowners, toChangeEvent, toSodInput } from '../lib/github-event.mjs';
+import { attest } from '../lib/attest.mjs';
+import { waiverSelfApproval } from '../checks/policy-sod/waiver.mjs';
 import { parse as parseYaml } from 'yaml';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -51,7 +55,8 @@ const USAGE = `Usage: acme-policy <command> [options]
   integrity --diff <file|->               Run the diff-based checks (integrity sensors, injection pre-scan, secrets)
   sod --input <file>                      Run policy.sod on a platform-neutral input
   knowledge-impact --repo <dir> --changed <file|->   List knowledge artifacts affected by changed paths
-  run --repo <dir> [--base <ref>] [--checks a,b | --command verify:fast] [--sod-input <file>]
+  run --repo <dir> [--base <ref>] [--checks a,b | --command verify:fast] [--sod-input <file> | --github-payload <event.json>]
+  attest --run <VerificationRun.json> --head <sha>
                                           Run registered checks and print a VerificationRun
   generate <app|package|ds-component> <name> --repo <dir> [--kind react-lib|node-lib] [--port n] [--privileged-admin]
            [--description <text>]
@@ -125,7 +130,7 @@ function commandRun(values) {
   const executor = process.env.FACTORY_EXECUTOR ?? 'local';
   const base = values.base ?? 'HEAD';
   const ids = values.checks ? values.checks.split(',') : values.command ? commandChecks(values.command) : checkRegistry().map((c) => c.checkId);
-  if (values['sod-input'] && !ids.includes('policy.sod')) ids.push('policy.sod'); // PR event input given: SoD runs too
+  if ((values['sod-input'] || values['github-payload']) && !ids.includes('policy.sod')) ids.push('policy.sod');
   const startedAt = new Date().toISOString();
   const { diff, changed } = collectChanges(repo, base);
   const headSha = (() => {
@@ -201,6 +206,17 @@ function commandRun(values) {
     else if (id === 'meta.config-parity') checks.push(configParityCheck(def, repo, pinned.version, pinned.dir));
     else if (id === 'meta.override-direction') checks.push(overrideDirectionCheck(def, baseConfig, config ?? {}));
     else if (id === 'meta.toolchain-pin') checks.push(toolchainPinCheck(def, repo, pinned));
+    else if (id === 'meta.workflow-pin') checks.push(workflowPinCheck(def, repo));
+    else if (id === 'provenance.attest') checks.push(checkResult(def, { status: 'NOT_ASSESSED', reason: 'attest runs on the VerificationRun artifact in the attest job' }));
+    else if (id === 'policy.waiver-approval') {
+      const waivers = readYaml(policyPath('registry', 'waivers.yaml')).waivers;
+      const requesterId = values['github-payload']
+        ? toChangeEvent(readJson(resolve(values['github-payload']))).requester.id
+        : null;
+      if (!waivers.length) checks.push(checkResult(def, { status: 'PASS' }));
+      else if (!requesterId) checks.push(checkResult(def, { status: 'NOT_ASSESSED', reason: 'waivers exist but no pull-request event identifies the requester' }));
+      else checks.push(...waivers.map((waiver) => waiverSelfApproval(def, waiver, requesterId, { agentLogins: readYaml(policyPath('registry', 'agent-accounts.yaml')).logins })));
+    }
     else if (id === 'meta.descriptor-drift') checks.push(descriptorDriftCheck(def, repo));
     else if (id === 'integrity.mutation-score') checks.push(mutationScoreCheck(def));
     else if (id.startsWith('integrity.')) checks.push(sensorCheck(def, shared().hits));
@@ -221,9 +237,17 @@ function commandRun(values) {
     else if (id === 'knowledge.record-schema') checks.push(recordSchemaCheck(def, repo));
     else if (id === 'knowledge.references') checks.push(referencesCheck(def, repo));
     else if (id === 'policy.sod') {
-      if (!values['sod-input']) checks.push({ ...sodCheck(def, {}), status: 'NOT_ASSESSED', reason: 'no PR event input (policy.sod runs in CI on the PR)' });
+      const input = values['github-payload']
+        ? toSodInput(
+            toChangeEvent(readJson(resolve(values['github-payload'])), { agentLogins: readYaml(policyPath('registry', 'agent-accounts.yaml')).logins }),
+            areasFromCodeowners(existsSync(join(repo, 'CODEOWNERS')) ? readText(join(repo, 'CODEOWNERS')) : '', changed),
+            { tier: shared().risk.standardTier },
+          )
+        : values['sod-input']
+          ? readJson(values['sod-input'])
+          : null;
+      if (!input) checks.push({ ...sodCheck(def, {}), status: 'NOT_ASSESSED', reason: 'no PR event input (policy.sod runs in CI on the PR)' });
       else {
-        const input = readJson(values['sod-input']);
         const result = sodCheck(def, input);
         const risk = shared().risk;
         // FE §10.1: authors never choose the tier; the SoD slots are computed for at least the classified tier.
@@ -319,7 +343,7 @@ function commandValidateSelf() {
   results.push(['showcase scenarios', (() => { loadScenarios(); return true; })()]);
   results.push(['kit pinned and installed', kit().installed]);
   results.push(['adapters registered for every adapter check', readYaml(policyPath('registry', 'checks.yaml')).checks.filter((c) => c.adapter).every((c) => readYaml(policyPath('registry', 'adapters.yaml')).adapters.some((a) => a.adapterId === c.adapter && a.checks.includes(c.checkId)))]);
-  for (const name of ['factory-config', 'check-result', 'waiver', 'knowledge-meta', 'sod-input', 'showcase-scenario', 'factory-project-config', 'check-registry', 'task-workflow-spec', 'task-event', 'agent-role', 'sandbox-policy']) {
+  for (const name of ['factory-config', 'check-result', 'waiver', 'knowledge-meta', 'sod-input', 'showcase-scenario', 'factory-project-config', 'check-registry', 'task-workflow-spec', 'task-event', 'agent-role', 'sandbox-policy', 'change-event', 'verification-run', 'break-glass']) {
     results.push([`schema ${name}`, (() => { validate(name, {}); return true; })()]);
   }
   for (const [name, ok] of results) console.log(`${ok ? '✓' : '✗'} ${name}`);
@@ -343,7 +367,7 @@ function main() {
   const { values, positionals } = parseArgs({
     args: rest,
     allowPositionals: true,
-    options: { schema: { type: 'string' }, diff: { type: 'string' }, input: { type: 'string' }, repo: { type: 'string' }, changed: { type: 'string' }, base: { type: 'string' }, checks: { type: 'string' }, 'sod-input': { type: 'string' }, only: { type: 'string' }, json: { type: 'boolean' }, check: { type: 'boolean' }, write: { type: 'boolean' }, kind: { type: 'string' }, description: { type: 'string' }, checkpoint: { type: 'string' }, 'dry-run': { type: 'boolean' }, port: { type: 'string' }, 'privileged-admin': { type: 'boolean' }, command: { type: 'string' }, events: { type: 'string' }, 'task-events': { type: 'string' } },
+    options: { schema: { type: 'string' }, diff: { type: 'string' }, input: { type: 'string' }, repo: { type: 'string' }, changed: { type: 'string' }, base: { type: 'string' }, checks: { type: 'string' }, 'sod-input': { type: 'string' }, 'github-payload': { type: 'string' }, head: { type: 'string' }, only: { type: 'string' }, json: { type: 'boolean' }, check: { type: 'boolean' }, write: { type: 'boolean' }, kind: { type: 'string' }, description: { type: 'string' }, checkpoint: { type: 'string' }, 'dry-run': { type: 'boolean' }, port: { type: 'string' }, 'privileged-admin': { type: 'boolean' }, command: { type: 'string' }, events: { type: 'string' }, 'task-events': { type: 'string' } },
   });
   switch (command) {
     case 'validate':
@@ -361,6 +385,12 @@ function main() {
     case 'knowledge-impact': {
       const changed = readText(values.changed ?? '-').split('\n').filter(Boolean);
       const result = knowledgeImpactCheck(checkDef('knowledge.impact'), resolve(values.repo), changed);
+      print(result);
+      return exitCodeFor(result.status);
+    }
+    case 'attest': {
+      if (!values.run || !values.head) { console.log(USAGE); return 2; }
+      const result = attest(checkDef('provenance.attest'), readJson(resolve(values.run)), { pinnedPolicySha: readYaml(policyPath('registry', 'github-pin.yaml')).policySha, headSha: values.head });
       print(result);
       return exitCodeFor(result.status);
     }

@@ -62,7 +62,8 @@ With a non-local executor (`FACTORY_EXECUTOR=ci`), build-tool caches are disable
 
 Exit codes (FE §7.6): `0` pass, `1` check failure, `2` infrastructure error (`ERROR`).
 
-## Not yet wired (waiting for D-01)
+## GitHub binding (M3)
 
-Running these checks as required, centrally-defined CI jobs on every PR; building the `policy.sod` input from PR
-events; branch protection and approval dismissal on new commits; attestation.
+`.github/workflows/verify.yml` is the reusable verify and attest workflow. Product repos call it by commit SHA.
+`meta.workflow-pin` checks that SHA. `bindings/github/ruleset.json` is the branch ruleset; it is not applied while
+`sec.secrets` stays red on `acme-frontend` (D-24). CODEOWNERS lists `QuyLX` and `quylx1` (D-27, DV-07).

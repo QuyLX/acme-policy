@@ -7,6 +7,7 @@ commands:
     - meta.config-parity
     - meta.override-direction
     - meta.toolchain-pin
+    - meta.workflow-pin
     - meta.descriptor-drift
     - quality.lint
     - quality.typecheck

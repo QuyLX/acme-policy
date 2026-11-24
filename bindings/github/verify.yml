@@ -1,0 +1,63 @@
+name: verify
+on:
+  workflow_call:
+    inputs:
+      head_sha:
+        description: Commit of the product repository to verify
+        required: true
+        type: string
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the pinned policy repo
+        uses: actions/checkout@v4
+        with:
+          repository: QuyLX/acme-policy
+          ref: ${{ github.workflow_sha }}
+          path: policy
+      - name: Checkout the product repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.head_sha }}
+          fetch-depth: 0
+          path: product
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install the policy repo
+        working-directory: policy
+        run: corepack enable && pnpm install --frozen-lockfile
+      - name: Install the product repo
+        working-directory: product
+        run: corepack enable && pnpm install --frozen-lockfile
+      - name: Verify
+        working-directory: policy
+        env:
+          FACTORY_EXECUTOR: ci
+          FACTORY_CI_JOB: github:verify
+          FACTORY_WORK_ITEM: ${{ github.repository }}#${{ github.event.pull_request.number }}
+        run: node bin/acme-policy.mjs run --repo ../product --base origin/main --command verify --github-payload "$GITHUB_EVENT_PATH" | tee "$RUNNER_TEMP/verification-run.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verification-run
+          path: ${{ runner.temp }}/verification-run.json
+  attest:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: QuyLX/acme-policy
+          ref: ${{ github.workflow_sha }}
+          path: policy
+      - uses: actions/download-artifact@v4
+        with:
+          name: verification-run
+          path: evidence
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Attest
+        working-directory: policy
+        run: node bin/acme-policy.mjs attest --run ../evidence/verification-run.json --head ${{ inputs.head_sha }}

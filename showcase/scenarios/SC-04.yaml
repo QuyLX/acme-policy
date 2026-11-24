@@ -33,4 +33,5 @@ cases:
     expect: { exitCode: 1, statuses: { quality.lint: FAIL, meta.config-parity: FAIL } }
   - id: forged-verifier-ref
     given: A result with a mismatched verifierRef is submitted to the attest job
-    pending: the attest job is delivered with the GitHub binding in M3
+    run: { kind: binding, op: attest, fixture: checks/github/fixtures/attest-forged.json }
+    expect: { statuses: { provenance.attest: FAIL }, rules: [provenance.attest] }
