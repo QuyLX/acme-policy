@@ -220,6 +220,16 @@
             {
               "type": "object",
               "additionalProperties": false,
+              "required": ["kind", "repo", "fix"],
+              "properties": {
+                "kind": { "const": "bugfix" },
+                "repo": { "type": "string" },
+                "fix": { "type": "string" }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
               "required": ["kind", "op", "fixture"],
               "properties": {
                 "kind": { "const": "binding" },

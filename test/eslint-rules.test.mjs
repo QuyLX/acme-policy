@@ -69,9 +69,15 @@ tester.run('FE-STATE-002 no-effect-fetch', R['no-effect-fetch'], {
 });
 
 tester.run('FE-API-001 no-raw-service-fetch', R['no-raw-service-fetch'], {
-  valid: ['await listUsers(ctx, {});', "await fetch('/api/local');"],
+  valid: [
+    'await listUsers(ctx, {});',
+    "await fetch('/api/local');",
+    'await fetch(`http://127.0.0.1:3011${path}`);',
+    "await fetch('http://localhost:3001/tenants');",
+  ],
   invalid: [
     { code: "await fetch('https://users.internal/v1/users');", errors: [{ messageId: 'raw' }] },
+    { code: "await fetch('https://tenants.example/v1/tenants');", errors: [{ messageId: 'raw' }] },
     { code: 'await fetch(`https://${host}/v1/users`);', errors: [{ messageId: 'raw' }] },
   ],
 });

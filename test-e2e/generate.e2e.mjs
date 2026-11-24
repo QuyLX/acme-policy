@@ -42,8 +42,13 @@ try {
   policy('generate', 'app', 'e2e-app', '--repo', repo, '--port', '3999', '--checkpoint', checkpoint);
   policy('generate', 'package', 'e2e-lib', '--repo', repo, '--kind', 'node-lib', '--checkpoint', checkpoint);
   policy('generate', 'ds-component', 'StatusDot', '--repo', repo);
-  step('pnpm install --offline (new workspace projects)');
-  sh('pnpm', ['install', '--offline', '--no-frozen-lockfile']);
+  // The generated projects change the lockfile, so resolution needs registry metadata.
+  // FACTORY_E2E_OFFLINE=1 keeps the old offline install for a warm local store.
+  const postInstall = process.env.FACTORY_E2E_OFFLINE === '1'
+    ? ['install', '--offline', '--no-frozen-lockfile']
+    : ['install', '--no-frozen-lockfile'];
+  step(`pnpm ${postInstall.join(' ')} (new workspace projects)`);
+  sh('pnpm', postInstall);
 
   step('central checks on the generated output');
   const checks = ['meta.config-parity', 'meta.toolchain-pin', 'meta.descriptor-drift', 'quality.lint', 'quality.typecheck', 'quality.test', 'quality.build', 'arch.cycles', 'integrity.control-file-change', 'policy.risk'];

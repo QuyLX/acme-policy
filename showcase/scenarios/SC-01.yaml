@@ -1,0 +1,13 @@
+# SC-01 — End-to-end bug fix on the tenants slice (FE §20.3, pilot portion: no attestation, merge queue, or staged release).
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-01
+title: End-to-end bug fix
+demonstrates: [CORE-VER-03, CORE-VER-04, CORE-GOV-05, CORE-GOV-06]
+slice: 0
+mode: pilot
+cases:
+  - id: end-to-end-bug-fix
+    given: An oracle fails on the base commit, the fix commit makes it pass, evidence is bound to that commit, and the author cannot approve it
+    run: { kind: bugfix, repo: showcase/fixtures/admin-tenants, fix: showcase/fixtures/admin-tenants/fix.diff }
+    expect: { status: PASS, rules: [showcase.bugfix] }

@@ -1,9 +1,12 @@
 // FE-API-001: call services only through contract-generated clients (@platform/api-codegen) — no raw fetch of an
 // absolute service URL from app code.
 const ABSOLUTE = /^https?:\/\//i;
-const literalUrl = (n) =>
-  (n?.type === 'Literal' && typeof n.value === 'string' && ABSOLUTE.test(n.value)) ||
-  (n?.type === 'TemplateLiteral' && ABSOLUTE.test(n.quasis[0]?.value.cooked ?? ''));
+const LOOPBACK = /^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/i;
+const textOf = (n) =>
+  n?.type === 'Literal' && typeof n.value === 'string' ? n.value
+  : n?.type === 'TemplateLiteral' ? (n.quasis[0]?.value.cooked ?? '')
+  : '';
+const literalUrl = (n) => ABSOLUTE.test(textOf(n)) && !LOOPBACK.test(textOf(n));
 export default {
   meta: {
     type: 'problem',

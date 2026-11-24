@@ -1,0 +1,8 @@
+diff --git a/src/read.mjs b/src/read.mjs
+--- a/src/read.mjs
++++ b/src/read.mjs
+@@ -1,3 +1,3 @@
+ export function tenantName() {
+-  return 'Wrong Name';
++  return 'Northwind Synthetic';
+ }
