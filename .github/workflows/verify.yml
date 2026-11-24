@@ -13,8 +13,8 @@ jobs:
       - name: Checkout the pinned policy repo
         uses: actions/checkout@v4
         with:
-          repository: QuyLX/acme-policy
-          ref: ${{ github.workflow_sha }}
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
           path: policy
       - name: Checkout the product repo
         uses: actions/checkout@v4
@@ -37,7 +37,13 @@ jobs:
           FACTORY_EXECUTOR: ci
           FACTORY_CI_JOB: github:verify
           FACTORY_WORK_ITEM: ${{ github.repository }}#${{ github.event.pull_request.number }}
-        run: node bin/acme-policy.mjs run --repo ../product --base origin/main --command verify --github-payload "$GITHUB_EVENT_PATH" | tee "$RUNNER_TEMP/verification-run.json"
+        run: |
+          set -o pipefail
+          args=(run --repo ../product --base origin/main --command verify)
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            args+=(--github-payload "$GITHUB_EVENT_PATH")
+          fi
+          node bin/acme-policy.mjs "${args[@]}" | tee "$RUNNER_TEMP/verification-run.json"
       - uses: actions/upload-artifact@v4
         with:
           name: verification-run
@@ -48,8 +54,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: QuyLX/acme-policy
-          ref: ${{ github.workflow_sha }}
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
           path: policy
       - uses: actions/download-artifact@v4
         with:
@@ -58,6 +64,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 26
+      - name: Install the policy repo
+        working-directory: policy
+        run: corepack enable && pnpm install --frozen-lockfile
       - name: Attest
         working-directory: policy
         run: node bin/acme-policy.mjs attest --run ../evidence/verification-run.json --head ${{ inputs.head_sha }}
