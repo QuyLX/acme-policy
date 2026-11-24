@@ -1,0 +1,19 @@
+apiVersion: aisf/4.0
+kind: FactoryConfig
+standard: aisf@4.0.0
+profile: aisf-frontend@1.1.0
+application: admin
+owner: team-a
+backupOwners: [team-b]
+lifecycle: active
+platform: { channel: stable }
+surfaces: []
+contracts:
+  consumes: []
+promptAssets: []
+autonomy:
+  zeroHumanOptIn: []
+  aiReviewMode: {}
+riskMap:
+  - { paths: ["apps/admin/**"], tier: Medium, subTier: R2, reason: "x:privileged-admin floor", source: "FE §10.1" }
+  - { paths: ["apps/admin/src/server/{session,authz}/**"], tier: High, subTier: R3, reason: "privileged path", source: "FE §10.1" }

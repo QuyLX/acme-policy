@@ -1,0 +1,10 @@
+diff --git a/apps/console/src/modules/compute/domain/retry.test.ts b/apps/console/src/modules/compute/domain/retry.test.ts
+--- a/apps/console/src/modules/compute/domain/retry.test.ts
++++ b/apps/console/src/modules/compute/domain/retry.test.ts
+@@ -1,4 +1,6 @@
+ import { retryCount } from './retry';
++
++vi.mock('./retry', () => ({ retryCount: () => 1 }));
+ 
+ it('retries a timed-out job exactly once', () => {
+   expect(retryCount('timeout')).toBe(1);

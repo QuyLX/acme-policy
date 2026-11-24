@@ -1,0 +1,5 @@
+apiVersion: aisf/4.0
+kind: FactoryProjectConfig
+projects:
+  ui:
+    kind: react-lib

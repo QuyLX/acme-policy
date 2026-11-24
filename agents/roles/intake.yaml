@@ -1,0 +1,11 @@
+apiVersion: aisf/4.0
+kind: AgentRole
+id: intake
+purpose: "Turn the request into a change brief with acceptance criteria and oracles; never decides scope or tier."
+reads: [issue, linked-docs, repository-map]
+mustNotRead: []
+writes: [change-brief]
+tools: [repo.read, knowledge.search]
+egress: none
+secrets: none
+session: any

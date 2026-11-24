@@ -1,0 +1,13 @@
+diff --git a/packages/lib/package.json b/packages/lib/package.json
+index 7792204..2c82780 100644
+--- a/packages/lib/package.json
++++ b/packages/lib/package.json
+@@ -5,5 +5,8 @@
+   "scripts": {
+     "lint": "eslint .",
+     "typecheck": "tsc --noEmit"
++  },
++  "dependencies": {
++    "left-pad": "1.3.0"
+   }
+ }

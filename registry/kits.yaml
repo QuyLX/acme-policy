@@ -1,0 +1,15 @@
+# Pinned verification kit (FE §8.7 item 3, DV-05). The verifier uses THESE versions, never the ones a product repo
+# declares. Tools run from the kit (eslint, tsc) are pinned by presets/package.json + the lockfile of this repo;
+# tools run from the product install (vitest, next, nx) must match `productTools` (meta.toolchain-pin).
+apiVersion: aisf/4.0
+kind: KitRegistry
+kit:
+  package: "@acme/presets"
+  version: 1.0.0
+  dir: presets
+productTools:
+  vitest: 5.1.1
+  next: 16.4.6
+  nx: 24.0.6
+  '@vitest/browser-playwright': 5.1.1   # projects with test.browser
+  playwright: 1.65.1

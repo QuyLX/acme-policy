@@ -1,0 +1,7 @@
+diff --git a/apps/admin/src/server/session/cookie.ts b/apps/admin/src/server/session/cookie.ts
+new file mode 100644
+index 0000000..3ec3198
+--- /dev/null
++++ b/apps/admin/src/server/session/cookie.ts
+@@ -0,0 +1 @@
++export const cookieName = "__Host-session";

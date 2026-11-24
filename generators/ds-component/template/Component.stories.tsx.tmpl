@@ -1,0 +1,7 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { {{Name}} } from './{{Name}}';
+
+const meta = { title: 'Components/{{Name}}', component: {{Name}} } satisfies Meta<typeof {{Name}}>;
+export default meta;
+
+export const Default: StoryObj<typeof meta> = { args: { children: '{{Name}}' } };

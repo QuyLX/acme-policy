@@ -1,0 +1,28 @@
+# SC-09 — DS token change (FE §20.3), in-repo form for topology B (one PR changes the token and verifies every
+# consumer; no prerelease or adoption PR needed, FE §3.3). DS owner approval and visual baselines come with M3/M5.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-09
+title: DS token change verified against every consumer
+demonstrates: [CORE-VER-01]
+slice: 1
+cases:
+  - id: primitive-change-reaches-consumers
+    given: A primitive color changes; the semantic token aliasing it and the files using that token are listed and verified in the same run
+    run: { kind: run, repo: checks/ds/fixtures/token-repo, change: checks/ds/fixtures/token-change.diff, checks: [ds.consumer-verification], executor: ci }
+    expect: { exitCode: 0, statuses: { ds.consumer-verification: PASS }, rules: [ds.consumer-verification] }
+  - id: unverified-consumer-blocks
+    given: A file outside every declared project uses the changed token, so it would ship unverified
+    run: { kind: run, repo: checks/ds/fixtures/token-repo, change: checks/ds/fixtures/token-change-orphan.diff, checks: [ds.consumer-verification], executor: ci }
+    expect: { exitCode: 1, statuses: { ds.consumer-verification: FAIL } }
+  - id: breaking-api-needs-major-changeset
+    given: A DS prop is removed and the API snapshot updated without a changeset
+    run: { kind: run, repo: checks/ds/fixtures/ds-repo, change: checks/ds/fixtures/api-break-no-changeset.diff, checks: [ds.api-compat, ds.semver-changelog], executor: ci }
+    expect: { exitCode: 1, statuses: { ds.api-compat: PASS, ds.semver-changelog: FAIL } }
+  - id: breaking-api-with-major-changeset
+    given: The same change with a major changeset and a codemod note
+    run: { kind: run, repo: checks/ds/fixtures/ds-repo, change: checks/ds/fixtures/api-break-with-changeset.diff, checks: [ds.api-compat, ds.semver-changelog], executor: ci }
+    expect: { exitCode: 0, statuses: { ds.api-compat: PASS, ds.semver-changelog: PASS } }
+  - id: visual-baseline-approval
+    given: A consumer with a visual diff needs its code owner to approve the new baseline
+    pending: visual baselines are added with the M5 browser lane; owner approval needs real identities (M3)

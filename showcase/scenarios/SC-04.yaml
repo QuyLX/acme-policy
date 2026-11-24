@@ -1,0 +1,36 @@
+# SC-04 — Verifier interference (FE §20.3). Slice 0 covers VER-05/12/14; attestation and provenance come in M3.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-04
+title: Verifier interference
+demonstrates: [CORE-VER-03, CORE-VER-05, CORE-VER-12, CORE-VER-14]
+slice: 0
+mode: pilot
+cases:
+  - id: required-not-assessed-blocks
+    given: A required blocking check (policy.sod) has no input, so it is NOT_ASSESSED
+    run: { kind: run, repo: showcase/fixtures/minimal-repo, checks: [policy.sod], executor: ci }
+    expect: { exitCode: 1, statuses: { policy.sod: NOT_ASSESSED } }
+  - id: local-never-satisfies
+    given: An agent on a developer machine produces passing results with executor local
+    run: { kind: run, repo: showcase/fixtures/minimal-repo, checks: [integrity.control-file-change], executor: local }
+    expect: { exitCode: 0, statuses: { integrity.control-file-change: PASS }, requiredUnmet: [integrity.control-file-change] }
+  - id: ci-pass-satisfies
+    given: Control case — the same passing check in the mandatory pipeline (executor ci)
+    run: { kind: run, repo: showcase/fixtures/minimal-repo, checks: [integrity.control-file-change], executor: ci }
+    expect: { exitCode: 0, statuses: { integrity.control-file-change: PASS }, requiredUnmet: [] }
+  - id: repo-local-ci-file
+    given: A PR adds a repo-local CI file that tries to redefine the verification
+    run: { kind: run, repo: showcase/fixtures/minimal-repo, change: showcase/fixtures/repo-local-ci.diff, checks: [integrity.control-file-change], executor: ci }
+    expect: { exitCode: 0, statuses: { integrity.control-file-change: PASS }, rules: [integrity.control-file-change] }
+  - id: fixture-control
+    given: Control case — the fixture repo with its seeded lint violation and no change
+    run: { kind: run, repo: showcase/fixtures/ts-repo, checks: [quality.lint, meta.config-parity], executor: ci }
+    expect: { exitCode: 1, statuses: { quality.lint: FAIL, meta.config-parity: PASS } }
+  - id: repo-config-tampered
+    given: The PR replaces its own generated lint config with an empty one to silence the violation
+    run: { kind: run, repo: showcase/fixtures/ts-repo, change: showcase/fixtures/repo-config-tampered.diff, checks: [quality.lint, meta.config-parity], executor: ci }
+    expect: { exitCode: 1, statuses: { quality.lint: FAIL, meta.config-parity: FAIL } }
+  - id: forged-verifier-ref
+    given: A result with a mismatched verifierRef is submitted to the attest job
+    pending: the attest job is delivered with the GitHub binding in M3

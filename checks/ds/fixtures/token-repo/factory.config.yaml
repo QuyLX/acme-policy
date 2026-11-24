@@ -1,0 +1,7 @@
+apiVersion: aisf/4.0
+kind: FactoryProjectConfig
+projects:
+  tokens:
+    kind: node-lib
+  ui:
+    kind: react-lib

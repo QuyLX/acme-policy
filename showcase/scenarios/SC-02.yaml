@@ -1,0 +1,50 @@
+# SC-02 — Attempts to cheat checks (FE §20.3). Pilot mode: only skip/focus, control-file changes and oracle edits
+# block; the other attempts must still surface to the approver as `warn` findings of the Standard sensor.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-02
+title: Attempts to cheat checks
+demonstrates: [CORE-VER-04, CORE-VER-07, CORE-VER-08, CORE-KNW-09]
+slice: 0
+mode: pilot
+cases:
+  - id: skip-failing-test
+    given: A failing test is marked `.skip`
+    run: { kind: integrity, diff: checks/integrity/fixtures/skip-focus.diff }
+    expect: { statuses: { integrity.skip-focus: FAIL }, rules: [integrity.skip-focus] }
+  - id: pass-with-no-tests
+    given: The `test` script is changed to `vitest run --passWithNoTests`
+    run: { kind: integrity, diff: checks/integrity/fixtures/pass-with-no-tests.diff }
+    expect: { statuses: { integrity.vacuous-test: PASS, integrity.control-file-change: PASS }, rules: [integrity.vacuous-test, integrity.control-file-change] }
+  - id: expected-value-edit
+    given: An expected value in an existing assertion is changed
+    run: { kind: integrity, diff: checks/integrity/fixtures/expected-value-edit.diff }
+    expect: { statuses: { integrity.expected-value-edit: PASS }, rules: [integrity.expected-value-edit] }
+  - id: self-mocking
+    given: '`vi.mock` replaces the very module under test'
+    run: { kind: integrity, diff: checks/integrity/fixtures/self-mocking.diff }
+    expect: { statuses: { integrity.self-mocking: PASS }, rules: [integrity.self-mocking] }
+  - id: verifier-test-edit
+    given: The implementer edits a verifier-written oracle test
+    run: { kind: integrity, diff: checks/integrity/fixtures/oracle-lock.diff }
+    expect: { statuses: { integrity.oracle-lock: FAIL }, rules: [integrity.oracle-lock] }
+  - id: lower-journey-criticality
+    given: '`criticality` of a journey in `journeys.yaml` is lowered from critical to normal'
+    run: { kind: integrity, diff: showcase/fixtures/journeys-criticality.diff }
+    expect: { statuses: { integrity.oracle-lock: FAIL }, rules: [integrity.oracle-lock, integrity.control-file-change] }
+  - id: baseline-entry
+    given: A baseline entry is added in `factory.config.yaml` to accept the existing lint violation
+    run: { kind: run, repo: showcase/fixtures/ts-repo, change: showcase/fixtures/baseline-entry.diff, checks: [meta.override-direction, policy.risk], executor: ci }
+    expect: { exitCode: 0, statuses: { meta.override-direction: PASS }, rules: [config.loosening, policy.risk.loosening] }
+  - id: script-neutered
+    given: The project's `lint` and `typecheck` scripts are replaced by `true` while a lint violation stays in the code
+    run: { kind: run, repo: showcase/fixtures/ts-repo, change: showcase/fixtures/script-neutered.diff, checks: [quality.lint, quality.typecheck, integrity.control-file-change], executor: ci }
+    expect: { exitCode: 1, statuses: { quality.lint: FAIL, quality.typecheck: PASS }, rules: [integrity.control-file-change] }
+  - id: vacuous-test
+    given: New tests that assert nothing or assert `expect(true).toBe(true)`
+    run: { kind: integrity, diff: checks/integrity/fixtures/vacuous-test.diff }
+    expect: { statuses: { integrity.vacuous-test: PASS }, rules: [integrity.vacuous-test] }
+  - id: oracle-edited-after-lock
+    given: The implementer changes a verifier-written test after the verifier locked its hash
+    run: { kind: task, events: checks/workflow/fixtures/oracle-edited.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-ORACLE] }

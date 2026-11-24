@@ -1,0 +1,13 @@
+apiVersion: aisf/4.0
+kind: AgentRole
+id: reviewer
+purpose: "AI review in shadow mode: add findings only, never approve or dismiss (CORE-REV-01)."
+reads: [pr-diff, verification-run, locked-acs, review-md]
+mustNotRead: [implementer-notes, reasoning]
+writes: [review-findings]
+tools: [repo.read]
+egress: none
+secrets: none
+session: separate
+mode: shadow
+neverDoes: [approve, dismiss-finding, change-waiver, enable-zero-human-merge]

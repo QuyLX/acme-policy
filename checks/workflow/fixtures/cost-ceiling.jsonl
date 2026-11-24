@@ -1,0 +1,24 @@
+{"workItemId": "TASK-1", "at": "2026-11-24T10:01:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "task.requested", "data": {"workflow": "bug-fix@1.0.0", "requestedBy": "user:dev-a", "requesterSource": "issue-command", "taskClass": "bug-fix"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:02:00Z", "actor": {"id": "ci:policy", "kind": "ci"}, "type": "facts.recorded", "data": {"tier": "Medium", "reversibility": "HIGH", "touches": ["module"]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:03:00Z", "actor": {"id": "agent:intake-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "intake", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:04:00Z", "actor": {"id": "ci:policy", "kind": "ci"}, "type": "step.completed", "data": {"step": "classify", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:05:00Z", "actor": {"id": "user:dev-a", "kind": "human"}, "type": "checkpoint.recorded", "data": {"checkpoint": "requirement-review", "outcome": "passed"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:06:00Z", "actor": {"id": "agent:investigator-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "resolve-context", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:07:00Z", "actor": {"id": "agent:verifier-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "reproduce", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:08:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "oracle.locked", "data": {"files": {"apps/admin/src/a.oracle.test.ts": "sha256:aaa"}}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:09:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "handoff.offered", "data": {"from": {"role": "verifier"}, "to": {"role": "implementer"}, "state": "PLANNED", "artifacts": ["reproduction-test", "oracleRefs"]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:10:00Z", "actor": {"id": "agent:investigator-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "diagnose", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:11:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "plan", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:12:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "implement", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:13:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "handoff.offered", "data": {"from": {"role": "implementer"}, "to": {"role": "verifier"}, "state": "VERIFYING", "artifacts": ["head-sha"]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:14:00Z", "actor": {"id": "agent:verifier-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "verify", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:15:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "oracle.observed", "data": {"files": {"apps/admin/src/a.oracle.test.ts": "sha256:aaa"}}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:16:00Z", "actor": {"id": "ci:verifier", "kind": "ci"}, "type": "checkpoint.recorded", "data": {"checkpoint": "independent-verification", "outcome": "passed"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:17:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "handoff.offered", "data": {"from": {"role": "implementer"}, "to": {"role": "reviewer"}, "state": "REVIEWING", "artifacts": ["pr", "verification-run", "locked-acs"]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:18:00Z", "actor": {"id": "agent:reviewer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "review", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:19:00Z", "actor": {"id": "user:dev-b", "kind": "human"}, "type": "checkpoint.recorded", "data": {"checkpoint": "implementation-review", "outcome": "passed", "approvals": [{"by": "user:dev-b", "slot": "independent"}]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:20:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "knowledge-reconcile", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:21:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "package", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:22:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "cost.reported", "data": {"amount": 21, "unit": "usd"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:23:00Z", "actor": {"id": "user:dev-b", "kind": "human"}, "type": "step.completed", "data": {"step": "approve-merge", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:24:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "task.merged", "data": {}}

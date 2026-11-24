@@ -1,0 +1,16 @@
+'use server';
+import { defineMutation } from '@platform/server';
+import { headers } from 'next/headers';
+import { z } from 'zod';
+import { sessions } from './context';
+
+/** Sample mutation: the only allowed shape of a server action (FE-NEXT-002). */
+export const renameWorkspace = defineMutation(
+  {
+    name: '{{name}}.workspace.rename',
+    input: z.object({ name: z.string().min(2).max(80) }),
+    authorize: (ctx) => ctx.actor.kind === 'user',
+    handler: async (_ctx, input) => ({ name: input.name }),
+  },
+  { sessions, headers, allowedOrigins: [`http://localhost:{{port}}`] },
+);

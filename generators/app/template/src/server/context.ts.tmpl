@@ -1,0 +1,19 @@
+import 'server-only';
+import { contextFromSession, createTestSessionProvider, type RequestContext, type SessionProvider } from '@platform/server';
+import { headers } from 'next/headers';
+
+/**
+ * Session source of this app. @platform/auth is deferred (D-03): until it exists, a synthetic session is used.
+ * Replace this provider when the IdP is decided; nothing else in the app changes.
+ */
+export const sessions: SessionProvider = createTestSessionProvider({
+  actor: { id: 'persona:local-developer', kind: 'user' },
+  tenantId: '00000001-0000-4000-8000-000000000001',
+  expiresAt: '2999-01-01T00:00:00.000Z',
+});
+
+/** Request context for server components, route handlers and mutations (FE §3.5). */
+export async function getRequestContext(): Promise<RequestContext> {
+  const h = await headers();
+  return contextFromSession(await sessions.getSession(), { requestId: h.get('x-request-id') ?? undefined });
+}

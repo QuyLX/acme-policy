@@ -1,0 +1,18 @@
+# Dependency policy (FE-DEP-001; CORE-DEP-02/03; FE §19.1-19.2). Control file of this repo.
+apiVersion: aisf/4.0
+kind: DependencyPolicy
+licenses:
+  allow: [MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, CC-BY-4.0, Unlicense, Python-2.0, MIT-0, Zlib]
+  # Reviewed exceptions (D-19, 2026-11-24): the allowlist stays permissive-only; each entry names the package (glob, to
+  # cover platform-specific binaries), the exact license that was reviewed, an owner and the reason. A different
+  # license on a matching package is not covered and fails again.
+  reviewed:
+    - { name: "@img/sharp-libvips-*", license: LGPL-3.0-or-later, owner: team-platform, reason: "libvips native binary used by sharp, a dependency of next for image optimization; dynamically linked, not modified" }
+    - { name: "lightningcss", license: MPL-2.0, owner: team-platform, reason: "CSS compiler used by Tailwind v4 at build time; not modified or redistributed in source form" }
+    - { name: "lightningcss-*", license: MPL-2.0, owner: team-platform, reason: "platform binary of lightningcss (see above)" }
+    - { name: "axe-core", license: MPL-2.0, owner: team-platform, reason: "accessibility test engine used only in DS tests and Storybook (devDependency); not shipped" }
+advisories:
+  blockAtMerge: [critical, high]     # only for packages the change introduces or changes
+  remediationDays: { critical: 7, high: 30, moderate: 90, low: 180 }   # CORE-DEP-02; overdue blocks release
+lockfile:
+  allowedTarballHosts: [registry.npmjs.org]

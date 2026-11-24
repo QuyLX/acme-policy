@@ -1,0 +1,49 @@
+# Verification adapters (Standard §7.16; FE §8.7 item 6). Tools do not follow the FE §7.6 exit convention, so each
+# adapter declares its own exit map. tsc exits 2 on type errors and 1 on a bad invocation (verified 2026-11-24,
+# TypeScript 6.0.3); `failNeedsOutput` keeps a crash from being reported as a product failure.
+apiVersion: aisf/4.0
+kind: AdapterRegistry
+adapters:
+  - adapterId: eslint
+    version: 1.0.0
+    owner: team-platform
+    checks: [quality.lint]
+    runsFrom: kit
+    exit: { "0": PASS, "1": FAIL }
+  - adapterId: tsc
+    version: 1.0.0
+    owner: team-platform
+    checks: [quality.typecheck]
+    runsFrom: kit
+    exit: { "0": PASS, "2": FAIL }
+    failNeedsOutput: "error TS"
+  - adapterId: vitest
+    version: 1.0.0
+    owner: team-platform
+    checks: [quality.test]
+    runsFrom: product
+    exit: { "0": PASS, "1": FAIL }
+  - adapterId: build
+    version: 1.0.0
+    owner: team-platform
+    checks: [quality.build]
+    runsFrom: product
+    exit: { "0": PASS, "1": FAIL }
+  - adapterId: command
+    version: 0.2.0
+    owner: team-platform
+    checks: []
+    runsFrom: product
+    exit: { "0": PASS, "1": FAIL }
+  - adapterId: vitest-browser
+    version: 1.0.0
+    owner: team-platform
+    checks: [ds.story-interaction]
+    runsFrom: product
+    exit: { "0": PASS, "1": FAIL }
+  - adapterId: vitest-visual
+    version: 1.0.0
+    owner: team-platform
+    checks: [visual.stories]
+    runsFrom: product
+    exit: { "0": PASS, "1": FAIL }

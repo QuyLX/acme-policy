@@ -1,0 +1,24 @@
+import { composeStories } from '@storybook/react-vite';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
+import { axeViolations } from '../../test/a11y';
+import { {{Name}} } from './{{Name}}';
+import * as stories from './{{Name}}.stories';
+
+const composed = composeStories(stories);
+
+describe('{{Name}} stories (jsdom a11y lane)', () => {
+  for (const [name, Story] of Object.entries(composed)) {
+    test(`${name} renders without axe violations`, async () => {
+      const { container } = render(<Story />);
+      expect(await axeViolations(container)).toEqual([]);
+    });
+  }
+});
+
+describe('{{Name}} contract DS-{{NAME}}', () => {
+  test('{{PFX}}-1: renders its content as visible text', () => {
+    render(<{{Name}}>Visible</{{Name}}>);
+    expect(screen.getByText('Visible')).toBeTruthy();
+  });
+});

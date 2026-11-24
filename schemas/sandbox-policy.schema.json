@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/sandbox-policy.schema.json",
+  "title": "SandboxPolicy (CORE-SEC-01; FE §9.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "toolCatalog",
+    "filesystem",
+    "network",
+    "secrets",
+    "untrustedInputs",
+    "audit",
+    "neverAllowed"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "SandboxPolicy"
+    },
+    "toolCatalog": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "effect"
+        ],
+        "properties": {
+          "effect": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "filesystem": {
+      "type": "object",
+      "properties": {
+        "write": {
+          "const": "worktree-only"
+        },
+        "read": {
+          "enum": [
+            "worktree-only",
+            "repository"
+          ]
+        }
+      },
+      "required": [
+        "write",
+        "read"
+      ]
+    },
+    "network": {
+      "type": "object",
+      "required": [
+        "default",
+        "allowlistHosts"
+      ],
+      "properties": {
+        "default": {
+          "const": "deny"
+        },
+        "allowlistHosts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "required": [
+        "production",
+        "injected"
+      ],
+      "properties": {
+        "production": {
+          "const": "forbidden"
+        },
+        "injected": {
+          "const": "none"
+        }
+      }
+    },
+    "untrustedInputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": [
+        "everyAction"
+      ],
+      "properties": {
+        "everyAction": {
+          "const": true
+        },
+        "identity": {
+          "type": "string"
+        }
+      }
+    },
+    "neverAllowed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

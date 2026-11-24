@@ -1,0 +1,26 @@
+# Docs update workflow for docs.link-fix (R0; FE §20.2, §7.1). PROPOSED until the workflow owner approves.
+apiVersion: aisf/4.0
+kind: TaskWorkflowSpec
+metadata: { id: docs-update, version: 1.0.0, owner: team-platform, status: PROPOSED }
+spec:
+  taskClasses: [docs.link-fix]
+  riskCeiling: Low
+  trigger: ["knowledge.references finding or issue labeled type:docs"]
+  inputs: { required: [goal, why, repository] }
+  preconditions: ["change touches documentation only"]
+  checkpoints:
+    - { id: requirement-review, kind: mandatory, after: classify }
+    - { id: implementation-review, kind: mandatory, after: review }
+  recoveryDefaults: { timeout: 15m, retry: { max: 2, backoff: linear, on: [ERROR, timeout] }, idempotent: true, sideEffect: none }
+  steps:
+    - { id: intake, skeletonStep: 1, kind: mandatory, role: intake, inputs: [goal, why], outputs: [change-brief], verification: "change-brief complete", onFailure: NEEDS_CLARIFICATION }
+    - { id: classify, skeletonStep: 2, kind: mandatory, role: policy, inputs: [change-brief], outputs: [policy-decision], verification: policy.risk, onFailure: escalate }
+    - { id: implement, skeletonStep: 8, kind: mandatory, role: implementer, inputs: [change-brief], outputs: [head-sha], verification: knowledge.references, onFailure: { retry: implement }, sideEffect: reversible, rollback: "reset the work branch" }
+    - { id: verify, skeletonStep: 11, kind: mandatory, role: verifier, inputs: [head-sha], outputs: [verification-run], verification: "verify:fast", onFailure: { returnTo: implement } }
+    - { id: review, skeletonStep: 12, kind: mandatory, role: reviewer, inputs: [pr, verification-run], outputs: [review-findings], verification: "findings dispositioned", onFailure: { returnTo: implement } }
+    - { id: approve-merge, skeletonStep: 16, kind: mandatory, role: human, inputs: [pr, policy-decision], outputs: [merge-approval], verification: policy.sod, onFailure: escalate }
+  handoffs:
+    - { from: implementer, to: reviewer, validIn: [REVIEWING], requiredArtifacts: [pr, verification-run], excludeContext: [implementer-notes, reasoning] }
+  maxHandoffRejections: 2
+  budgets: { verifyRepairIterations: 2, reviewRounds: 2, mergeQueueAttempts: 2, cost: { limit: 5, unit: usd } }
+  completion: { requiredOutputs: [pr, merge-approval] }

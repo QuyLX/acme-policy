@@ -1,0 +1,28 @@
+# Control files (Standard §7.13, FE §8.7; CORE-VER-07).
+# A change to any matching path needs approval from a code owner of that file (Standard §9.10)
+# and is reported by integrity.control-file-change.
+apiVersion: aisf/4.0
+kind: ControlFileRegistry
+paths:
+  - "**/factory.yaml"
+  - "factory.config.yaml"
+  - "CODEOWNERS"
+  - "**/CODEOWNERS"
+  - "**/REVIEW.md"
+  - "**/AGENTS.md"
+  - "package.json"
+  - "**/package.json"
+  - "pnpm-workspace.yaml"
+  - "pnpm-lock.yaml"
+  - "nx.json"
+  - "**/eslint.config.mjs"
+  - "**/tsconfig.json"
+  - "**/vitest.config.*"
+  - "**/vitest.browser.config.*"
+  - "packages/factory-cli/**"
+  - ".github/**"
+  - ".gitlab/**"
+  - ".gitlab-ci.yml"
+  - ".claude/**"
+  - ".factory/**"
+  - "**/journeys.yaml"

@@ -1,0 +1,13 @@
+import type { ComponentDoc } from '../doc';
+import type { {{Name}}Props } from './{{Name}}';
+
+export default {
+  name: '{{Name}}',
+  status: 'experimental',
+  summary: '{{summary}}',
+  a11yPattern: 'https://www.w3.org/WAI/ARIA/apg/patterns/',
+  contract: 'DS-{{NAME}}',
+  props: { children: 'Visible content.' },
+  do: ['Describe the behavior this component guarantees in its Contract Spec before adding variants.'],
+  dont: ['Do not pass className or style.'],
+} satisfies ComponentDoc<{{Name}}Props>;

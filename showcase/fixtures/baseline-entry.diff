@@ -1,0 +1,10 @@
+diff --git a/factory.config.yaml b/factory.config.yaml
+index 3cc0c77..20c8da2 100644
+--- a/factory.config.yaml
++++ b/factory.config.yaml
+@@ -3,3 +3,5 @@ kind: FactoryProjectConfig
+ projects:
+   lib:
+     kind: node-lib
++    baseline:
++      - { rule: "@typescript-eslint/no-explicit-any", file: src/index.ts, count: 1 }

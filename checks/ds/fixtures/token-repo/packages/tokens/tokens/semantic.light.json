@@ -1,0 +1,1 @@
+{ "color": { "fg": { "default": { "$value": "{color.neutral.900}", "$type": "color" }, "muted": { "$value": "{color.neutral.600}", "$type": "color" } } } }

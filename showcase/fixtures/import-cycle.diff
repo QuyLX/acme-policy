@@ -1,0 +1,16 @@
+diff --git a/packages/lib/src/a.ts b/packages/lib/src/a.ts
+new file mode 100644
+index 0000000..a95927f
+--- /dev/null
++++ b/packages/lib/src/a.ts
+@@ -0,0 +1,2 @@
++import { b } from './b';
++export const a = (): number => b() + 1;
+diff --git a/packages/lib/src/b.ts b/packages/lib/src/b.ts
+new file mode 100644
+index 0000000..36e6cfd
+--- /dev/null
++++ b/packages/lib/src/b.ts
+@@ -0,0 +1,2 @@
++import { a } from './a';
++export const b = (): number => (a.length > 0 ? 1 : 0);

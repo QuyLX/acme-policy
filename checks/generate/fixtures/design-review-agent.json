@@ -1,0 +1,1 @@
+{ "id": "CP-2", "workItemId": "TASK-9", "checkpoint": "design-review", "subject": { "artifactDigest": "sha256:plan" }, "outcome": "passed", "reviews": [], "approvals": [{ "by": "agent:implementer-1" }], "verificationRuns": [], "recordedAt": "2026-11-24T10:00:00Z" }

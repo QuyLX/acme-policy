@@ -1,0 +1,7 @@
+diff --git a/packages/tokens/tokens/primitives.json b/packages/tokens/tokens/primitives.json
+index a2a6f4c..8d7d11a 100644
+--- a/packages/tokens/tokens/primitives.json
++++ b/packages/tokens/tokens/primitives.json
+@@ -1 +1 @@
+-{ "color": { "neutral": { "600": { "$value": "#525252", "$type": "color" }, "900": { "$value": "#171717", "$type": "color" } } } }
++{ "color": { "neutral": { "600": { "$value": "#4a4a4a", "$type": "color" }, "900": { "$value": "#171717", "$type": "color" } } } }

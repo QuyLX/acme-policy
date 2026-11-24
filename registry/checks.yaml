@@ -1,0 +1,870 @@
+# Check Registry (Standard §8.7; FE §8.2). Central check definitions (CORE-VER-05): a product PR cannot modify them.
+# `mode` selects the enforcement in effect: pilot = Standard §20.8 (sensors at warn except skip-focus,
+# control-file-change and oracle-lock); `targetEnforcement` is the Standard §7.13 target, the L2 minimum.
+# quality.* checks run through tool adapters (registry/adapters.yaml) with configs generated from the pinned kit;
+# no check executes a script defined by the repo under verification (DV-05). Every active check carries fixtures
+# (or a proof test) that test/registry-proof.test.mjs runs: the mutation proof of FE §8.2 rule 1.
+apiVersion: aisf/4.0
+kind: CheckRegistry
+mode: pilot
+checks:
+  - checkId: quality.lint
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-ARCH-001, FE-ARCH-006, FE-DS-001, FE-STATE-002, FE-UX-001]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: FE Blueprint 4.1 §8.4 baseline
+    evidenceLayer: static
+    adapter: eslint
+    timeoutSeconds: 600
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/ts-repo"}
+      conforming:
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/fix-lint.diff"}
+  - checkId: quality.typecheck
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: FE Blueprint 4.1 §8.4 baseline
+    evidenceLayer: static
+    adapter: tsc
+    timeoutSeconds: 600
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/type-error.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/ts-repo"}
+  - checkId: quality.test
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: FE Blueprint 4.1 §8.4 baseline
+    evidenceLayer: static
+    adapter: vitest
+    timeoutSeconds: 900
+    fixtures:
+      proofTest: test/product-tool-adapters.test.mjs
+  - checkId: quality.build
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: FE Blueprint 4.1 §8.4 baseline
+    evidenceLayer: static
+    adapter: build
+    timeoutSeconds: 1200
+    fixtures:
+      proofTest: test/product-tool-adapters.test.mjs
+  - checkId: meta.config-parity
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-CFG-001]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 \u00a78.7 item 3, FE-CFG-001"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/repo-config-tampered.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/ts-repo"}
+  - checkId: meta.override-direction
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 \u00a78.7 item 3, FE-CFG-001"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/baseline-entry.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/ts-repo"}
+  - checkId: meta.toolchain-pin
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 \u00a78.7 item 3, FE-CFG-001"
+    evidenceLayer: static
+    fixtures:
+      proofTest: test/m1-meta-and-adapters.test.mjs
+  - checkId: meta.descriptor-drift
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 CORE-KNW-04; FE §7.2
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/meta/fixtures/descriptor-drift"}
+      conforming:
+        - {"repo": "checks/meta/fixtures/descriptor-ok"}
+  - checkId: integrity.test-count-delta
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/test-deletion.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.skip-focus
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/skip-focus.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.suppressions
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-CODE-001]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/suppression.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.snapshot-churn
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: warn
+    severity: WARNING
+    gate: merge
+    implementsRules: [FE-TEST-002]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/snapshot-churn.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.threshold-change
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: warn
+    severity: WARNING
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/threshold-in-config.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+        - {"diff": "checks/integrity/fixtures/threshold-in-prose.diff"}
+  - checkId: integrity.control-file-change
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/pass-with-no-tests.diff"}
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/script-neutered.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/deps-only.diff"}
+  - checkId: integrity.expected-value-edit
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-TEST-004]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/expected-value-edit.diff"}
+        - {"diff": "checks/integrity/fixtures/scenario-fixture-edit.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.self-mocking
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-TEST-004]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/self-mocking.diff"}
+        - {"diff": "checks/integrity/fixtures/generated-mock-edit.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.vacuous-test
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/vacuous-test.diff"}
+        - {"diff": "checks/integrity/fixtures/pass-with-no-tests.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.tolerance-inflation
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: warn
+    severity: WARNING
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/tolerance-inflation.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.broad-catch
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: warn
+    severity: WARNING
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/broad-catch.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.oracle-lock
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-TEST-003]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: "AISF Standard 4.0 \u00a77.13 (profile addition, FE \u00a78.6)"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/oracle-lock.diff"}
+        - {"diff": "showcase/fixtures/journeys-criticality.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+  - checkId: integrity.mutation-score
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: planned
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: observe
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.13
+    evidenceLayer: static
+    fixtures: {}
+  - checkId: policy.sod
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §9.10
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"sodInput": "checks/policy-sod/fixtures/medium-requester-self-approves.json"}
+        - {"sodInput": "checks/policy-sod/fixtures/medium-stale-approval.json"}
+      conforming:
+        - {"sodInput": "checks/policy-sod/fixtures/medium-independent-approves.json"}
+  - checkId: policy.risk
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §9.5-9.6; FE §10.1
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/policy-risk/fixtures/repo", "change": "checks/policy-risk/fixtures/privileged.diff", "expect": {"tier": "R3"}}
+        - {"repo": "checks/policy-risk/fixtures/repo", "change": "checks/policy-risk/fixtures/admin-page.diff", "expect": {"tier": "R2"}}
+      conforming:
+        - {"repo": "checks/policy-risk/fixtures/repo", "change": "checks/policy-risk/fixtures/docs.diff", "expect": {"tier": "R0"}}
+  - checkId: knowledge.impact
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: warn
+    targetEnforcement: blocking
+    severity: WARNING
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §5.8-5.10
+    evidenceLayer: static
+    params:
+      docsGlobs: ["docs/**/*.md", "apps/*/docs/**/*.md", "packages/*/docs/**/*.md"]
+    fixtures:
+      violating:
+        - {"repo": "checks/knowledge-impact/fixtures/repo", "change": "checks/knowledge-impact/fixtures/retry-change.diff"}
+      conforming:
+        - {"repo": "checks/knowledge-impact/fixtures/repo"}
+  - checkId: knowledge.record-schema
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §5.8-5.10
+    evidenceLayer: static
+    params:
+      docsGlobs: ["docs/**/*.md", "apps/*/docs/**/*.md", "packages/*/docs/**/*.md"]
+    fixtures:
+      violating:
+        - {"repo": "checks/knowledge-impact/fixtures/repo"}
+      conforming:
+        - {"repo": "checks/knowledge/fixtures/valid"}
+  - checkId: knowledge.references
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §5.8-5.10
+    evidenceLayer: static
+    params:
+      docsGlobs: ["docs/**/*.md", "apps/*/docs/**/*.md", "packages/*/docs/**/*.md"]
+    fixtures:
+      violating:
+        - {"repo": "checks/knowledge/fixtures/broken-refs"}
+      conforming:
+        - {"repo": "checks/knowledge/fixtures/valid"}
+  - checkId: review.injection-prescan
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: AISF Standard 4.0 §7 item 23; FE §9.9
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/injection.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+        - {"diff": "checks/integrity/fixtures/injection-in-control-file.diff"}
+  - checkId: sec.secrets
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-SEC-002]
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: FE Blueprint 4.1 §19.1; CORE-SEC-07
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"diff": "checks/integrity/fixtures/secrets.diff"}
+      conforming:
+        - {"diff": "checks/integrity/fixtures/clean.diff"}
+        - {"diff": "checks/integrity/fixtures/env-example.diff"}
+  - checkId: deps.policy
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-DEP-001]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: FE Blueprint 4.1 §19.1-19.2; CORE-DEP-02/03
+    evidenceLayer: static
+    timeoutSeconds: 120
+    fixtures:
+      proofTest: test/deps-and-install.test.mjs
+  - checkId: build.install-frozen
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: FE Blueprint 4.1 §19.2
+    evidenceLayer: static
+    timeoutSeconds: 300
+    fixtures:
+      proofTest: test/deps-and-install.test.mjs
+  - checkId: arch.cycles
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-ARCH-003]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: FE Blueprint 4.1 §4.5
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/ts-repo", "change": "showcase/fixtures/import-cycle.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/ts-repo"}
+  - checkId: workflow.conformance
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: optional
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: "AISF Standard 4.0 §6.4-6.7, §6.12-6.14; FE §9.10-9.12"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"taskEvents": "checks/workflow/fixtures/same-identity.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/oracle-edited.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/handoff-leak.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/checkpoint-missing.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/verify-loop.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/cost-ceiling.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/conditional-skipped.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/irreversible-retry.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+      conforming:
+        - {"taskEvents": "checks/workflow/fixtures/happy.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/timeouts-no-budget.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+        - {"taskEvents": "checks/workflow/fixtures/conditional-done.jsonl", "playbooks": "checks/workflow/fixtures/playbooks"}
+  - checkId: ds.api-compat
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §5.2, §8.4 design-system"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/api-drift.diff"}
+      conforming:
+        - {"repo": "checks/ds/fixtures/ds-repo"}
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/api-break-with-changeset.diff"}
+  - checkId: ds.semver-changelog
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §5.2, §8.4 design-system"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/api-break-no-changeset.diff"}
+      conforming:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/api-break-with-changeset.diff"}
+        - {"repo": "checks/ds/fixtures/ds-repo"}
+  - checkId: ds.docs-api-sync
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §5.2, §8.4 design-system"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/undocumented-prop.diff"}
+      conforming:
+        - {"repo": "checks/ds/fixtures/ds-repo"}
+  - checkId: ds.consumer-verification
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §5.5, §8.4 design-system; SC-09"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/ds/fixtures/token-repo", "change": "checks/ds/fixtures/token-change-orphan.diff"}
+      conforming:
+        - {"repo": "checks/ds/fixtures/token-repo", "change": "checks/ds/fixtures/token-change.diff"}
+        - {"repo": "checks/ds/fixtures/token-repo"}
+  - checkId: ds.bundle-budget
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §4.7, §8.4 design-system"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/budget-exceeded.diff"}
+      conforming:
+        - {"repo": "checks/ds/fixtures/ds-repo", "change": "checks/ds/fixtures/budget-ok.diff"}
+  - checkId: ds.story-interaction
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-UX-001]
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: wcag
+      source: "WCAG 2.2 AA via axe-core in a real browser; FE §5.4, §8.4 design-system"
+    evidenceLayer: browser
+    adapter: vitest-browser
+    timeoutSeconds: 900
+    fixtures:
+      proofTest: test/product-tool-adapters.test.mjs
+  - checkId: visual.stories
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-TEST-002]
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: profile
+      source: "FE Blueprint 4.1 §8.4 design-system, §8.11; D-21"
+    evidenceLayer: browser
+    adapter: vitest-visual
+    timeoutSeconds: 900
+    fixtures:
+      proofTest: test/product-tool-adapters.test.mjs

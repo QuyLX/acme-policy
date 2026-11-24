@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/showcase-scenario.schema.json",
+  "title": "ShowcaseScenario — a scripted, repeatable Factory acceptance scenario (FE §20.1, §20.3)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "id",
+    "title",
+    "demonstrates",
+    "slice",
+    "cases"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "ShowcaseScenario"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^SC-[0-9]{2}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "demonstrates": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^CORE-[A-Z]{3}-[0-9]{2}$"
+      },
+      "minItems": 1
+    },
+    "slice": {
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    },
+    "mode": {
+      "enum": [
+        "pilot",
+        "default"
+      ]
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "given"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "given": {
+          "type": "string"
+        },
+        "pending": {
+          "type": "string",
+          "description": "Why this case cannot run yet (milestone that delivers it). A pending case is reported NOT_ASSESSED, never PASS."
+        },
+        "run": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "diff"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "integrity"
+                },
+                "diff": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "input"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "sod"
+                },
+                "input": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "repo",
+                "checks"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "run"
+                },
+                "repo": {
+                  "type": "string"
+                },
+                "change": {
+                  "type": "string"
+                },
+                "checks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "sodInput": {
+                  "type": "string"
+                },
+                "executor": {
+                  "enum": [
+                    "local",
+                    "ci",
+                    "agent-sandbox"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "events"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "task"
+                },
+                "events": {
+                  "type": "string"
+                },
+                "playbooks": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "base",
+                "head"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "playbook-change"
+                },
+                "base": {
+                  "type": "string"
+                },
+                "head": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "repo",
+                "generator",
+                "name"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "generate"
+                },
+                "repo": {
+                  "type": "string"
+                },
+                "generator": {
+                  "enum": [
+                    "package",
+                    "ds-component",
+                    "app"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "checkpoint": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "ERROR",
+                "NOT_ASSESSED"
+              ]
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "exitCode": {
+              "enum": [
+                0,
+                1,
+                2
+              ]
+            },
+            "statuses": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "ERROR",
+                  "NOT_ASSESSED"
+                ]
+              }
+            },
+            "requiredUnmet": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "taskState": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "pending"
+          ]
+        },
+        {
+          "required": [
+            "run",
+            "expect"
+          ]
+        }
+      ]
+    }
+  }
+}

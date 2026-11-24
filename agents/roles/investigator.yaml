@@ -1,0 +1,11 @@
+apiVersion: aisf/4.0
+kind: AgentRole
+id: investigator
+purpose: "Resolve context and basis (ACTIVE records, id@version) and explain the root cause from the failing test."
+reads: [change-brief, repository, knowledge-records, reproduction-test]
+mustNotRead: []
+writes: [context-pack, basis, root-cause]
+tools: [repo.read, knowledge.search, factory.context]
+egress: none
+secrets: none
+session: any

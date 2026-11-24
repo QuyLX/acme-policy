@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/sod-input.schema.json",
+  "title": "Platform-neutral input to policy.sod (built from PR events by the CI adapter)",
+  "type": "object",
+  "required": ["workItemId", "tier", "headSha", "requester", "author", "pushers", "approvals", "areas", "controlFilesTouched"],
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": { "type": "string" },
+    "tier": { "enum": ["Low", "Medium", "High"] },
+    "headSha": { "type": "string", "minLength": 7 },
+    "requester": {
+      "type": "object",
+      "required": ["id", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "source": { "enum": ["ci-dispatch", "issue-command", "cli-login", "automation-owner", "unknown"] }
+      }
+    },
+    "requesterSignedOff": { "type": "boolean" },
+    "author": { "type": "string" },
+    "pushers": { "type": "array", "items": { "type": "string" } },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["by", "commitSha"],
+        "additionalProperties": false,
+        "properties": { "by": { "type": "string" }, "commitSha": { "type": "string" }, "isAgent": { "type": "boolean" } }
+      }
+    },
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "teamMembers", "codeOwners"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "teamMembers": { "type": "array", "items": { "type": "string" } },
+          "codeOwners": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "controlFilesTouched": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "owners"],
+        "additionalProperties": false,
+        "properties": { "path": { "type": "string" }, "owners": { "type": "array", "items": { "type": "string" } } }
+      }
+    },
+    "breakerTripped": { "type": "boolean" },
+    "blockingIntegrityHit": { "type": "boolean" }
+  }
+}

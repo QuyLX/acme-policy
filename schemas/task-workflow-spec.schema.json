@@ -1,0 +1,460 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/task-workflow-spec.schema.json",
+  "title": "TaskWorkflowSpec (Standard Appendix C, K.4)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "TaskWorkflowSpec"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "owner",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "DRAFT",
+            "PROPOSED",
+            "ACTIVE",
+            "NEEDS_REVALIDATION",
+            "SUPERSEDED",
+            "DEPRECATED",
+            "ARCHIVED"
+          ]
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskClasses",
+        "riskCeiling",
+        "trigger",
+        "inputs",
+        "preconditions",
+        "checkpoints",
+        "steps",
+        "completion"
+      ],
+      "properties": {
+        "taskClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "riskCeiling": {
+          "enum": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "trigger": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required"
+          ],
+          "properties": {
+            "required": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "optional": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subStates": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "after"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "requirement-review",
+                  "specification-review",
+                  "design-review",
+                  "plan-review",
+                  "independent-verification",
+                  "implementation-review",
+                  "release-readiness"
+                ]
+              },
+              "kind": {
+                "enum": [
+                  "mandatory",
+                  "conditional"
+                ]
+              },
+              "when": {
+                "type": "string"
+              },
+              "after": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "skeletonStep",
+              "kind",
+              "role",
+              "inputs",
+              "outputs",
+              "verification",
+              "onFailure"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "skeletonStep": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16
+              },
+              "kind": {
+                "enum": [
+                  "mandatory",
+                  "conditional",
+                  "optional"
+                ]
+              },
+              "when": {
+                "type": "string"
+              },
+              "subState": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "outputs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "verification": {
+                "type": "string"
+              },
+              "onFailure": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "timeout": {
+                "type": "string"
+              },
+              "retry": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "max",
+                  "backoff",
+                  "on"
+                ],
+                "properties": {
+                  "max": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "backoff": {
+                    "enum": [
+                      "none",
+                      "linear",
+                      "exponential"
+                    ]
+                  },
+                  "on": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "ERROR",
+                        "timeout"
+                      ]
+                    }
+                  }
+                }
+              },
+              "idempotent": {
+                "type": "boolean"
+              },
+              "sideEffect": {
+                "enum": [
+                  "none",
+                  "reversible",
+                  "compensable",
+                  "irreversible"
+                ]
+              },
+              "rollback": {
+                "type": "string"
+              },
+              "compensation": {
+                "type": "string"
+              }
+            },
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "conditional"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "when"
+              ]
+            }
+          }
+        },
+        "handoffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to",
+              "validIn",
+              "requiredArtifacts"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "validIn": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "requiredArtifacts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "excludeContext": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "maxHandoffRejections": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "verifyRepairIterations": {
+              "type": "integer"
+            },
+            "reviewRounds": {
+              "type": "integer"
+            },
+            "mergeQueueAttempts": {
+              "type": "integer"
+            },
+            "cost": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "limit",
+                "unit"
+              ],
+              "properties": {
+                "limit": {
+                  "type": "number"
+                },
+                "unit": {
+                  "enum": [
+                    "usd",
+                    "tokens"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "recoveryDefaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "timeout": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "max",
+                "backoff",
+                "on"
+              ],
+              "properties": {
+                "max": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "backoff": {
+                  "enum": [
+                    "none",
+                    "linear",
+                    "exponential"
+                  ]
+                },
+                "on": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "ERROR",
+                      "timeout"
+                    ]
+                  }
+                }
+              }
+            },
+            "idempotent": {
+              "type": "boolean"
+            },
+            "sideEffect": {
+              "enum": [
+                "none",
+                "reversible",
+                "compensable",
+                "irreversible"
+              ]
+            },
+            "rollback": {
+              "type": "string"
+            },
+            "compensation": {
+              "type": "string"
+            }
+          }
+        },
+        "completion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requiredOutputs"
+          ],
+          "properties": {
+            "requiredOutputs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

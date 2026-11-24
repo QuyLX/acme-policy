@@ -1,0 +1,8 @@
+diff --git a/apps/console/src/modules/compute/domain/retry.test.ts b/apps/console/src/modules/compute/domain/retry.test.ts
+--- a/apps/console/src/modules/compute/domain/retry.test.ts
++++ b/apps/console/src/modules/compute/domain/retry.test.ts
+@@ -3,5 +3,5 @@ import { retryCount } from './retry';
+ it('retries a timed-out job exactly once', () => {
+-  expect(retryCount('timeout')).toBe(1);
++  expect(retryCount('timeout')).toBe(3);
+ });

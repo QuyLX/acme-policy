@@ -1,0 +1,14 @@
+diff --git a/packages/tokens/tokens/primitives.json b/packages/tokens/tokens/primitives.json
+index a2a6f4c..8d7d11a 100644
+--- a/packages/tokens/tokens/primitives.json
++++ b/packages/tokens/tokens/primitives.json
+@@ -1 +1 @@
+-{ "color": { "neutral": { "600": { "$value": "#525252", "$type": "color" }, "900": { "$value": "#171717", "$type": "color" } } } }
++{ "color": { "neutral": { "600": { "$value": "#4a4a4a", "$type": "color" }, "900": { "$value": "#171717", "$type": "color" } } } }
+diff --git a/tools/banner.tsx b/tools/banner.tsx
+new file mode 100644
+index 0000000..3084ac8
+--- /dev/null
++++ b/tools/banner.tsx
+@@ -0,0 +1 @@
++export const Banner = () => <div className="text-fg-muted">unverified</div>;

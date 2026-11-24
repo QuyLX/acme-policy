@@ -1,0 +1,8 @@
+# Generators (FE §9.8 golden paths; tech-design 12). Templates are pinned with the verifier (DV-05): output that is
+# byte-identical to the template at this version is the trusted mechanism `factory.generate` (Standard §7.13).
+apiVersion: aisf/4.0
+kind: GeneratorRegistry
+generators:
+  - { id: package, version: 1.0.0, requiresCheckpoint: design-review, target: "packages/{{name}}" }
+  - { id: ds-component, version: 1.0.0, requiresCheckpoint: null, target: "packages/ds-react/src/{{dir}}", note: "design-review by the DS owner happens on the PR (FE §9.11)" }
+  - { id: app, version: 1.0.0, requiresCheckpoint: design-review, target: "apps/{{name}}", note: "Next.js app wired to ds-*, server, i18n (tech-design 12 §3)" }

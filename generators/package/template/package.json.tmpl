@@ -1,0 +1,12 @@
+{
+  "name": "@platform/{{name}}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "{{description}}",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit", "lint": "eslint ." },
+  "devDependencies": {{devDependencies}},
+  "nx": { "tags": ["scope:shared", "type:lib"] },
+  "factory": { "generatedFrom": "package@{{generatorVersion}}" }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "acme-policy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Central policy repo: vocabulary, schemas, registries, required checks and verification adapters (FE Blueprint \u00a73.3, \u00a78.7; AISF Standard \u00a77.15).",
+  "packageManager": "pnpm@12.23.0",
+  "engines": {
+    "node": ">=26.13.0"
+  },
+  "bin": {
+    "acme-policy": "./bin/acme-policy.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/",
+    "validate": "node bin/acme-policy.mjs validate-self",
+    "showcase": "node bin/acme-policy.mjs showcase",
+    "test:e2e": "node test-e2e/generate.e2e.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "picomatch": "4.0.7",
+    "yaml": "2.9.1"
+  }
+}

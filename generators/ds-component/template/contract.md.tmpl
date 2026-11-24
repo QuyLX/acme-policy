@@ -1,0 +1,38 @@
+---
+id: DS-{{NAME}}
+kind: component
+status: PROPOSED
+version: "0.1"
+owner: team-platform
+authority: intent
+describes: ["packages/ds-react/src/{{dir}}/**"]
+basedOn: ["FE-BLUEPRINT@4.1"]
+---
+# Contract Spec — {{Name}} (DS-{{NAME}})
+
+> PROPOSED: generated skeleton. Moving to ACTIVE needs a `specification-review` by the Design System owner.
+
+## Ownership boundary
+Owned: {{summary}} Not owned: product-specific content.
+
+## Public concepts
+`children`: visible content.
+
+## Behavioral contract
+| ID | Invariant | Basis |
+|---|---|---|
+| {{PFX}}-1 | Content is rendered as visible text | WCAG 1.3.1 |
+
+## Allowed variation
+Spacing within the token scale.
+
+## A11y contract
+Non-interactive until the contract says otherwise. jsdom lane: axe per story.
+
+## Theming anatomy
+`text-fg` on the surrounding surface.
+
+## Verification map
+| Clause | Check | What goes wrong if removed |
+|---|---|---|
+| {{PFX}}-1 | `{{Name}}.test.tsx` "{{PFX}}-1" | Content not exposed to assistive technology |

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/factory-project-config.schema.json",
+  "title": "FactoryProjectConfig — a product repo's factory.config.yaml: project kinds and the only allowed config differences (FE §8.7 item 3, FE-CFG-001)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "projects"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "FactoryProjectConfig"
+    },
+    "projects": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/project"
+      }
+    }
+  },
+  "$defs": {
+    "severity": {
+      "enum": [
+        "off",
+        "warn",
+        "error"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "next-app",
+            "react-lib",
+            "node-lib",
+            "node-tool"
+          ],
+          "description": "node-tool = JavaScript-only tooling: lint only, no type check"
+        },
+        "lint": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rules": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/severity"
+                  },
+                  {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "$ref": "#/$defs/severity"
+                      }
+                    ],
+                    "minItems": 1
+                  }
+                ]
+              }
+            },
+            "ignores": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "typescript": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Strictness flags cannot be overridden. `extraInclude` can only add files to the type check.",
+          "properties": {
+            "types": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "paths": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "extraInclude": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "test": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "environment": {
+              "enum": [
+                "node",
+                "jsdom"
+              ]
+            },
+            "setupFiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "coverage": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "lines": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            },
+            "browser": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Real-browser lanes: ds.story-interaction (*.browser.test.*) and, with visual, visual.stories (*.visual.test.*)",
+              "properties": {
+                "tailwind": {
+                  "type": "boolean"
+                },
+                "visual": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "react-server"
+                ]
+              },
+              "description": "Module resolution conditions for tests (react-server for server-only packages)"
+            }
+          }
+        },
+        "baseline": {
+          "type": "array",
+          "description": "Ratchet entries for existing violations. Adding one is loosening (R3).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rule",
+              "file",
+              "count"
+            ],
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "file": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "publicApi": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "entry",
+            "snapshot"
+          ],
+          "description": "Published API of a shared package: snapshot for ds.api-compat/ds.semver-changelog; optional gzip budget for ds.bundle-budget",
+          "properties": {
+            "entry": {
+              "type": "string"
+            },
+            "snapshot": {
+              "type": "string"
+            },
+            "budgetKb": {
+              "type": "number",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

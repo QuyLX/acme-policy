@@ -1,0 +1,12 @@
+apiVersion: aisf/4.0
+kind: AgentRole
+id: verifier
+purpose: "Write the reproduction and acceptance tests from approved ACs, prove they fail on the base commit, then verify the fix with the oracle locked."
+reads: [change-brief, approved-acs, base-commit, head-sha]
+mustNotRead: [implementer-notes, reasoning, plan, implementer-branch-before-lock]
+writes: ["**/*.oracle.test.ts", "**/*.oracle.test.tsx", "**/oracles/**"]
+tools: [repo.read, worktree.write, factory.verify]
+egress: none
+secrets: none
+session: separate
+distinctIdentityFrom: [implementer]

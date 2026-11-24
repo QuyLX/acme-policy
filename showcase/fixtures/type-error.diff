@@ -1,0 +1,7 @@
+diff --git a/packages/lib/src/broken.ts b/packages/lib/src/broken.ts
+new file mode 100644
+index 0000000..abae572
+--- /dev/null
++++ b/packages/lib/src/broken.ts
+@@ -0,0 +1 @@
++export const answer: number = "forty-two";

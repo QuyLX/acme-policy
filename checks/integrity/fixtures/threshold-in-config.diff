@@ -1,0 +1,9 @@
+diff --git a/apps/console/vitest.config.ts b/apps/console/vitest.config.ts
+--- a/apps/console/vitest.config.ts
++++ b/apps/console/vitest.config.ts
+@@ -3,5 +3,5 @@ export default defineConfig({
+   test: {
+-    coverage: { thresholds: { lines: 80 } },
++    coverage: { thresholds: { lines: 40 } },
+   },
+ });

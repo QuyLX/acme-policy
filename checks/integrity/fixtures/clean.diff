@@ -1,0 +1,8 @@
+diff --git a/apps/console/src/modules/compute/domain/quota.ts b/apps/console/src/modules/compute/domain/quota.ts
+--- a/apps/console/src/modules/compute/domain/quota.ts
++++ b/apps/console/src/modules/compute/domain/quota.ts
+@@ -1,3 +1,3 @@
+ export function remaining(limit: number, used: number) {
+-  return limit - used;
++  return Math.max(0, limit - used);
+ }

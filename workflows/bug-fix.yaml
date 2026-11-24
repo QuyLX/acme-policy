@@ -1,0 +1,42 @@
+# Bug Fix workflow — pilot form (Standard Appendix C.4 subset of C.3; FE §9.2). PROPOSED: the workflow owner must
+# approve it before it becomes ACTIVE; an agent never activates its own playbook. Single source (CORE-SEC-05).
+apiVersion: aisf/4.0
+kind: TaskWorkflowSpec
+metadata: { id: bug-fix, version: 1.0.0, owner: team-platform, status: PROPOSED }
+spec:
+  taskClasses: [bug-fix]
+  riskCeiling: Medium            # pilot: R1/R2 (FE §20.2)
+  trigger: ["issue labeled type:bug with a factory task command"]
+  inputs: { required: [goal, why, repository, reproductionReference], optional: [suspectedArea] }
+  preconditions: ["repository has golden commands and a resolved verification profile", "no unresolved knowledge conflict blocks the affected area"]
+  checkpoints:
+    - { id: requirement-review, kind: mandatory, after: classify }
+    - { id: plan-review, kind: conditional, after: plan, when: "tier == High OR reversibility == LOW" }
+    - { id: independent-verification, kind: mandatory, after: verify }
+    - { id: implementation-review, kind: mandatory, after: review }
+  recoveryDefaults:
+    timeout: 30m
+    retry: { max: 2, backoff: exponential, on: [ERROR, timeout] }
+    idempotent: true
+    sideEffect: none
+  steps:
+    - { id: intake, skeletonStep: 1, kind: mandatory, role: intake, inputs: [goal, why, reproductionReference], outputs: [change-brief], verification: "change-brief fields complete; every AC has an oracle", onFailure: NEEDS_CLARIFICATION }
+    - { id: classify, skeletonStep: 2, kind: mandatory, role: policy, inputs: [change-brief], outputs: [policy-decision], verification: policy.risk, onFailure: escalate }
+    - { id: resolve-context, skeletonStep: 3, kind: mandatory, role: investigator, inputs: [change-brief], outputs: [context-pack, basis], verification: "every basis artifact is ACTIVE", onFailure: NEEDS_CLARIFICATION }
+    - { id: reproduce, skeletonStep: 10, kind: mandatory, role: verifier, inputs: [change-brief, base-commit], outputs: [reproduction-test, oracleRefs], verification: "reproduction test fails on the base commit", onFailure: NEEDS_CLARIFICATION }
+    - { id: diagnose, skeletonStep: 5, kind: mandatory, role: investigator, inputs: [reproduction-test, context-pack], outputs: [root-cause], verification: "root cause explains the failing test", onFailure: escalate }
+    - { id: plan, skeletonStep: 6, kind: mandatory, role: implementer, inputs: [root-cause], outputs: [plan], verification: "plan names files, tests and revert", onFailure: escalate }
+    - { id: implement, skeletonStep: 8, kind: mandatory, role: implementer, inputs: [plan, reproduction-test], outputs: [head-sha], verification: "verify:fast", onFailure: { retry: implement }, sideEffect: reversible, rollback: "reset the work branch" }
+    - { id: verify, skeletonStep: 11, kind: mandatory, role: verifier, inputs: [head-sha, oracleRefs], outputs: [verification-run], verification: "verify; oracle hashes unchanged", onFailure: { returnTo: implement } }
+    - { id: review, skeletonStep: 12, kind: mandatory, role: reviewer, inputs: [pr, verification-run, locked-acs], outputs: [review-findings], verification: "findings dispositioned", onFailure: { returnTo: implement } }
+    - { id: knowledge-reconcile, skeletonStep: 14, kind: mandatory, role: implementer, inputs: [knowledge-impact], outputs: [reconciliation-decisions], verification: knowledge.impact, onFailure: escalate }
+    - { id: package, skeletonStep: 15, kind: mandatory, role: implementer, inputs: [verification-run, review-findings], outputs: [pr], verification: "PR template sections complete (Appendix G)", onFailure: escalate, sideEffect: reversible, rollback: "close the PR" }
+    - { id: approve-merge, skeletonStep: 16, kind: mandatory, role: human, inputs: [pr, policy-decision], outputs: [merge-approval], verification: policy.sod, onFailure: escalate }
+  handoffs:
+    - { from: verifier, to: implementer, validIn: [PLANNED], requiredArtifacts: [reproduction-test, oracleRefs] }
+    - { from: implementer, to: verifier, validIn: [VERIFYING], requiredArtifacts: [head-sha], excludeContext: [implementer-notes, reasoning, plan] }
+    - { from: implementer, to: reviewer, validIn: [REVIEWING], requiredArtifacts: [pr, verification-run, locked-acs], excludeContext: [implementer-notes, reasoning] }
+  maxHandoffRejections: 2
+  budgets: { verifyRepairIterations: 3, reviewRounds: 3, mergeQueueAttempts: 2, cost: { limit: 20, unit: usd } }
+  completion: { requiredOutputs: [pr, verification-run, merge-approval] }
+  metrics: [lead-time, human-touches, verify-iterations, review-rounds, cost]

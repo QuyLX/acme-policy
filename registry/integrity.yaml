@@ -1,0 +1,13 @@
+# Detector parameters shared by the integrity sensors (Standard §7.13 item 39: the profile provides detectors for
+# its stack; FE §8.6). Changing this file changes what the sensors see: it is a control file of this repo.
+apiVersion: aisf/4.0
+kind: IntegrityDetectors
+testFileGlobs: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.mjs", "**/e2e/**/*.ts", "**/*.stories.tsx"]
+configFileGlobs: ["**/*.json", "**/*.{yaml,yml,toml}", "**/*.config.{js,mjs,cjs,ts,mts}", "**/.*rc", "**/.*rc.{json,js,cjs,yaml,yml}"]
+oracleGlobs: ["**/*.oracle.test.ts", "**/*.oracle.test.tsx", "**/oracles/**", "**/journeys.yaml"]
+snapshotGlobs: ["**/__snapshots__/**", "**/*.snap", "**/*-snapshots/**", "**/__screenshots__/**", "**/golden/**"]
+scenarioFixtureGlobs: ["**/scenarios/**/*.{json,yaml,yml,ts}", "**/__fixtures__/**"]
+generatedMockGlobs: ["**/__generated__/**"]
+codeFileGlobs: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"]
+# package.json fields a mandatory check reads (Standard §7.13 items 5-7; FE §8.7 item 7). Other fields are not control.
+packageJsonControlFields: [scripts, packageManager, pnpm, overrides, resolutions, nx, engines, type, exports]

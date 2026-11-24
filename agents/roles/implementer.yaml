@@ -1,0 +1,13 @@
+apiVersion: aisf/4.0
+kind: AgentRole
+id: implementer
+purpose: "Implement the planned change in a worktree; may add supplementary tests; opens an oracle change request instead of editing oracles."
+reads: [change-brief, context-pack, root-cause, reproduction-test, plan]
+mustNotRead: []
+writes: [worktree]
+mustNotWrite: ["**/*.oracle.test.*", "**/oracles/**", "journeys.yaml", "**/__snapshots__/**", "**/__screenshots__/**", "**/__generated__/**"]
+tools: [repo.read, worktree.write, factory.verify, package.install]
+egress: [registry.npmjs.org]
+secrets: none
+session: separate
+distinctIdentityFrom: [verifier]

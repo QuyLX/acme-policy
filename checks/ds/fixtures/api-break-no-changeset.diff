@@ -1,0 +1,39 @@
+diff --git a/packages/ui/api/ui.api.json b/packages/ui/api/ui.api.json
+index f2c54ed..107cb15 100644
+--- a/packages/ui/api/ui.api.json
++++ b/packages/ui/api/ui.api.json
+@@ -8,10 +8,6 @@
+       "label": {
+         "optional": false,
+         "type": "string"
+-      },
+-      "tone": {
+-        "optional": true,
+-        "type": "ChipTone | undefined"
+       }
+     }
+   },
+diff --git a/packages/ui/src/chip/Chip.doc.ts b/packages/ui/src/chip/Chip.doc.ts
+index e1608c2..f8fe6ba 100644
+--- a/packages/ui/src/chip/Chip.doc.ts
++++ b/packages/ui/src/chip/Chip.doc.ts
+@@ -1,4 +1,4 @@
+ export default {
+   name: 'Chip',
+-  props: { label: 'Visible text.', tone: 'Visual tone; text always carries the meaning.' },
++  props: { label: 'Visible text.' },
+ };
+diff --git a/packages/ui/src/chip/Chip.tsx b/packages/ui/src/chip/Chip.tsx
+index 5c516db..dafa38d 100644
+--- a/packages/ui/src/chip/Chip.tsx
++++ b/packages/ui/src/chip/Chip.tsx
+@@ -2,8 +2,7 @@ export type ChipTone = 'neutral' | 'info';
+ export interface ChipProps {
+   /** Visible text. */
+   label: string;
+-  tone?: ChipTone;
+ }
+ export function Chip(props: ChipProps): string {
+-  return `${props.tone ?? 'neutral'}:${props.label}`;
++  return `neutral:${props.label}`;
+ }

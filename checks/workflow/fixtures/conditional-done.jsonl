@@ -1,0 +1,7 @@
+{"workItemId": "TASK-1", "at": "2026-11-24T10:01:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "task.requested", "data": {"workflow": "demo@1.0.0", "requestedBy": "user:dev-a", "requesterSource": "issue-command"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:02:00Z", "actor": {"id": "ci:policy", "kind": "ci"}, "type": "facts.recorded", "data": {"touches": ["public-api"]}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:03:00Z", "actor": {"id": "agent:intake-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "intake", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:04:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "migrate", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:14:00Z", "actor": {"id": "agent:reviewer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "design-check", "status": "PASS"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:05:00Z", "actor": {"id": "user:dev-b", "kind": "human"}, "type": "checkpoint.recorded", "data": {"checkpoint": "implementation-review", "outcome": "passed"}}
+{"workItemId": "TASK-1", "at": "2026-11-24T10:06:00Z", "actor": {"id": "user:dev-b", "kind": "human"}, "type": "step.completed", "data": {"step": "approve-merge", "status": "PASS"}}

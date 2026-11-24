@@ -1,0 +1,9 @@
+diff --git a/journeys.yaml b/journeys.yaml
+--- a/journeys.yaml
++++ b/journeys.yaml
+@@ -1,4 +1,4 @@
+ - id: console/compute.create-instance
+-  criticality: critical
++  criticality: normal
+   personas: [project-admin, project-viewer]
+   scenarios: [happy, quota-exceeded]

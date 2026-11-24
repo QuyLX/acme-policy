@@ -1,0 +1,10 @@
+diff --git a/factory.config.yaml b/factory.config.yaml
+index 3cc80f3..f216137 100644
+--- a/factory.config.yaml
++++ b/factory.config.yaml
+@@ -3,4 +3,4 @@ kind: FactoryProjectConfig
+ projects:
+   ui:
+     kind: react-lib
+-    publicApi: { entry: src/index.ts, snapshot: api/ui.api.json }
++    publicApi: { entry: src/index.ts, snapshot: api/ui.api.json, budgetKb: 1 }

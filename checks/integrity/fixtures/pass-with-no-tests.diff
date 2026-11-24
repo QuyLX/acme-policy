@@ -1,0 +1,9 @@
+diff --git a/apps/console/package.json b/apps/console/package.json
+--- a/apps/console/package.json
++++ b/apps/console/package.json
+@@ -5,7 +5,7 @@
+   "scripts": {
+-    "test": "vitest run",
++    "test": "vitest run --passWithNoTests",
+     "build": "next build"
+   }

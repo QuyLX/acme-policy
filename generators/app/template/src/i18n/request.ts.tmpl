@@ -1,0 +1,4 @@
+import { createRequestConfig } from '@platform/i18n';
+import { getRequestConfig } from 'next-intl/server';
+
+export default getRequestConfig(createRequestConfig((locale) => import(`../../messages/${locale}.json`).then((m) => m.default)));

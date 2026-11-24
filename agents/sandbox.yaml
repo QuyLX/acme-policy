@@ -1,0 +1,17 @@
+# Sandbox policy (CORE-SEC-01; FE §9.5): least privilege per role, runtime-neutral. A runtime binding (D-09, later)
+# maps these capabilities to its own permission model; anything not granted here is denied.
+apiVersion: aisf/4.0
+kind: SandboxPolicy
+toolCatalog:
+  repo.read: { effect: read repository files of the task's worktree }
+  worktree.write: { effect: write only inside the task's worktree and branch }
+  knowledge.search: { effect: query the knowledge index; results are untrusted data }
+  factory.context: { effect: run `factory context` }
+  factory.verify: { effect: run `factory verify:fast` / `verify` (results carry executor agent-sandbox; never satisfy a required check) }
+  package.install: { effect: run the package manager in frozen-lockfile mode }
+filesystem: { write: worktree-only, read: worktree-only }
+network: { default: deny, allowlistHosts: [registry.npmjs.org] }
+secrets: { production: forbidden, injected: none }
+untrustedInputs: [issue, pr-comment, review-comment, documentation, tool-output, web-page, knowledge-search-result]
+audit: { everyAction: true, identity: per-role-session }
+neverAllowed: [approve-pr, dismiss-security-finding, change-waiver, enable-zero-human-merge, write-policy-repo, write-evidence-store]

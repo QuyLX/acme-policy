@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/check-result.schema.json",
+  "title": "CheckResult (Standard Appendix K.2)",
+  "type": "object",
+  "required": ["checkId", "checkVersion", "requiredBy", "requirement", "enforcement", "severity", "gate", "status", "command", "durationMs", "attempts", "evidence"],
+  "properties": {
+    "checkId": { "type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$" },
+    "checkVersion": { "type": "string" },
+    "implementsRules": { "type": "array", "items": { "type": "string" } },
+    "requiredBy": { "type": "array", "items": { "type": "string" } },
+    "requirement": { "enum": ["required", "advisory"] },
+    "enforcement": { "enum": ["observe", "warn", "blocking"] },
+    "severity": { "enum": ["BLOCKER", "WARNING", "INFO"] },
+    "gate": { "enum": ["merge", "publish", "post-release"] },
+    "status": { "enum": ["PASS", "FAIL", "ERROR", "NOT_ASSESSED"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "disposition": { "type": "object" },
+    "command": { "type": "string" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "attempts": { "type": "integer", "minimum": 1 },
+    "tool": { "type": "object" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "severity", "message", "state"],
+        "properties": {
+          "source": { "enum": ["check", "ai-review", "security-review", "integrity"] },
+          "ruleId": { "type": "string" },
+          "severity": { "type": "string" },
+          "location": { "type": "string" },
+          "message": { "type": "string" },
+          "state": { "enum": ["open", "fixed", "dismissed"] }
+        }
+      }
+    },
+    "evidence": { "type": "array" },
+    "extensions": { "type": "object", "propertyNames": { "pattern": "^x-" } }
+  },
+  "if": { "properties": { "status": { "not": { "const": "PASS" } } } },
+  "then": { "required": ["reason"] }
+}

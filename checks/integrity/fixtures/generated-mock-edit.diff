@@ -1,0 +1,8 @@
+diff --git a/packages/api-clients/src/__generated__/msw/compute.ts b/packages/api-clients/src/__generated__/msw/compute.ts
+--- a/packages/api-clients/src/__generated__/msw/compute.ts
++++ b/packages/api-clients/src/__generated__/msw/compute.ts
+@@ -3,3 +3,3 @@ export const handlers = [
+   http.get('/v1/instances/:id', () =>
+-    HttpResponse.json({ id: 'i-1', status: 'RUNNING' })),
++    HttpResponse.json({ id: 'i-1', status: 'STOPPED' })),
+ ];

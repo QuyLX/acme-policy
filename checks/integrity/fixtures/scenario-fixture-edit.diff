@@ -1,0 +1,9 @@
+diff --git a/apps/console/src/modules/compute/scenarios/create-instance.json b/apps/console/src/modules/compute/scenarios/create-instance.json
+--- a/apps/console/src/modules/compute/scenarios/create-instance.json
++++ b/apps/console/src/modules/compute/scenarios/create-instance.json
+@@ -1,4 +1,4 @@
+ {
+   "request": { "name": "web-1" },
+-  "expectedStatus": "RUNNING"
++  "expectedStatus": "PENDING"
+ }

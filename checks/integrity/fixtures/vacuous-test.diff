@@ -1,0 +1,14 @@
+diff --git a/apps/console/src/modules/compute/domain/quota.test.ts b/apps/console/src/modules/compute/domain/quota.test.ts
+--- a/apps/console/src/modules/compute/domain/quota.test.ts
++++ b/apps/console/src/modules/compute/domain/quota.test.ts
+@@ -10,3 +10,11 @@ it('rejects a request above the quota', () => {
+   expect(canCreate(11, 10)).toBe(false);
+ });
++
++it('accepts a request at the quota', () => {
++  canCreate(10, 10);
++});
++
++it('accepts a request below the quota', () => {
++  expect(true).toBe(true);
++});

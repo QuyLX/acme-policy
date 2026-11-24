@@ -1,0 +1,22 @@
+{
+  "Chip": {
+    "kind": "value"
+  },
+  "ChipProps": {
+    "kind": "type",
+    "props": {
+      "label": {
+        "optional": false,
+        "type": "string"
+      },
+      "tone": {
+        "optional": true,
+        "type": "ChipTone | undefined"
+      }
+    }
+  },
+  "ChipTone": {
+    "kind": "type",
+    "type": "\"neutral\" | \"info\""
+  }
+}

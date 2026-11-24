@@ -1,0 +1,11 @@
+diff --git a/packages/ui/src/users.ts b/packages/ui/src/users.ts
+index adb1da7..b48a197 100644
+--- a/packages/ui/src/users.ts
++++ b/packages/ui/src/users.ts
+@@ -3,5 +3,5 @@ declare function useQuery(o: { queryKey: readonly unknown[]; queryFn: () => Prom
+ declare function tenantQueryKey(scope: { tenantId: string }, ...parts: string[]): readonly unknown[];
+ 
+ export function useUsers(scope: { tenantId: string }, load: () => Promise<unknown>) {
+-  return useQuery({ queryKey: tenantQueryKey(scope, 'users'), queryFn: load });
++  return useQuery({ queryKey: ['users'], queryFn: load });
+ }

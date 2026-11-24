@@ -1,0 +1,10 @@
+# Profile registry (Standard §20.1–20.3; CORE-PRF-01).
+apiVersion: aisf/4.0
+kind: ProfileRegistry
+profiles:
+  - id: aisf-frontend
+    version: 1.1.0
+    standard: aisf@4.0.0
+    source: "FE Blueprint 4.1 (Frontend Platform & AI Software Factory Blueprint)"
+    owner: team-platform
+    status: pending-assessment   # PC-1..PC-7 assessment requires the Standard owner and an independent assessor (D-10)

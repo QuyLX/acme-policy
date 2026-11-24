@@ -1,0 +1,7 @@
+{
+  "name": "ts-repo",
+  "private": true,
+  "devDependencies": {
+    "@acme/presets": "link:../../../presets"
+  }
+}

@@ -1,0 +1,4 @@
+# Active waivers (CORE-GOV-09). Each entry must validate against schemas/waiver.schema.json.
+apiVersion: aisf/4.0
+kind: WaiverRegistry
+waivers: []

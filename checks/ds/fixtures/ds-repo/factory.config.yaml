@@ -1,0 +1,6 @@
+apiVersion: aisf/4.0
+kind: FactoryProjectConfig
+projects:
+  ui:
+    kind: react-lib
+    publicApi: { entry: src/index.ts, snapshot: api/ui.api.json }

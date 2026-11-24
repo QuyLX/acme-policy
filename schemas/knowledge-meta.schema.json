@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/knowledge-meta.schema.json",
+  "title": "Knowledge artifact frontmatter (Standard Appendix K.5, Appendix E)",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "status",
+    "version",
+    "owner",
+    "authority"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)+$"
+    },
+    "kind": {
+      "enum": [
+        "spec",
+        "design",
+        "adr",
+        "proposal",
+        "living-doc",
+        "runbook",
+        "agent-guide",
+        "skill",
+        "playbook",
+        "component",
+        "threat-model",
+        "policy"
+      ],
+      "description": "Standard KnowledgeKind plus kinds registered by aisf-frontend@1.1.0 (FE \u00a718: component, threat-model, policy)."
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "PROPOSED",
+        "ACTIVE",
+        "NEEDS_REVALIDATION",
+        "SUPERSEDED",
+        "DEPRECATED",
+        "ARCHIVED"
+      ]
+    },
+    "version": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "enum": [
+        "intent",
+        "decision",
+        "implementation-description",
+        "procedure",
+        "guidance"
+      ]
+    },
+    "describes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "basedOn": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^.+@.+$"
+      }
+    },
+    "generatedFrom": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supersededBy": {
+      "type": "string"
+    },
+    "validatedAgainst": {
+      "type": "object"
+    },
+    "reviewTriggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deprecationReason": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "SUPERSEDED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "supersededBy"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "DEPRECATED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "deprecationReason"
+        ]
+      }
+    }
+  ]
+}

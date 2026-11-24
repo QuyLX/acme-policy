@@ -1,0 +1,28 @@
+# SC-11 — Seeded product defects (FE §20.3), subset delivered with M6: missing tenant key in the client query cache
+# and in the server data cache. The runtime half (two tenants never share a cached response) is proven by
+# @platform/server tests (cache.test.ts). Remaining defects (UI-only permission, CSV injection, …) need their packs.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-11
+title: Seeded product defects (tenant scoping subset)
+demonstrates: [CORE-VER-01]
+slice: 1
+cases:
+  - id: query-key-without-tenant
+    given: A client query uses a literal key ['users'] instead of tenantQueryKey (cross-tenant cache bleed)
+    run: { kind: run, repo: showcase/fixtures/react-repo, change: showcase/fixtures/query-key-without-tenant.diff, checks: [quality.lint], executor: ci }
+    expect: { exitCode: 1, statuses: { quality.lint: FAIL } }
+  - id: server-cache-direct
+    given: Server code calls unstable_cache directly instead of cachedForTenant (key without tenant)
+    run: { kind: run, repo: showcase/fixtures/react-repo, change: showcase/fixtures/server-cache-direct.diff, checks: [quality.lint], executor: ci }
+    expect: { exitCode: 1, statuses: { quality.lint: FAIL } }
+  - id: tenant-scoped-control
+    given: Control case — the query key is built with tenantQueryKey
+    run: { kind: run, repo: showcase/fixtures/react-repo, checks: [quality.lint], executor: ci }
+    expect: { exitCode: 0, statuses: { quality.lint: PASS } }
+  - id: permission-only-in-ui
+    given: A permission enforced only in the UI
+    pending: needs authz.permission-matrix / authz.negative (operational pack) and @platform/auth (D-03)
+  - id: csv-formula-injection
+    given: CSV export with a cell starting with "="
+    pending: needs cap:import-export pack (export.csv-injection)

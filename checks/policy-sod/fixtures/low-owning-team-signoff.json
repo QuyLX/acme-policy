@@ -1,0 +1,1 @@
+{"workItemId":"ISSUE-1","headSha":"abc1234","author":"agent:implementer","pushers":["agent:implementer"],"areas":[{"id":"console/compute","teamMembers":["alice","bob","carol"],"codeOwners":["bob","carol"]}],"controlFilesTouched":[],"tier":"Low","requester":{"id":"alice","source":"issue-command"},"requesterSignedOff":true,"approvals":[]}

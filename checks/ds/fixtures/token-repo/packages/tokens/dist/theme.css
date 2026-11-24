@@ -1,0 +1,4 @@
+@theme inline {
+  --color-fg: var(--ds-color-fg-default);
+  --color-fg-muted: var(--ds-color-fg-muted);
+}

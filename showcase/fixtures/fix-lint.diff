@@ -1,0 +1,10 @@
+diff --git a/packages/lib/src/index.ts b/packages/lib/src/index.ts
+index d8aa187..e9477c4 100644
+--- a/packages/lib/src/index.ts
++++ b/packages/lib/src/index.ts
+@@ -1,4 +1,4 @@
+ // Seeded lint violation (@typescript-eslint/no-explicit-any) for showcase scenarios; type-checks cleanly.
+-export function describeValue(input: any): string {
++export function describeValue(input: unknown): string {
+   return String(input);
+ }

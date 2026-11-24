@@ -1,0 +1,45 @@
+# Standard commands (FE §7.6) → check IDs. The policy repo decides what each command verifies; the Factory CLI in a
+# product repo only names the command (commands, Test Planner and playbooks reference check IDs only, FE §8.7 item 6).
+apiVersion: aisf/4.0
+kind: CommandRegistry
+commands:
+  verify:fast:
+    - meta.config-parity
+    - meta.override-direction
+    - meta.toolchain-pin
+    - meta.descriptor-drift
+    - quality.lint
+    - quality.typecheck
+    - quality.test
+    - arch.cycles
+    - integrity.test-count-delta
+    - integrity.skip-focus
+    - integrity.suppressions
+    - integrity.snapshot-churn
+    - integrity.threshold-change
+    - integrity.control-file-change
+    - integrity.expected-value-edit
+    - integrity.self-mocking
+    - integrity.vacuous-test
+    - integrity.tolerance-inflation
+    - integrity.broad-catch
+    - integrity.oracle-lock
+    - review.injection-prescan
+    - sec.secrets
+    - policy.risk
+    - knowledge.impact
+    - knowledge.record-schema
+    - knowledge.references
+    - ds.api-compat
+    - ds.semver-changelog
+    - ds.docs-api-sync
+    - ds.consumer-verification
+  verify:
+    - { include: verify:fast }
+    - quality.build
+    - ds.bundle-budget
+    - ds.story-interaction
+    - visual.stories
+    - build.install-frozen
+    - deps.policy
+    - integrity.mutation-score

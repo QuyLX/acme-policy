@@ -1,0 +1,10 @@
+import type { ReactNode } from 'react';
+
+export interface {{Name}}Props {
+  /** Visible content; the component never relies on color alone. */
+  children: ReactNode;
+}
+
+export function {{Name}}({ children }: {{Name}}Props) {
+  return <span className="inline-flex items-center gap-1 text-sm text-fg">{children}</span>;
+}

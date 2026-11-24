@@ -1,0 +1,38 @@
+diff --git a/.changeset/chip-size.md b/.changeset/chip-size.md
+new file mode 100644
+index 0000000..38038e9
+--- /dev/null
++++ b/.changeset/chip-size.md
+@@ -0,0 +1,5 @@
++---
++"ui": minor
++---
++
++Add `size` to Chip.
+diff --git a/packages/ui/api/ui.api.json b/packages/ui/api/ui.api.json
+index f2c54ed..f2ffcc1 100644
+--- a/packages/ui/api/ui.api.json
++++ b/packages/ui/api/ui.api.json
+@@ -9,6 +9,10 @@
+         "optional": false,
+         "type": "string"
+       },
++      "size": {
++        "optional": true,
++        "type": "\"sm\" | \"md\" | undefined"
++      },
+       "tone": {
+         "optional": true,
+         "type": "ChipTone | undefined"
+diff --git a/packages/ui/src/chip/Chip.tsx b/packages/ui/src/chip/Chip.tsx
+index 5c516db..5fbd32f 100644
+--- a/packages/ui/src/chip/Chip.tsx
++++ b/packages/ui/src/chip/Chip.tsx
+@@ -3,6 +3,7 @@ export interface ChipProps {
+   /** Visible text. */
+   label: string;
+   tone?: ChipTone;
++  size?: 'sm' | 'md';
+ }
+ export function Chip(props: ChipProps): string {
+   return `${props.tone ?? 'neutral'}:${props.label}`;

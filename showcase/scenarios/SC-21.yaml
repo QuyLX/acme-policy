@@ -1,0 +1,52 @@
+# SC-21 — Workflow, checkpoint, handoff and recovery (FE §20.3). Partial: the cases the runtime-neutral task runner
+# covers (M4). Generator design-review and profile-layer resolve come with M7 and later.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-21
+title: Workflow, checkpoint, handoff and recovery
+demonstrates: [CORE-WRK-07, CORE-WRK-08, CORE-WRK-11, CORE-WRK-12, CORE-REV-07, CORE-MET-03]
+slice: 1
+cases:
+  - id: conditional-step-skipped
+    given: A conditional step whose condition holds (touches public-api) is skipped
+    run: { kind: task, events: checks/workflow/fixtures/conditional-skipped.jsonl, playbooks: checks/workflow/fixtures/playbooks }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-STEP] }
+  - id: conditional-checkpoint-skipped
+    given: Tier High makes plan-review mandatory, and it was not recorded
+    run: { kind: task, events: checks/workflow/fixtures/checkpoint-missing.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-CHECKPOINT] }
+  - id: handoff-with-implementer-notes
+    given: The handoff to the verifier lacks the head SHA and includes the implementer's notes and reasoning
+    run: { kind: task, events: checks/workflow/fixtures/handoff-leak.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-HANDOFF] }
+  - id: timeout-does-not-consume-budget
+    given: The verify step times out, then errors, then passes
+    run: { kind: task, events: checks/workflow/fixtures/timeouts-no-budget.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: MERGED }
+  - id: irreversible-retried
+    given: A step with an irreversible side effect is retried automatically after ERROR
+    run: { kind: task, events: checks/workflow/fixtures/irreversible-retry.jsonl, playbooks: checks/workflow/fixtures/playbooks }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-IRREVERSIBLE] }
+  - id: verifier-is-implementer
+    given: The same identity writes the reproduction test and the fix
+    run: { kind: task, events: checks/workflow/fixtures/same-identity.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-INDEPENDENCE] }
+  - id: playbook-drops-checkpoint
+    given: A new version of bug-fix drops the plan-review checkpoint
+    run: { kind: playbook-change, base: workflows/bug-fix.yaml, head: checks/workflow/fixtures/bug-fix-no-plan-review.yaml }
+    expect: { statuses: { workflow.playbook-change: FAIL }, rules: [workflow.loosening] }
+  - id: generate-without-design-review
+    given: '`factory generate package` without a design-review checkpoint'
+    run: { kind: generate, repo: showcase/fixtures/ts-repo, generator: package, name: audit-log }
+    expect: { exitCode: 1, statuses: { factory.generate: FAIL } }
+  - id: generate-with-agent-approved-review
+    given: '`factory generate package` with a design-review "approved" by an agent'
+    run: { kind: generate, repo: showcase/fixtures/ts-repo, generator: package, name: audit-log, checkpoint: checks/generate/fixtures/design-review-agent.json }
+    expect: { exitCode: 1, statuses: { factory.generate: FAIL } }
+  - id: generate-with-design-review
+    given: Control case — the same command with a passed design-review by a human
+    run: { kind: generate, repo: showcase/fixtures/ts-repo, generator: package, name: audit-log, checkpoint: checks/generate/fixtures/design-review-passed.json }
+    expect: { exitCode: 0, statuses: { factory.generate: PASS } }
+  - id: profile-layers-conflict
+    given: Two profile layers pin two different Node versions
+    pending: profile-layer resolve with trace is a Phase 1a follow-up item (FE §8.3)

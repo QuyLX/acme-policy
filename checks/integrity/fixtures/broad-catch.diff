@@ -1,0 +1,12 @@
+diff --git a/apps/console/src/modules/compute/data/instances.ts b/apps/console/src/modules/compute/data/instances.ts
+--- a/apps/console/src/modules/compute/data/instances.ts
++++ b/apps/console/src/modules/compute/data/instances.ts
+@@ -4,6 +4,10 @@ export async function stopInstance(id: string) {
+-  await client.stop(id);
++  try {
++    await client.stop(id);
++  } catch {
++    // ignore
++  }
+   return refresh(id);
+ }

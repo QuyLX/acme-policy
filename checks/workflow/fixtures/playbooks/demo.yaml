@@ -1,0 +1,18 @@
+# Fixture playbook (tests only): one conditional step and one irreversible step, for SC-21 cases.
+apiVersion: aisf/4.0
+kind: TaskWorkflowSpec
+metadata: { id: demo, version: 1.0.0, owner: team-platform, status: DRAFT }
+spec:
+  taskClasses: [demo]
+  riskCeiling: Medium
+  trigger: [fixture]
+  inputs: { required: [goal] }
+  preconditions: []
+  checkpoints: [{ id: implementation-review, kind: mandatory, after: design-check }]
+  recoveryDefaults: { timeout: 5m, retry: { max: 2, backoff: none, on: [ERROR, timeout] }, idempotent: true, sideEffect: none }
+  steps:
+    - { id: intake, skeletonStep: 1, kind: mandatory, role: intake, inputs: [goal], outputs: [change-brief], verification: brief, onFailure: escalate }
+    - { id: migrate, skeletonStep: 8, kind: mandatory, role: implementer, inputs: [change-brief], outputs: [migration], verification: migrated, onFailure: escalate, sideEffect: irreversible, idempotent: false }
+    - { id: design-check, skeletonStep: 12, kind: conditional, when: "touches == public-api", role: reviewer, inputs: [migration], outputs: [design-notes], verification: reviewed, onFailure: escalate }
+    - { id: approve-merge, skeletonStep: 16, kind: mandatory, role: human, inputs: [migration], outputs: [merge-approval], verification: policy.sod, onFailure: escalate }
+  completion: { requiredOutputs: [merge-approval] }

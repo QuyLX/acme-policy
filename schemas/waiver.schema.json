@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/waiver.schema.json",
+  "title": "Waiver (Standard Appendix K.3; CORE-GOV-09)",
+  "type": "object",
+  "required": ["id", "checkId", "scope", "reason", "owner", "approvedBy", "createdAt", "expiresAt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^WVR-\\d{4}-\\d{4}$" },
+    "checkId": { "type": "string" },
+    "scope": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 10 },
+    "owner": { "$ref": "#/$defs/human" },
+    "approvedBy": { "$ref": "#/$defs/human" },
+    "createdAt": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}" },
+    "expiresAt": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}" }
+  },
+  "$defs": {
+    "human": { "type": "object", "required": ["id"], "additionalProperties": false, "properties": { "id": { "type": "string", "minLength": 1 } } }
+  }
+}

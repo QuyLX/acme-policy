@@ -1,0 +1,21 @@
+# SC-08 — Non-converging loops (FE §20.3). Slice 1 in the Blueprint; the runtime-neutral task runner (M4) makes the
+# budget rules testable now.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-08
+title: Non-converging loops
+demonstrates: [CORE-WRK-04, CORE-WRK-13, CORE-REV-05]
+slice: 1
+cases:
+  - id: repair-loop-escalates
+    given: The repair loop keeps failing (4 failing verify iterations, budget 3)
+    run: { kind: task, events: checks/workflow/fixtures/verify-loop.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-LOOP], taskState: ESCALATED }
+  - id: cost-ceiling-stops
+    given: The task reaches its cost ceiling (21 USD of a 20 USD ceiling)
+    run: { kind: task, events: checks/workflow/fixtures/cost-ceiling.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-COST], taskState: ESCALATED }
+  - id: within-budget
+    given: Control case — a bug fix within every budget
+    run: { kind: task, events: checks/workflow/fixtures/happy.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: MERGED }

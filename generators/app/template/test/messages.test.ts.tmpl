@@ -1,0 +1,8 @@
+import { missingKeys } from '@platform/i18n';
+import { expect, test } from 'vitest';
+import en from '../messages/en.json';
+import vi from '../messages/vi.json';
+
+test('every message key exists in every locale (i18n.missing-keys)', () => {
+  expect(missingKeys({ vi, en })).toEqual([]);
+});

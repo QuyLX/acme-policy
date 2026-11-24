@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/agent-role.schema.json",
+  "title": "AgentRole (FE §9.5, §9.10)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "id",
+    "purpose",
+    "reads",
+    "writes",
+    "tools",
+    "egress",
+    "secrets",
+    "session"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "AgentRole"
+    },
+    "id": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "reads": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mustNotRead": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mustNotWrite": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "egress": {
+      "oneOf": [
+        {
+          "const": "none"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "secrets": {
+      "const": "none"
+    },
+    "session": {
+      "enum": [
+        "any",
+        "separate"
+      ]
+    },
+    "distinctIdentityFrom": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mode": {
+      "enum": [
+        "shadow",
+        "advisory",
+        "blocking"
+      ]
+    },
+    "neverDoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

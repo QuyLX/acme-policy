@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/task-event.schema.json",
+  "title": "TaskEvent — platform-neutral task runner input (tech-design 11 Part B)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workItemId",
+    "at",
+    "actor",
+    "type",
+    "data"
+  ],
+  "properties": {
+    "workItemId": {
+      "type": "string"
+    },
+    "at": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "human",
+            "agent",
+            "ci"
+          ]
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
+    "type": {
+      "enum": [
+        "task.requested",
+        "facts.recorded",
+        "step.completed",
+        "checkpoint.recorded",
+        "handoff.offered",
+        "oracle.locked",
+        "oracle.observed",
+        "cost.reported",
+        "task.merged"
+      ]
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "task.requested"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "workflow",
+              "requestedBy",
+              "requesterSource"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "step.completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "step",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "ERROR",
+                  "timeout"
+                ]
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "checkpoint.recorded"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "checkpoint",
+              "outcome"
+            ],
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "passed",
+                  "failed",
+                  "not-applicable"
+                ]
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "handoff.offered"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "from",
+              "to",
+              "state",
+              "artifacts"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "oracle.locked",
+              "oracle.observed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "files"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "cost.reported"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "amount",
+              "unit"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    }
+  ]
+}

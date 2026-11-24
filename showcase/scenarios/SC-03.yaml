@@ -1,0 +1,43 @@
+# SC-03 — Separation of duties (FE §20.3). policy.sod input is platform-neutral; M3 builds it from real PR events.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-03
+title: Separation of duties
+demonstrates: [CORE-GOV-05, CORE-GOV-06, CORE-WRK-02, CORE-KNW-03]
+slice: 0
+mode: pilot
+cases:
+  - id: requester-approves-own-agent-pr
+    given: At Medium (R2) the requester approves the PR opened by their own agent
+    run: { kind: sod, input: checks/policy-sod/fixtures/medium-requester-self-approves.json }
+    expect: { status: FAIL }
+  - id: outside-team-signoff
+    given: A requester outside the owning team signs off an R1 PR
+    run: { kind: sod, input: checks/policy-sod/fixtures/low-outside-team-signoff-only.json }
+    expect: { status: FAIL }
+  - id: unknown-requester
+    given: The requester identity cannot be established from the triggering event
+    run: { kind: sod, input: checks/policy-sod/fixtures/low-unknown-requester.json }
+    expect: { status: FAIL }
+  - id: new-commit-after-approval
+    given: A new commit is pushed after the approval
+    run: { kind: sod, input: checks/policy-sod/fixtures/medium-stale-approval.json }
+    expect: { status: FAIL }
+  - id: agent-approves
+    given: An agent account submits an approval
+    run: { kind: sod, input: checks/policy-sod/fixtures/medium-agent-approves.json }
+    expect: { status: FAIL }
+  - id: independent-approval
+    given: Control case — one independent approval on the head SHA at Medium
+    run: { kind: sod, input: checks/policy-sod/fixtures/medium-independent-approves.json }
+    expect: { status: PASS }
+  - id: tier-understated
+    given: A change to an Admin privileged path (session) arrives with a PR input that claims tier Medium
+    run: { kind: run, repo: checks/policy-risk/fixtures/repo, change: checks/policy-risk/fixtures/privileged.diff, checks: [policy.risk], sodInput: checks/policy-sod/fixtures/medium-independent-approves.json, executor: ci }
+    expect: { exitCode: 1, statuses: { policy.sod: FAIL, policy.risk: PASS }, rules: [policy.risk.path] }
+  - id: forged-requested-by
+    given: A forged `Requested-by:` trailer names someone else as requester
+    pending: requester identity is taken from the triggering event by the GitHub binding in M3
+  - id: requester-own-waiver
+    given: The requester approves a waiver for their own required check
+    pending: waiver approval flow is delivered with the GitHub binding in M3

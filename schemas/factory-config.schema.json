@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.example/schemas/factory-config.schema.json",
+  "title": "factory.yaml — repository/application descriptor",
+  "description": "Union of Standard Appendix K FactoryConfig and the FE profile descriptor (FE §7.2). Control file (Standard §7.13). apiVersion accepts both spellings until decision D-13 resolves the Blueprint inconsistency.",
+  "type": "object",
+  "required": [
+    "apiVersion",
+    "profile",
+    "application",
+    "owner",
+    "backupOwners",
+    "lifecycle",
+    "surfaces"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0",
+      "description": "Standard Appendix K form (D-13, DV-06)"
+    },
+    "kind": {
+      "const": "FactoryConfig"
+    },
+    "standard": {
+      "type": "string",
+      "pattern": "^aisf@\\d+\\.\\d+\\.\\d+$"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+@\\d+\\.\\d+\\.\\d+$"
+    },
+    "verificationProfile": {
+      "type": "string"
+    },
+    "application": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "owner": {
+      "$ref": "#/$defs/team"
+    },
+    "backupOwners": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/team"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "lifecycle": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "enum": [
+            "stable",
+            "next"
+          ]
+        }
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "consumes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(openapi|asyncapi|graphql|schema):[a-z0-9-]+@\\d+(\\.\\d+)*$"
+          }
+        },
+        "provides": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "promptAssets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zeroHumanOptIn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "aiReviewMode": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "shadow",
+              "advisory",
+              "blocking"
+            ]
+          }
+        }
+      }
+    },
+    "riskMap": {
+      "description": "Deterministic path → tier map (Standard §20.8 item 4). Unmatched paths are High.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "paths",
+          "tier"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High"
+            ]
+          },
+          "subTier": {
+            "enum": [
+              "R0",
+              "R1",
+              "R2",
+              "R3"
+            ]
+          },
+          "protectedCategory": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "description": "Blueprint or decision the entry implements"
+          }
+        }
+      }
+    },
+    "dataClass": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "paths",
+          "class"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "class": {
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "team": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "surface": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "backupOwner",
+        "paths",
+        "rendering",
+        "archetypes",
+        "criticality"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+/[a-z0-9-]+$"
+        },
+        "owner": {
+          "$ref": "#/$defs/team"
+        },
+        "backupOwner": {
+          "$ref": "#/$defs/team"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rendering": {
+          "enum": [
+            "authenticated",
+            "public-static",
+            "docs"
+          ]
+        },
+        "archetypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "minItems": 1
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^cap:[a-z0-9-]+$"
+          }
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "criticality": {
+          "enum": [
+            "critical",
+            "high",
+            "normal"
+          ]
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "aiMode": {
+              "enum": [
+                "shadow",
+                "advisory",
+                "blocking"
+              ]
+            },
+            "depth": {
+              "enum": [
+                "quick",
+                "standard",
+                "deep"
+              ]
+            }
+          }
+        },
+        "autonomy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "zeroHuman": {
+              "type": "boolean"
+            }
+          }
+        },
+        "slo": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

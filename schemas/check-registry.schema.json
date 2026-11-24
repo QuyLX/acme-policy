@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/check-registry.schema.json",
+  "title": "CheckRegistry (Standard §8.7; FE §8.2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "mode",
+    "checks"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "aisf/4.0"
+    },
+    "kind": {
+      "const": "CheckRegistry"
+    },
+    "mode": {
+      "enum": [
+        "pilot",
+        "default"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    }
+  },
+  "$defs": {
+    "mode": {
+      "enum": [
+        "observe",
+        "warn",
+        "blocking"
+      ]
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "diff": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        },
+        "change": {
+          "type": "string"
+        },
+        "sodInput": {
+          "type": "string"
+        },
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tier": {
+              "enum": [
+                "R0",
+                "R1",
+                "R2",
+                "R3"
+              ]
+            }
+          }
+        },
+        "taskEvents": {
+          "type": "string"
+        },
+        "playbooks": {
+          "type": "string"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "diff"
+          ]
+        },
+        {
+          "required": [
+            "repo"
+          ]
+        },
+        {
+          "required": [
+            "sodInput"
+          ]
+        },
+        {
+          "required": [
+            "taskEvents"
+          ]
+        }
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "checkVersion",
+        "owner",
+        "lifecycle",
+        "requirement",
+        "enforcement",
+        "severity",
+        "gate",
+        "implementsRules",
+        "baselineable",
+        "fpSlo",
+        "autoDemote",
+        "basis",
+        "evidenceLayer",
+        "fixtures"
+      ],
+      "properties": {
+        "checkId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+        },
+        "checkVersion": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "planned",
+            "shadow",
+            "active",
+            "deprecated"
+          ]
+        },
+        "requirement": {
+          "enum": [
+            "required",
+            "optional"
+          ]
+        },
+        "enforcement": {
+          "$ref": "#/$defs/mode"
+        },
+        "targetEnforcement": {
+          "$ref": "#/$defs/mode"
+        },
+        "severity": {
+          "enum": [
+            "BLOCKER",
+            "WARNING",
+            "INFO"
+          ]
+        },
+        "gate": {
+          "enum": [
+            "merge",
+            "publish",
+            "post-release"
+          ]
+        },
+        "implementsRules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^FE-[A-Z0-9]+-[0-9]{3}$"
+          }
+        },
+        "baselineable": {
+          "type": "boolean"
+        },
+        "fpSlo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "autoDemote": {
+          "type": "boolean"
+        },
+        "basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "class",
+            "source"
+          ],
+          "properties": {
+            "class": {
+              "enum": [
+                "standard",
+                "profile",
+                "security",
+                "privacy",
+                "wcag",
+                "contract"
+              ]
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "evidenceLayer": {
+          "enum": [
+            "static",
+            "dom",
+            "a11y-tree",
+            "browser",
+            "runtime-api",
+            "field"
+          ]
+        },
+        "adapter": {
+          "type": "string"
+        },
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "params": {
+          "type": "object"
+        },
+        "fixtures": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "violating": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fixture"
+              }
+            },
+            "conforming": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fixture"
+              }
+            },
+            "proofTest": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
