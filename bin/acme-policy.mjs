@@ -14,7 +14,7 @@ import { secretHits, secretsCheck } from '../checks/sec/secrets.mjs';
 import { classifyRisk, riskCheck, understated } from '../checks/policy-risk/classify.mjs';
 import { classifyConfigChange } from '../checks/meta/override-direction.mjs';
 import { cyclesCheck } from '../checks/arch/cycles.mjs';
-import { headersCspCheck } from '../checks/sec/headers-csp.mjs';
+import { headersCspCheck, findNextConfig } from '../checks/sec/headers-csp.mjs';
 import { depsPolicyCheck } from '../checks/deps/policy.mjs';
 import { installFrozenCheck } from '../checks/build/install-frozen.mjs';
 import { recordSchemaCheck } from '../checks/knowledge/record-schema.mjs';
@@ -249,8 +249,8 @@ function commandRun(values) {
     else if (id === 'policy.risk') checks.push(riskCheck(def, shared().risk));
     else if (id === 'arch.cycles') checks.push(cyclesCheck(def, repo, discoverProjects(repo)));
     else if (id === 'sec.headers-csp') {
-      const apps = discoverProjects(repo).filter((p) => existsSync(join(repo, p.dir, 'next.config.ts'))).map((p) => p.dir);
-      checks.push(headersCspCheck(def, repo, apps.length ? apps : existsSync(join(repo, 'next.config.ts')) ? ['.'] : []));
+      const apps = discoverProjects(repo).filter((p) => findNextConfig(join(repo, p.dir))).map((p) => p.dir);
+      checks.push(headersCspCheck(def, repo, apps.length ? apps : findNextConfig(repo) ? ['.'] : []));
     }
     else if (id === 'deps.policy') checks.push(depsPolicyCheck(def, { repo, policy: readYaml(policyPath('registry', 'deps-policy.yaml')), changed, isNew, timeoutSeconds: def.timeoutSeconds ?? 120 }));
     else if (id === 'build.install-frozen') checks.push(installFrozenCheck(def, { repo, allowedHosts: readYaml(policyPath('registry', 'deps-policy.yaml')).lockfile.allowedTarballHosts, timeoutSeconds: def.timeoutSeconds ?? 300 }));

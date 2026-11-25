@@ -1386,5 +1386,6 @@ checks:
       violating:
         - {"repo": "checks/sec/fixtures/headers-missing"}
         - {"repo": "checks/sec/fixtures/headers-unsafe"}
+        - {"repo": "checks/sec/fixtures/headers-comment-only"}
       conforming:
         - {"repo": "checks/sec/fixtures/headers-clean"}

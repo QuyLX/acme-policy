@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { policyPath, POLICY_ROOT } from '../lib/io.mjs';
-import { planPackage, planDsComponent, verifyCheckpoint, render } from '../lib/generate.mjs';
+import { headersCspFindings } from '../checks/sec/headers-csp.mjs';
+import { planPackage, planApp, planDsComponent, verifyCheckpoint, render } from '../lib/generate.mjs';
 
 const cli = (args) => spawnSync(process.execPath, [join(POLICY_ROOT, 'bin/acme-policy.mjs'), ...args], { encoding: 'utf8' });
 const fixtureRepo = () => {
@@ -53,4 +54,13 @@ test('ds-component plan: contract clause, test and doc agree (docs-sync shape)',
   assert.match(contract, /^\| STA-1 \|/m);
   assert.match(test_, /STA-1:/);
   assert.match(p.files['packages/ds-react/src/status-dot/StatusDot.doc.ts'], /contract: 'DS-STATUSDOT'/);
+});
+
+test('a generated app passes sec.headers-csp (the template cannot drift from the check)', () => {
+  const repo = fixtureRepo();
+  try {
+    const plan = planApp({ repo, name: 'portal' });
+    for (const [rel, text] of Object.entries(plan.files)) { mkdirSync(dirname(join(repo, rel)), { recursive: true }); writeFileSync(join(repo, rel), text); }
+    assert.deepEqual(headersCspFindings(join(repo, plan.dir)), []);
+  } finally { rmSync(repo, { recursive: true, force: true }); }
 });
