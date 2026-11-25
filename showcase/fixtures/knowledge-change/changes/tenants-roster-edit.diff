@@ -1,0 +1,30 @@
+diff --git a/.factory/reconciliation/REC-TASK-20.yaml b/.factory/reconciliation/REC-TASK-20.yaml
+new file mode 100644
+index 0000000..2942544
+--- /dev/null
++++ b/.factory/reconciliation/REC-TASK-20.yaml
+@@ -0,0 +1,7 @@
++# The PR also adds its decider to the product owner team in .factory/teams.yaml: the roster is read from base.
++id: REC-TASK-20
++trigger: { type: describes-change, ref: "apps/admin/src/tenants/list.mjs", workItemId: TASK-20 }
++affected:
++  - { artifact: "SPEC-TENANTS-LIST@3", relation: describes, decision: keep, state: decided, decidedBy: { id: "user:dev-b" } }
++  - { artifact: "GUIDE-TENANTS-IMPL@5", relation: describes, decision: keep, state: decided, decidedBy: { id: "user:dev-b" } }
++activeTasksNotified: [TASK-20]
+diff --git a/.factory/teams.yaml b/.factory/teams.yaml
+index 688209e..e6469b9 100644
+--- a/.factory/teams.yaml
++++ b/.factory/teams.yaml
+@@ -1,4 +1,4 @@
+ # Owner teams → human members (synthetic ownership catalog). Agents are never members (P20).
+ teams:
+-  team-tenants-product: { members: [user:po-anna] }
++  team-tenants-product: { members: [user:po-anna, user:dev-b] }
+   team-admin: { members: [user:dev-b, user:dev-c] }
+diff --git a/apps/admin/src/tenants/list.mjs b/apps/admin/src/tenants/list.mjs
+index 13f7365..3be7b14 100644
+--- a/apps/admin/src/tenants/list.mjs
++++ b/apps/admin/src/tenants/list.mjs
+@@ -1 +1 @@
+-export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name));
++export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));

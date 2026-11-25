@@ -1,0 +1,7 @@
+# SC-15: an in-team requester signs off an R1 (Low) docs change while the docs.link-fix / docs breakers are evaluated
+# from the recorded A0-revert signal. policy.sod reads breakerTripped from the breaker state, not from the request.
+sod: showcase/fixtures/autonomy/sod-low-signoff.json
+breakers: showcase/fixtures/autonomy/breakers-closed.yaml
+signals: showcase/fixtures/autonomy/signals-a0-revert.yaml
+now: "2026-11-20T12:00:00Z"
+taskClass: docs.link-fix

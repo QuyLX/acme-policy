@@ -1,0 +1,5 @@
+# quality.flaky-policy input (violating): recorded rerun of a test that is not registered failed, then passed.
+at: "2026-11-25T10:00:00Z"
+baseRegistry: showcase/fixtures/flaky/registry-empty.yaml
+reruns:
+  - { testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", checkId: quality.test, attempts: [FAIL, PASS] }

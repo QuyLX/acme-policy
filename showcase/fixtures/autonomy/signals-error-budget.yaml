@@ -1,0 +1,3 @@
+# RECORDED signal log (synthetic): the docs surface's error budget is exhausted (FE §19.4).
+signals:
+  - { kind: error-budget-exhausted, surface: docs, at: "2026-11-19T06:00:00Z", detail: "availability SLO 99.9%: 30-day budget at 0%" }

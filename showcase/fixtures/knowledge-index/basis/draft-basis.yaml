@@ -1,0 +1,7 @@
+# A task basis that cites the DRAFT ADR (Standard §5.8: DRAFT is not usable as a basis).
+sources: showcase/fixtures/knowledge-index/sources.yaml
+repo: showcase/fixtures/knowledge-index/repo
+requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+tier: R2
+workItemId: TASK-18
+basis: { artifacts: ["ADR-SESSION-0004@0.1", "contract:iam@1.4.0"] }

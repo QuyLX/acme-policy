@@ -1,0 +1,8 @@
+{
+  "name": "@console/catalog",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Console catalog module export, consumed by another repo through the portfolio index.",
+  "exports": "./index.mjs"
+}

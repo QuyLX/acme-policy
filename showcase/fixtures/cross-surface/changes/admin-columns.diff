@@ -1,0 +1,7 @@
+diff --git a/apps/admin/src/tenants/columns.json b/apps/admin/src/tenants/columns.json
+index 4cbdac4..67d717e 100644
+--- a/apps/admin/src/tenants/columns.json
++++ b/apps/admin/src/tenants/columns.json
+@@ -1 +1 @@
+-{ "columns": ["id", "name", "plan"] }
++{ "columns": ["id", "name", "plan", "region"] }

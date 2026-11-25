@@ -1,0 +1,2 @@
+{"workItemId": "TASK-Q1", "at": "2026-11-24T11:00:00Z", "actor": {"id": "agent:implementer-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "implement", "status": "PASS"}}
+{"workItemId": "TASK-Q1", "at": "2026-11-24T11:01:00Z", "actor": {"id": "agent:verifier-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "verify", "status": "PASS"}}

@@ -1,0 +1,100 @@
+# SC-18 — Retrieving the right knowledge (FE §20.3; Standard §4.7, §5.8; FE §7.3, §7.8, §12).
+# Simulated: the Knowledge Index is built by the real lib/knowledge-index.mjs from synthetic records in four fixture
+# "repos" (showcase/fixtures/knowledge-index/sources*); each source records a synthetic commit SHA because the fixture
+# directories are not git repos of their own. The requester is a recorded task identity (no IdP): an agent with
+# internal clearance, and a human of the on-call group for the control case. Pinned versions are read from a synthetic
+# repo (@platform/server 2.4.0, contract iam@1.4.0). The task state comes from the real task runner.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-18
+title: Retrieving the right knowledge
+demonstrates: [CORE-KNW-05, CORE-SEC-02]
+slice: 1
+mode: pilot
+cases:
+  - id: default-search-active-and-pinned
+    given: An agent asks about session handling in a repo pinned to @platform/server 2.x and iam@1.4.0
+    run:
+      kind: knowledge-search
+      sources: showcase/fixtures/knowledge-index/sources.yaml
+      repo: showcase/fixtures/knowledge-index/repo
+      query: session handling
+      requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+      expectSources: { ids: [ADR-SESSION-0002, CONTRACT-IAM-V1] }
+    expect:
+      statuses: { knowledge.retrieval: PASS, knowledge.conflict: PASS }
+      decision:
+        results: ["ADR-SESSION-0002@2 ACTIVE", "CONTRACT-IAM-V1@1.4.0 ACTIVE"]
+        citations:
+          - "platform:docs/adr/ADR-SESSION-0002.md@a1f0c3d2e4b5968778695a4b3c2d1e0f9a8b7c6d"
+          - "contracts:docs/CONTRACT-IAM-V1.md@b2e1d4c3f5a6079889706b5c4d3e2f1a0b9c8d7e"
+        citationsComplete: true
+        untrusted: true
+        builtAt: "2026-11-25T06:00:00Z"
+  - id: drafts-only-on-request-and-marked
+    given: The same query with --include-draft
+    run:
+      kind: knowledge-search
+      sources: showcase/fixtures/knowledge-index/sources.yaml
+      repo: showcase/fixtures/knowledge-index/repo
+      query: session handling
+      includeDraft: true
+      requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+    expect:
+      statuses: { knowledge.retrieval: PASS }
+      decision:
+        results: ["ADR-SESSION-0002@2 ACTIVE", "ADR-SESSION-0004@0.1 DRAFT not-a-basis", "GUIDE-SESSION-0001@3 ARCHIVED not-a-basis", "CONTRACT-IAM-V1@1.4.0 ACTIVE"]
+  - id: basis-citing-draft-fails
+    given: The task records the DRAFT ADR in its basis
+    run: { kind: knowledge-check, check: knowledge.basis, input: showcase/fixtures/knowledge-index/basis/draft-basis.yaml }
+    expect: { statuses: { knowledge.basis: FAIL }, rules: [KNW-BASIS-NOT-ACTIVE] }
+  - id: basis-active-pinned-passes
+    given: Control case — the basis cites the ACTIVE ADR for 2.x and the declared contract version
+    run: { kind: knowledge-check, check: knowledge.basis, input: showcase/fixtures/knowledge-index/basis/active-basis.yaml }
+    expect: { statuses: { knowledge.basis: PASS } }
+  - id: restricted-never-returned
+    given: The agent queries the exact title of the restricted runbook; a second restricted runbook has no index opt-in
+    run:
+      kind: knowledge-search
+      sources: showcase/fixtures/knowledge-index/sources.yaml
+      repo: showcase/fixtures/knowledge-index/repo
+      query: session handling incident runbook
+      requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+    expect:
+      statuses: { knowledge.retrieval: PASS }
+      decision:
+        results: ["ADR-SESSION-0002@2 ACTIVE", "CONTRACT-IAM-V1@1.4.0 ACTIVE"]
+        indexed: [ADR-SESSION-0002, ADR-SESSION-0003, ADR-SESSION-0004, CONTRACT-IAM-V1, CONTRACT-IAM-V2, GUIDE-SESSION-0001, RUNBOOK-SESSION-0001]
+  - id: restricted-visible-to-its-readers
+    given: Control case — a human of the on-call group runs the same query
+    run:
+      kind: knowledge-search
+      sources: showcase/fixtures/knowledge-index/sources.yaml
+      repo: showcase/fixtures/knowledge-index/repo
+      query: session handling incident runbook
+      requester: { id: "user:oncall-1", kind: human, clearance: [public, internal], groups: [team-admin-oncall] }
+    expect:
+      statuses: { knowledge.retrieval: PASS }
+      decision:
+        results: ["RUNBOOK-SESSION-0001@4 ACTIVE", "ADR-SESSION-0002@2 ACTIVE", "CONTRACT-IAM-V1@1.4.0 ACTIVE"]
+  - id: two-active-records-conflict
+    given: A second ACTIVE ADR for the same 2.x session scope, without a supersedes link, appears in the index
+    run:
+      kind: knowledge-search
+      sources: showcase/fixtures/knowledge-index/sources-conflict.yaml
+      repo: showcase/fixtures/knowledge-index/repo
+      query: session handling
+      workItemId: TASK-18
+      requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+      taskEvents: showcase/fixtures/knowledge-index/events/task-context.jsonl
+    expect:
+      statuses: { knowledge.conflict: FAIL, workflow.conformance: PASS }
+      rules: [KNW-CONFLICT]
+      taskState: NEEDS_CLARIFICATION
+      decision:
+        conflicts: [KC-ADR-SESSION-0002-ADR-SESSION-0005]
+        conflictRecordErrors: []
+  - id: conflicting-basis-fails
+    given: The task records both conflicting ACTIVE ADRs in its basis
+    run: { kind: knowledge-check, check: knowledge.basis, input: showcase/fixtures/knowledge-index/basis/conflicting-basis.yaml }
+    expect: { statuses: { knowledge.basis: FAIL }, rules: [KNW-CONFLICT] }

@@ -1,0 +1,17 @@
+# RECORDED incident review (synthetic; Standard §12.4, Appendix D). An escaped defect from a docs.link-fix change.
+id: "2026-117"
+at: "2026-11-18T16:00:00Z"
+summary: A link fix rewrote an anchor inside a code sample of the API guide; copy-paste of the sample broke for users.
+rootCause:
+  requirements: not a cause
+  implementation: the agent edited text inside a fenced code block
+  architecture: not a cause
+  contract: not a cause
+  verification: knowledge.references does not check code blocks for unintended edits
+  agent-context: the docs-update skill does not say code blocks are out of scope
+  release: not a cause
+shouldHaveCaught: { layer: sensor, why: "a deterministic check can tell prose links from code blocks" }
+agentWasMissing: check
+preventiveMechanism: { kind: eval-case, layer: sensor, ref: "eval docs.link-fix/code-block-untouched + sensor change request" }
+evalCase: { pr: PR-801, bugLocation: "docs/api/guide.md:142", confirmedBy: "user:docs-owner", sets: [reviewer, agent] }
+attribution: { taskClass: docs.link-fix, confirmedBy: "user:docs-owner" }

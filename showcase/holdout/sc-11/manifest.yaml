@@ -1,0 +1,67 @@
+# Hold-out set of seeded product defects for SC-11 (FE §12 "Seeded defects"; FE §20.3 SC-11 "recall is measured on
+# the hold-out set"). Each variant is a diff applied to the clean fixture repo of its class; the run kind
+# `holdout-recall` (lib/modules/product.mjs) runs the named check through the real `acme-policy run` pipeline and
+# counts the variant as caught when the check FAILs with a finding of one of the class's rules.
+#
+# Separation from the dev set: no file here is a registry fixture (registry/checks.yaml) or a development fixture of
+# SC-11 (showcase/fixtures/*.diff); the kind refuses to run if a registry fixture points into showcase/holdout/.
+# Every variant is written differently from the development fixtures of its class (other files, other syntax forms).
+#
+# Limitation: this is NOT an independent hold-out in the FE §12 sense ("held by someone else, rotated each quarter").
+# It was written by the same team, in the same change, with the check sources in view. Published recall still needs
+# a hold-out held and rotated by someone other than the check authors. The checks were not changed against this set.
+#
+# Out of scope (no such surface in this phase): an internal note exposed in the customer-facing API (Desk) and XSS
+# through chat markdown (Chat).
+#
+# `rules`: a finding with that ruleId, or, for a tool-adapter check that reports one finding per project
+# (quality.lint), a finding whose tool output names the rule.
+apiVersion: aisf/4.0
+kind: HoldoutSet
+id: sc-11-holdout
+version: 1.0.0
+writtenBy: same team as the checks, same change (not independent)
+classes:
+  - id: tenant-key-client-query-cache
+    defect: A client query cache key without tenant (FE-CTX-001)
+    repo: showcase/fixtures/react-repo
+    check: quality.lint
+    rules: ["@acme/tenant-query-key"]
+    variants:
+      - { id: invoices-suspense, diff: showcase/holdout/sc-11/tenant-key-client-query-cache/invoices-suspense.diff, defect: "useSuspenseQuery keyed ['invoices', status, page] in a new module" }
+      - { id: projects-query-options, diff: showcase/holdout/sc-11/tenant-key-client-query-cache/projects-query-options.diff, defect: "queryOptions factory keyed ['projects', 'list'] as const" }
+      - { id: users-key-constant, diff: showcase/holdout/sc-11/tenant-key-client-query-cache/users-key-constant.diff, defect: "the user list key hoisted into an exported constant ['users']" }
+      - { id: audit-log-prefetch, diff: showcase/holdout/sc-11/tenant-key-client-query-cache/audit-log-prefetch.diff, defect: "client.prefetchQuery keyed ['audit-log', { page }]" }
+      - { id: regions-hoisted-options, diff: showcase/holdout/sc-11/tenant-key-client-query-cache/regions-hoisted-options.diff, defect: "an options object { queryKey: ['regions'] } built first, then passed to useQuery" }
+  - id: tenant-key-server-data-cache
+    defect: The server data cache used directly, so the key has no tenant (FE-NEXT-005)
+    repo: showcase/fixtures/react-repo
+    check: quality.lint
+    rules: ["@acme/no-direct-data-cache"]
+    variants:
+      - { id: plans-use-cache, diff: showcase/holdout/sc-11/tenant-key-server-data-cache/plans-use-cache.diff, defect: "a 'use cache' directive in a function body" }
+      - { id: pricing-fetch-revalidate, diff: showcase/holdout/sc-11/tenant-key-server-data-cache/pricing-fetch-revalidate.diff, defect: "fetch with next.revalidate and tags" }
+      - { id: quotas-force-cache, diff: showcase/holdout/sc-11/tenant-key-server-data-cache/quotas-force-cache.diff, defect: "fetch with cache: 'force-cache' beside an authorization header" }
+      - { id: settings-aliased-unstable-cache, diff: showcase/holdout/sc-11/tenant-key-server-data-cache/settings-aliased-unstable-cache.diff, defect: "unstable_cache imported under an alias (memoize)" }
+      - { id: catalog-shared-fetch-init, diff: showcase/holdout/sc-11/tenant-key-server-data-cache/catalog-shared-fetch-init.diff, defect: "fetch cache options in a shared constant passed as the init argument" }
+  - id: permission-only-in-ui
+    defect: A permission enforced only in the UI (FE-PERM-001, FE-NEXT-003)
+    repo: showcase/fixtures/admin-authz-repo
+    check: authz.permission-matrix
+    rules: [authz.authorize-trivial, authz.server-guard-missing, authz.client-only-permission]
+    variants:
+      - { id: suspend-authorize-function-true, diff: showcase/holdout/sc-11/permission-only-in-ui/suspend-authorize-function-true.diff, defect: "authorize becomes a function expression returning true" }
+      - { id: suspend-authorize-wrong-permission, diff: showcase/holdout/sc-11/permission-only-in-ui/suspend-authorize-wrong-permission.diff, defect: "authorize checks tenants.read instead of tenants.suspend" }
+      - { id: export-route-guard-dropped, diff: showcase/holdout/sc-11/permission-only-in-ui/export-route-guard-dropped.diff, defect: "the export route keeps only the sign-in check; a new client link is gated on tenants.export" }
+      - { id: delete-action-ui-gate-only, diff: showcase/holdout/sc-11/permission-only-in-ui/delete-action-ui-gate-only.diff, defect: "a new delete action authorizes any signed-in actor; the button is gated on tenants.delete" }
+      - { id: suspend-authorize-or-read, diff: showcase/holdout/sc-11/permission-only-in-ui/suspend-authorize-or-read.diff, defect: "authorize is can(tenants.read) || can(tenants.suspend), so support can suspend" }
+  - id: csv-formula-injection
+    defect: CSV export cells not neutralized (FE §8.4 cap:import-export)
+    repo: showcase/fixtures/admin-authz-repo
+    check: export.csv-injection
+    rules: ["@acme/csv-safe-export"]
+    variants:
+      - { id: template-literal-rows, diff: showcase/holdout/sc-11/csv-formula-injection/template-literal-rows.diff, defect: "rows built with a template literal, lines joined with CRLF" }
+      - { id: custom-quote-helper, diff: showcase/holdout/sc-11/csv-formula-injection/custom-quote-helper.diff, defect: "an RFC 4180 quote helper that does not neutralize =, +, -, @" }
+      - { id: semicolon-sheet-module, diff: showcase/holdout/sc-11/csv-formula-injection/semicolon-sheet-module.diff, defect: "a semicolon-separated builder in a server module, used by the route" }
+      - { id: string-concat-shared-headers, diff: showcase/holdout/sc-11/csv-formula-injection/string-concat-shared-headers.diff, defect: "the body built by string concatenation in a loop; headers in a shared constant" }

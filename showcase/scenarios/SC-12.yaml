@@ -1,0 +1,37 @@
+# SC-12 — Cross-team contract (FE §20.3, §8.2; Standard §7.5 items 6-8, §8.7 rule 8, Appendix K.2 Disposition).
+# Simulated (tech-design 13 §0): `recorded provider data`. There is no provider pipeline for admin.step-up-auth: the
+# provider's VerificationRun, its Ed25519 signature and the deployment records are recorded fixtures, validated against
+# their schemas. The signature is verified for real (node:crypto) against the key in the Check Registry
+# (admin.step-up-auth params.provider); the signer is simulated (synthetic key pair, private key discarded after signing
+# the fixtures). The run's subject commit is compared with the deployment record (independent source), the pinned
+# policy SHA comes from the registry, never from the bundle; the disposition is decided by lib/assessed-elsewhere.mjs
+# and the exit code by the real runExitCode at the recorded evaluation time (exempting only registry
+# cross-team-contract checks). The consumer result is always NOT_ASSESSED. Deployment records are not authenticated.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-12
+title: Cross-team contract
+demonstrates: [CORE-VER-11]
+slice: 1
+mode: default
+cases:
+  - id: verified-provider-version
+    given: The attested provider run (3 days old) verified the commit production runs
+    run: { kind: cross-team-contract, checkId: admin.step-up-auth, input: showcase/fixtures/contract/verified.yaml }
+    expect:
+      statuses: { admin.step-up-auth: NOT_ASSESSED }
+      dispositions: { admin.step-up-auth: assessed-elsewhere }
+      exitCode: 0
+      decision: { disposition.decidedBy: policy, disposition.assessedElsewhere.providerVersion: 1.4.0, disposition.assessedElsewhere.validUntil: "2026-11-24T09:00:00.000Z" }
+  - id: unverified-provider-deploy
+    given: The provider deployed v1.5.0 without a verification run; the only attested run verified v1.4.0
+    run: { kind: cross-team-contract, checkId: admin.step-up-auth, input: showcase/fixtures/contract/unverified-deploy.yaml }
+    expect: { statuses: { admin.step-up-auth: NOT_ASSESSED }, rules: [contract.version-mismatch], exitCode: 1, decision: { disposition: null, fixOwner: team-identity } }
+  - id: stale-provider-run
+    given: The version matches production, but the attested run is 8 days old (validity is 7 days)
+    run: { kind: cross-team-contract, checkId: admin.step-up-auth, input: showcase/fixtures/contract/stale.yaml }
+    expect: { statuses: { admin.step-up-auth: NOT_ASSESSED }, rules: [contract.stale], exitCode: 1, decision: { disposition: null } }
+  - id: forged-provider-run
+    given: The provider deployed v1.5.0 unverified; the bundle carries v1's run edited to claim it verified v1.5.0's commit, with v1's signature
+    run: { kind: cross-team-contract, checkId: admin.step-up-auth, input: showcase/fixtures/contract/forged-run.yaml }
+    expect: { statuses: { admin.step-up-auth: NOT_ASSESSED }, rules: [contract.not-attested], exitCode: 1, decision: { disposition: null, fixOwner: team-identity } }

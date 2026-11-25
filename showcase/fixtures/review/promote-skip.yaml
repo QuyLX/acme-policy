@@ -1,0 +1,7 @@
+# SC-13: shadow → blocking in one step (RECORDED data that would meet the blocking thresholds).
+# The current mode is not part of the request: review.ai-mode reads it from the surface descriptor (repo fixture).
+surface: admin/users
+requested: blocking
+dispositions: showcase/fixtures/review/admin-dispositions-advisory.yaml
+evalSet: showcase/fixtures/review/eval-set.yaml
+reviewerOutputs: showcase/fixtures/review/reviewer-baseline.yaml

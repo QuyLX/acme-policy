@@ -1,0 +1,15 @@
+diff --git a/packages/ui/src/projects.ts b/packages/ui/src/projects.ts
+new file mode 100644
+index 0000000..90c251a
+--- /dev/null
++++ b/packages/ui/src/projects.ts
+@@ -0,0 +1,9 @@
++// Shared query definition for the project switcher, reused by the sidebar and the settings page.
++declare function queryOptions<T>(options: { queryKey: readonly unknown[]; queryFn: () => Promise<T>; staleTime?: number }): unknown;
++
++export const projectsQuery = (load: () => Promise<{ id: string; name: string }[]>) =>
++  queryOptions({
++    queryKey: ['projects', 'list'] as const,
++    queryFn: load,
++    staleTime: 60_000,
++  });

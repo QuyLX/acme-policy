@@ -1,0 +1,15 @@
+# Recorded data (SC-10): a baseline file committed in a pull request by its author, listing the violations the PR adds
+# (including the new audit-export route). Synthetic identities. A baseline is only ever written by the CI snapshot
+# mechanism trusted:baseline-snapshot (Standard §8.7 rule 7; FE §8.2), so applyBaseline must ignore this one.
+apiVersion: aisf/4.0
+kind: CheckBaseline
+checkId: export.csv-injection
+checkVersion: 1.0.0
+producer: "pr:dev-1"
+ref: refs/pull/42/head
+takenAt: "2026-11-25T09:00:00Z"
+entries:
+  - { location: "apps/admin/src/app/tenants/audit-export/route.ts:13", fingerprint: "fff67368e0884b51", ruleId: "@acme/csv-safe-export" }
+  - { location: "apps/admin/src/app/tenants/audit-export/route.ts:14", fingerprint: "4b43eeda608ab1fa", ruleId: "@acme/csv-safe-export" }
+  - { location: "apps/admin/src/app/tenants/export/route.ts:17", fingerprint: "65dd34adc772fd7e", ruleId: "@acme/csv-safe-export" }
+  - { location: "apps/admin/src/app/tenants/export/route.ts:18", fingerprint: "f9ed91ef9b3bab74", ruleId: "@acme/csv-safe-export" }

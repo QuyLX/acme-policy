@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "aisf/4.0",
+  "runId": "sc-19-faulty",
+  "workItemId": "SC-19",
+  "channel": "code",
+  "subject": {
+    "repo": "console-compute",
+    "commitSha": "14177b28ce8e6d308bdc32d2e946ec1d80181223",
+    "baseSha": "14177b28ce8e6d308bdc32d2e946ec1d80181223"
+  },
+  "resolvedProfiles": [
+    {
+      "id": "aisf-frontend",
+      "version": "1.1.0"
+    }
+  ],
+  "environment": {
+    "executor": "ci"
+  },
+  "checks": [
+    {
+      "checkId": "quality.test",
+      "checkVersion": "1.0.0",
+      "requiredBy": [
+        "aisf-frontend@1.1.0"
+      ],
+      "requirement": "required",
+      "enforcement": "blocking",
+      "severity": "BLOCKER",
+      "gate": "merge",
+      "status": "FAIL",
+      "command": "node --test src/lro.oracle.test.mjs",
+      "durationMs": 0,
+      "attempts": 1,
+      "findings": [],
+      "evidence": [],
+      "reason": "1 test case(s) did not pass",
+      "extensions": {
+        "x-fe": {
+          "evidenceLayer": "static",
+          "ownership": "local",
+          "lifecycle": "active",
+          "journeys": [
+            "console/compute.create-instance"
+          ],
+          "scenarios": [
+            "happy",
+            "lro-failure"
+          ],
+          "acceptanceCriteria": [
+            "AC-CI-1",
+            "AC-CI-6"
+          ]
+        },
+        "x-test-cases": [
+          {
+            "id": "src/lro.oracle.test.mjs::@journey:console/compute.create-instance @scenario:happy @ac:AC-CI-1 a finished create operation shows RUNNING",
+            "file": "src/lro.oracle.test.mjs",
+            "title": "@journey:console/compute.create-instance @scenario:happy @ac:AC-CI-1 a finished create operation shows RUNNING",
+            "status": "PASS"
+          },
+          {
+            "id": "src/lro.oracle.test.mjs::@journey:console/compute.create-instance @scenario:lro-failure @ac:AC-CI-6 a failed create operation shows FAILED, never RUNNING",
+            "file": "src/lro.oracle.test.mjs",
+            "title": "@journey:console/compute.create-instance @scenario:lro-failure @ac:AC-CI-6 a failed create operation shows FAILED, never RUNNING",
+            "status": "FAIL"
+          }
+        ]
+      },
+      "requirementIds": [
+        "AC-CI-1",
+        "AC-CI-6"
+      ]
+    }
+  ],
+  "summary": {
+    "byStatus": {
+      "FAIL": 1
+    },
+    "requiredUnmet": [
+      "quality.test"
+    ]
+  },
+  "provenance": {
+    "factoryVersion": "0.1.0",
+    "verifierRef": "acme-policy@showcase",
+    "producer": {
+      "ciJob": "showcase"
+    },
+    "startedAt": "2026-11-25T10:20:00.000Z",
+    "finishedAt": "2026-11-25T10:20:00.000Z"
+  }
+}

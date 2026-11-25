@@ -1,0 +1,18 @@
+diff --git a/apps/admin/src/domains/tenants/server/suspend.authz.test.ts b/apps/admin/src/domains/tenants/server/suspend.authz.test.ts
+index fb19149..21edc9c 100644
+--- a/apps/admin/src/domains/tenants/server/suspend.authz.test.ts
++++ b/apps/admin/src/domains/tenants/server/suspend.authz.test.ts
+@@ -6,13 +6,6 @@ import { createTestSessionProvider, useSessionProvider } from '../../../platform
+ import { sessionFor } from '../../../testing/personas.ts';
+ import { suspendTenant } from './suspend.action.ts';
+ 
+-test('@authz:tenants.suspend @persona:noAccess a signed-in user without permissions is forbidden', async () => {
+-  useSessionProvider(createTestSessionProvider(sessionFor('noAccess')));
+-  const result = await suspendTenant({ tenantId: 't-001' });
+-  assert.equal(result.ok, false);
+-  assert.equal(!result.ok && result.error.code, 'forbidden');
+-});
+-
+ test('@authz:tenants.suspend @persona:support support can read tenants but is forbidden to suspend them', async () => {
+   useSessionProvider(createTestSessionProvider(sessionFor('support')));
+   const result = await suspendTenant({ tenantId: 't-001' });

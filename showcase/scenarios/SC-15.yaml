@@ -1,0 +1,63 @@
+# SC-15 — Autonomy and breakers (FE §20.3; Standard §9.5 item 11, §9.9 items 1-7, §9.10, §12.2.1 items 8-10, §12.4,
+# §12.6 item 2.4; FE §10.4, §10.6, §11.4, §11.7, §19.4).
+# Simulated (tech-design 13 §0): `decision only`. A0 MUST NOT be enabled in pilot mode (Standard §20.8 item 4.7):
+# decideAutonomy returns the level that would apply and the level applied in pilot (A1); nothing merges. Pilot mode is
+# read from registry/checks.yaml (`mode`), never from the request. The A0 merge
+# that is reverted, the error-budget signal, the Change Shepherd's flag and rollout actions (no flag provider exists)
+# and the incident review are recorded synthetic fixtures. Trust is recomputed from the SC-13 record, breakers are
+# tightened from the signals by lib/breakers.mjs, and policy.sod is the real check. Shadow checks are evaluated at
+# their targetEnforcement.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-15
+title: Autonomy and breakers
+demonstrates: [CORE-GOV-05, CORE-GOV-07, CORE-GOV-08, CORE-OPS-02, CORE-OPS-04, CORE-OPS-06]
+slice: 2
+mode: default
+cases:
+  - id: a0-when-all-conditions-hold
+    given: docs.link-fix R0/HIGH on the opted-in docs surface, T2, blocking AI review with no findings, gates green, no breaker
+    run: { kind: autonomy, input: showcase/fixtures/autonomy/request-a0-all-conditions.yaml }
+    expect: { statuses: { policy.autonomy: PASS }, decision: { level: A0, decisionOnly: true, trustLevel: T2, pilot.a0Allowed: false, pilot.applied: A1, ruleIds: [] } }
+  - id: a0-revert-pauses-a0
+    given: A docs.link-fix change merged at A0 is reverted (absolute trigger at low volume)
+    run: { kind: autonomy, input: showcase/fixtures/autonomy/request-after-a0-revert.yaml }
+    expect: { statuses: { policy.autonomy: PASS }, decision: { level: A1, ruleIds: [autonomy.breaker-tripped], signoffCounts: false, newlyTripped: ["surface:docs:zero-human-revert"] } }
+  - id: a0-proposed-after-revert-refused
+    given: A PolicyDecision still proposes A0 after the revert
+    run: { kind: autonomy, input: showcase/fixtures/autonomy/request-proposed-a0-after-revert.yaml }
+    expect: { statuses: { policy.autonomy: FAIL }, rules: [autonomy.too-light, autonomy.a0-pilot-forbidden], decision: { level: A1 } }
+  - id: a0-proposed-with-pilot-off-claim-refused
+    given: All zero-human conditions hold and a PolicyDecision proposes A0; the request claims pilotMode false, the registry says pilot
+    run: { kind: autonomy, input: showcase/fixtures/autonomy/request-proposed-a0-claims-pilot-off.yaml }
+    expect: { statuses: { policy.autonomy: FAIL }, rules: [autonomy.a0-pilot-forbidden], decision: { level: A0, pilot.a0Allowed: false, pilot.applied: A1, claimedPilotMode: false } }
+  - id: error-budget-closes-a0
+    given: The docs surface's error budget is exhausted
+    run: { kind: autonomy, input: showcase/fixtures/autonomy/request-error-budget-exhausted.yaml }
+    expect: { statuses: { policy.autonomy: PASS }, decision: { level: A1, ruleIds: [autonomy.error-budget], signoffCounts: false } }
+  - id: signoff-not-counted-while-tripped
+    given: An in-team requester signs off an R1 (Low) docs change while the docs breaker is tripped
+    run: { kind: breaker-sod, input: showcase/fixtures/autonomy/sod-signoff-breaker.yaml }
+    expect: { statuses: { policy.sod: FAIL }, decision: { breakerTripped: true, signoffCounts: false, unmet: ["code-owner(docs)"] } }
+  - id: code-owner-fills-slot
+    given: The same change after an independent code owner of docs approves the head SHA
+    run: { kind: breaker-sod, input: showcase/fixtures/autonomy/sod-signoff-breaker-owner.yaml }
+    expect: { statuses: { policy.sod: PASS }, decision: { breakerTripped: true, signoffCounts: false, unmet: [] } }
+  - id: shepherd-flag-off-for-alert
+    given: A regression alert during an R1 rollout; the Change Shepherd turns off its safeState-off feature flag and pauses the rollout
+    run: { kind: change-shepherd, input: showcase/fixtures/ops/shepherd-flag-off.yaml }
+    expect: { statuses: { ops.change-shepherd: PASS }, decision: { allowed: true, taskState: PAUSED } }
+  - id: shepherd-reverts-main
+    given: The Change Shepherd tries to revert the change on main
+    run: { kind: change-shepherd, input: showcase/fixtures/ops/shepherd-revert-main.yaml }
+    expect: { statuses: { ops.change-shepherd: FAIL }, rules: [ops.shepherd-out-of-scope], decision: { allowed: false } }
+  - id: shepherd-turns-off-safe-on-flag
+    given: The Change Shepherd turns off a flag whose safeState is on (it enforces step-up auth)
+    run: { kind: change-shepherd, input: showcase/fixtures/ops/shepherd-flag-off-safe-on.yaml }
+    expect: { statuses: { ops.change-shepherd: FAIL }, rules: [ops.flag-leaves-safe-state], decision: { allowed: false } }
+  - id: incident-produces-eval-case
+    given: An escaped docs.link-fix defect is reviewed; the review adds an eval case and is attributed to the class
+    run: { kind: incident-review, input: showcase/fixtures/ops/incident-request.yaml }
+    expect:
+      statuses: { ops.incident-review: PASS }
+      decision: { evalCase.id: INC-2026-117, evalSetIncidents: { before: 12, after: 13 }, trippedBreakers: ["taskClass:docs.link-fix:escaped-defect"], trustEffect: [trust-to-t0, re-evaluation, signoff-not-counted] }

@@ -1,0 +1,9 @@
+{
+  "apiVersion": "aisf/4.0",
+  "kind": "PortfolioIndex",
+  "builtAt": "2026-11-25T00:00:00Z",
+  "repos": [
+    { "id": "frontend", "path": "frontend", "publishes": [{ "package": "@console/catalog", "paths": ["apps/console/src/modules/catalog/**"] }] },
+    { "id": "partner-portal", "path": "consumer-repo", "consumes": ["@console/catalog"] }
+  ]
+}

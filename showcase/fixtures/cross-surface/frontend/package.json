@@ -1,0 +1,6 @@
+{
+  "name": "frontend",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic monorepo for SC-17 (cross-surface testing). Modelled on the frontend monorepo layout; console and admin never depend on each other (ADR-FE-0002)."
+}

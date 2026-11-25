@@ -1,0 +1,7 @@
+{
+  "name": "partner-portal",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic second repo that consumes the console catalog export (SC-17).",
+  "dependencies": { "@console/catalog": "1.x" }
+}

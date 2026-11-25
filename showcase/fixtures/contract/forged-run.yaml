@@ -1,0 +1,8 @@
+# SC-12 input (RECORDED provider data): the provider deployed v1.5.0 (2222…) without a verification run. The evidence
+# bundle carries v1's run record edited to claim it verified 2222…, with v1's signature. The subject now matches the
+# deployment and verifierRef is the pinned SHA, but the Ed25519 signature (registry key) does not verify.
+providerRun: showcase/fixtures/contract/provider-run-v2-forged.json
+providerAttestation: showcase/fixtures/contract/provider-run-v1.sig.json
+deployments: showcase/fixtures/contract/deployments-v2-unverified.yaml
+environment: production
+now: "2026-11-20T12:00:00Z"

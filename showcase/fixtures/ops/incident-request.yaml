@@ -1,0 +1,5 @@
+# SC-15: incident review → eval case appended to the SC-13 eval set; the attributed escaped defect trips the class breaker.
+review: showcase/fixtures/ops/incident-review.yaml
+evalSet: showcase/fixtures/review/eval-set.yaml
+breakers: showcase/fixtures/autonomy/breakers-closed.yaml
+now: "2026-11-20T12:00:00Z"

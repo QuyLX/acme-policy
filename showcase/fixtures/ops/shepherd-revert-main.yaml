@@ -1,0 +1,5 @@
+# SC-15 (SIMULATED): the Change Shepherd tries to revert the change on main to stop the regression.
+tier: R1
+flags: showcase/fixtures/ops/flags.yaml
+actions:
+  - { tool: git.revert-main, target: "PR-930", alert: "ALERT-2207 error rate 4x on /exports", at: "2026-11-20T10:03:00Z" }

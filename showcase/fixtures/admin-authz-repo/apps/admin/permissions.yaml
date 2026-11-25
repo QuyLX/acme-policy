@@ -1,0 +1,30 @@
+# Permission matrix of the admin app (FE-PERM-001; FE §8.4 operational pack: authz.permission-matrix, authz.negative).
+# Control file (registry/control-files.yaml). `roles` is the IAM stand-in until D-03 picks an IdP: persona → permissions.
+# `noAccess` is a valid, signed-in session with no permissions (forbidden), not a missing session (unauthenticated).
+# Entry paths are relative to this file's directory.
+apiVersion: aisf/4.0
+kind: PermissionMatrix
+app: admin
+roles:
+  staff: [tenants.read, tenants.suspend, tenants.export]
+  support: [tenants.read]
+  noAccess: []
+entries:
+  - id: tenants.list
+    kind: page
+    path: src/app/tenants/page.tsx
+    permission: tenants.read
+    allow: [staff, support]
+    deny: [noAccess]
+  - id: tenants.suspend
+    kind: action
+    path: src/domains/tenants/server/suspend.action.ts
+    permission: tenants.suspend
+    allow: [staff]
+    deny: [support, noAccess]
+  - id: tenants.export
+    kind: route
+    path: src/app/tenants/export/route.ts
+    permission: tenants.export
+    allow: [staff]
+    deny: [support, noAccess]

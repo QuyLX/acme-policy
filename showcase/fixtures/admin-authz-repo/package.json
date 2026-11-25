@@ -1,0 +1,6 @@
+{
+  "name": "admin-authz-fixture",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic Admin slice for SC-11 / SC-10 (tech-design 13 §5). No IdP: sessions come from a SessionProvider test double."
+}

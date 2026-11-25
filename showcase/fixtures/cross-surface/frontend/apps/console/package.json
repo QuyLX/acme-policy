@@ -1,0 +1,6 @@
+{
+  "name": "console",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@platform/server": "workspace:*" }
+}

@@ -1,0 +1,8 @@
+# BreakerState (schemas/breaker-state.schema.json): no breaker tripped for surface docs or class docs.link-fix.
+apiVersion: aisf/4.0
+kind: BreakerState
+updatedAt: "2026-11-20T00:00:00Z"
+breakers:
+  - { id: "surface:docs:zero-human-revert", scope: { kind: surface, id: docs }, signal: zero-human-revert, state: closed }
+  - { id: "surface:docs:error-budget", scope: { kind: surface, id: docs }, signal: error-budget, state: closed }
+  - { id: "taskClass:docs.link-fix:escaped-defect", scope: { kind: taskClass, id: docs.link-fix }, signal: escaped-defect, state: closed }

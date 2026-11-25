@@ -1,0 +1,20 @@
+diff --git a/.factory/reconciliation/REC-TASK-20.yaml b/.factory/reconciliation/REC-TASK-20.yaml
+new file mode 100644
+index 0000000..5852600
+--- /dev/null
++++ b/.factory/reconciliation/REC-TASK-20.yaml
+@@ -0,0 +1,7 @@
++# ReconciliationRecord proposed by the implementing agent (Standard §5.10 item 13): not a decision.
++id: REC-TASK-20
++trigger: { type: describes-change, ref: "apps/admin/src/tenants/list.mjs", workItemId: TASK-20 }
++affected:
++  - { artifact: "SPEC-TENANTS-LIST@3", relation: describes, decision: keep, state: proposed }
++  - { artifact: "GUIDE-TENANTS-IMPL@5", relation: describes, decision: keep, state: proposed }
++activeTasksNotified: []
+diff --git a/apps/admin/src/tenants/list.mjs b/apps/admin/src/tenants/list.mjs
+index 13f7365..3be7b14 100644
+--- a/apps/admin/src/tenants/list.mjs
++++ b/apps/admin/src/tenants/list.mjs
+@@ -1 +1 @@
+-export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name));
++export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));

@@ -1,0 +1,10 @@
+# Synthetic profile layer for SC-21: the console repository profile pins a different Node runtime (layer 4).
+apiVersion: aisf/4.0
+kind: ProfileLayer
+layer: repository
+id: console-repo
+version: 2.3.0
+owner: team-console
+checks:
+  - { id: meta.toolchain-pin, params: { node: { exact: "26" } } }
+  - { id: test.e2e-journeys, requirement: required, params: { browsers: { set: [chromium, webkit] } } }

@@ -1,0 +1,6 @@
+{
+  "keyId": "identity-provider-ci-2026",
+  "alg": "ed25519",
+  "subject": "provider-run-v1.json",
+  "signature": "l7hnpLl1uqXtpzfFVNRX5VP8U4M/RuVnolz4s5njjsZB2rf6p0ngUM25P8O5/pB/sNWbb1Q3Xx78rTGnQn6WBA=="
+}

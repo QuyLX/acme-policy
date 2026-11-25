@@ -1,0 +1,34 @@
+diff --git a/apps/admin/src/app/tenants/export/route.ts b/apps/admin/src/app/tenants/export/route.ts
+index 8d2c18b..775f729 100644
+--- a/apps/admin/src/app/tenants/export/route.ts
++++ b/apps/admin/src/app/tenants/export/route.ts
+@@ -1,13 +1,12 @@
+ // Route entry `tenants.export`: CSV download of the tenant list. The body is built only through toCsv.
+-import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
++import { ForbiddenError } from '../../../platform/authz.ts';
+ import { requestContext, UnauthenticatedError } from '../../../platform/session.ts';
+ import { toCsv } from '../../../platform/csv.ts';
+ import { allTenants } from '../../../domains/tenants/server/data.ts';
+ 
+ export async function GET(): Promise<Response> {
+   try {
+-    const ctx = await requestContext();
+-    requirePermission(ctx, 'tenants.export');
++    await requestContext(); // signed-in users only; the export link is shown to staff
+   } catch (err) {
+     if (err instanceof UnauthenticatedError) return new Response(null, { status: 401 });
+     if (err instanceof ForbiddenError) return new Response(null, { status: 403 });
+diff --git a/apps/admin/src/domains/tenants/ui/ExportLink.tsx b/apps/admin/src/domains/tenants/ui/ExportLink.tsx
+new file mode 100644
+index 0000000..7dfb957
+--- /dev/null
++++ b/apps/admin/src/domains/tenants/ui/ExportLink.tsx
+@@ -0,0 +1,8 @@
++'use client';
++// Download link for the tenant CSV export, shown only to personas allowed to export.
++import { can } from '../../../platform/authz.ts';
++
++export function ExportLink({ session }: { session: { permissions: string[] } | null }) {
++  if (!can(session, 'tenants.export')) return null;
++  return <a href="/tenants/export">Export CSV</a>;
++}

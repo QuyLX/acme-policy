@@ -1,0 +1,17 @@
+diff --git a/packages/ui/src/invoices.ts b/packages/ui/src/invoices.ts
+new file mode 100644
+index 0000000..3456f38
+--- /dev/null
++++ b/packages/ui/src/invoices.ts
+@@ -0,0 +1,11 @@
++// Open/paid invoice list for the billing page (synthetic data only).
++declare function useSuspenseQuery<T>(options: { queryKey: readonly unknown[]; queryFn: () => Promise<T> }): { data: T };
++
++export type InvoiceFilter = { status: 'open' | 'paid'; page: number };
++
++export function useInvoices(filter: InvoiceFilter, load: (f: InvoiceFilter) => Promise<unknown[]>) {
++  return useSuspenseQuery({
++    queryKey: ['invoices', filter.status, filter.page],
++    queryFn: () => load(filter),
++  });
++}

@@ -1,0 +1,7 @@
+# SC-15: the same R1 (Low) docs change with the breaker tripped, after an independent code owner of docs approves the
+# head SHA. The requester's sign-off is still required but not counted (Standard §9.10 SoD table, FE §10.6).
+sod: showcase/fixtures/autonomy/sod-low-signoff-owner-approved.json
+breakers: showcase/fixtures/autonomy/breakers-closed.yaml
+signals: showcase/fixtures/autonomy/signals-a0-revert.yaml
+now: "2026-11-20T12:00:00Z"
+taskClass: docs.link-fix

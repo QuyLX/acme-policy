@@ -1,0 +1,7 @@
+# SC-13: shadow → advisory on the full shadow period (RECORDED data).
+# The current mode is not part of the request: review.ai-mode reads it from the surface descriptor (repo fixture).
+surface: admin/users
+requested: advisory
+dispositions: showcase/fixtures/review/admin-dispositions-shadow.yaml
+evalSet: showcase/fixtures/review/eval-set.yaml
+reviewerOutputs: showcase/fixtures/review/reviewer-baseline.yaml

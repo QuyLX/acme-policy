@@ -1,0 +1,4 @@
+# Owner teams → human members (synthetic ownership catalog). Agents are never members (P20).
+teams:
+  team-tenants-product: { members: [user:po-anna] }
+  team-admin: { members: [user:dev-b, user:dev-c] }

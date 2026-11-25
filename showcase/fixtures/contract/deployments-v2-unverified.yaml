@@ -1,0 +1,3 @@
+# RECORDED provider deployment records: after v1, the provider deployed v2 to production without a verification run.
+- { apiVersion: aisf/4.0, kind: DeploymentRecord, provider: identity-provider, environment: production, version: 1.4.0, commitSha: "1111111111111111111111111111111111111111", status: deployed, at: "2026-11-12T10:00:00Z", recordedBy: "ci:provider-deploy" }
+- { apiVersion: aisf/4.0, kind: DeploymentRecord, provider: identity-provider, environment: production, version: 1.5.0, commitSha: "2222222222222222222222222222222222222222", status: deployed, at: "2026-11-19T15:00:00Z", recordedBy: "ci:provider-deploy" }

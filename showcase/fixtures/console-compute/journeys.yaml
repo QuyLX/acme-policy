@@ -1,0 +1,16 @@
+# Journey Registry (FE §7.7), curated fields only. Synthetic data for SC-19. A control file: editing or deleting an
+# existing AC or scenario is an oracle change (FE §9.10).
+- id: console/compute.create-instance
+  surface: console/compute
+  owner: team-compute
+  criticality: critical
+  personas: [owner, admin, viewer, no-access]
+  permissions: [compute.instances.create]
+  requirements: [req:COMPUTE-101, req:COMPUTE-117]
+  scenarios:
+    - { id: happy, ac: [AC-CI-1] }
+    - { id: lro-failure, ac: [AC-CI-6] }   # added from incident INC-7 (playbook regression-from-incident)
+  acceptance:
+    - { id: AC-CI-1, statement: "A finished create operation shows the instance as RUNNING" }
+    - { id: AC-CI-6, statement: "A failed create operation shows the instance as FAILED with the error, never RUNNING" }
+  evidence: [e2e, persisted-state]

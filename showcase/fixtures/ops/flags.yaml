@@ -1,0 +1,4 @@
+# Flag registry excerpt (synthetic; FE §4.5 FE-FLAG-001, §11.4): each flag declares its safeState.
+flags:
+  - { id: admin.export-dialog-v2, safeState: "off", owner: "user:admin-lead", note: "feature flag: off returns to the previous verified behavior" }
+  - { id: admin.step-up-auth-enforced, safeState: "on", owner: "user:security-owner", note: "off removes a security control" }

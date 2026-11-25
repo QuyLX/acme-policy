@@ -1,0 +1,50 @@
+# SC-07 — Semantic conflict in the merge queue (FE §20.3; Standard §6.4 items 9-13, 19; §6.5; FE §11.6).
+# Simulated (tech-design 13 §0): `simulated: no merge queue`. GitHub Free user-owned repositories have no merge queue.
+# Accountability is decided by the operational action of Standard §6.4 item 19, with real `acme-policy run` pipelines
+# on showcase/fixtures/ts-repo: the failing check is rerun on main (a) without the change and (b) with it. The task
+# events up to approval are recorded fixtures; queue.* events come from the simulation and the task state is derived
+# by the real task runner (budget = min(policy ceiling 2, playbook, task)). The flake case's original queue failure is
+# recorded (nondeterminism cannot be produced on demand); its two reruns are real.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-07
+title: Semantic conflict in the merge queue
+demonstrates: [CORE-WRK-06]
+slice: 1
+mode: default
+cases:
+  - id: semantic-conflict-attributed
+    given: Main just merged a rename of describeValue; the queued change adds a call to the old name. Each passes quality.typecheck alone, combined they fail
+    run: { kind: merge-queue, input: checks/workflow/fixtures/queue-semantic-conflict.yaml, events: showcase/fixtures/queue/task-approved.jsonl, proveIndependence: true }
+    expect:
+      statuses: { workflow.merge-queue: FAIL }
+      rules: [queue.attributed-to-change]
+      taskState: REPAIRING
+      decision: { attribution: attributed-to-change, runs.changeAlone: PASS, runs.mainAlone: PASS, runs.a: PASS, runs.b: FAIL, budget: { limit: 2, used: 1 } }
+  - id: attributed-twice-escalates
+    given: The repaired change still calls the old name and fails the queue a second time
+    run: { kind: merge-queue, input: checks/workflow/fixtures/queue-semantic-conflict.yaml, events: showcase/fixtures/queue/task-approved.jsonl, repaired: showcase/fixtures/queue/task-repaired.jsonl, attempts: 2 }
+    expect:
+      rules: [queue.attributed-to-change, WF-LOOP]
+      taskState: ESCALATED
+      decision: { attempts: [attributed-to-change, attributed-to-change], budget: { limit: 2, used: 2 } }
+  - id: main-broken-pauses-queue
+    given: A type error is already on main; an unrelated queued change fails in the queue
+    run: { kind: merge-queue, input: checks/workflow/fixtures/queue-main-broken.yaml, events: showcase/fixtures/queue/task-approved.jsonl }
+    expect:
+      statuses: { workflow.merge-queue: NOT_ASSESSED }
+      rules: [queue.main-broken]
+      taskState: IN_MERGE_QUEUE
+      decision: { attribution: main-broken, runs.a: FAIL, notify: ["user:dev-c"], queuePaused: true, budget: { limit: 2, used: 0 } }
+  - id: flake-candidate-no-budget
+    given: The queue reported quality.typecheck FAIL (recorded), but both reruns pass
+    run: { kind: merge-queue, input: checks/workflow/fixtures/queue-flake.yaml, events: showcase/fixtures/queue/task-approved.jsonl }
+    expect:
+      statuses: { workflow.merge-queue: NOT_ASSESSED }
+      rules: [queue.flake-candidate]
+      taskState: IN_MERGE_QUEUE
+      decision: { attribution: flake-candidate, runs.a: PASS, runs.b: PASS, budget: { limit: 2, used: 0 } }
+  - id: clean-change-passes-queue
+    given: An independent change on the same main
+    run: { kind: merge-queue, input: checks/workflow/fixtures/queue-clean.yaml, events: showcase/fixtures/queue/task-approved.jsonl }
+    expect: { statuses: { workflow.merge-queue: PASS }, decision: { attribution: passed, budget: { limit: 2, used: 0 } } }

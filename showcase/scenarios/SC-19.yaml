@@ -1,0 +1,48 @@
+# SC-19 — Traceability and regression from an incident (FE §20.3; FE §7.7, §9.2, §9.10; Standard §6.4.1 items 7, 10-11,
+# §7.13 item 29). CORE-VER-04.
+# What is real: the reproduction oracle (showcase/fixtures/console-compute) really runs under `node --test` on a temp git
+# copy, on the faulty commit and on the fix commit; the VerificationRuns are built from those runs and validated;
+# `trace`, integrity.oracle-lock and the task runner (playbook regression-from-incident) are the real code.
+# Simulated (tech-design 13 §0): the incident INC-7 on console/compute and the console repo are a synthetic fixture; the
+# requirement keys are synthetic tracker ids; `trace-recorded-evidence` reads recorded VerificationRuns in place of an
+# evidence store; the oracle-change task cases are recorded event logs with the identities the platform binding records.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-19
+title: Traceability and regression from an incident
+demonstrates: [CORE-VER-04]
+slice: 1
+mode: pilot
+cases:
+  - id: reproduction-fails-on-faulty-commit
+    given: The reproduction test for AC-CI-6 fails on the faulty commit and passes on the fix; the run is bound to the fix commit and trace finds PASS evidence for every AC of req:COMPUTE-117
+    run: { kind: incident-regression, repo: showcase/fixtures/console-compute, fix: showcase/fixtures/console-compute/fix.diff, oracle: src/lro.oracle.test.mjs, ref: "req:COMPUTE-117", ac: AC-CI-6 }
+    expect: { statuses: { showcase.regression-reproduction: PASS, factory.trace: PASS }, rules: [trace.complete] }
+  - id: trace-recorded-evidence
+    given: '`acme-policy trace req:COMPUTE-117` over the recorded runs: requirement → journey → AC → scenario → test → PASS on the fix commit'
+    run: { kind: trace, repo: showcase/fixtures/console-compute, ref: "req:COMPUTE-117", runs: [showcase/fixtures/console-compute/runs/run-faulty.json, showcase/fixtures/console-compute/runs/run-fix.json] }
+    expect: { statuses: { factory.trace: PASS }, rules: [trace.complete] }
+  - id: trace-without-pass-evidence
+    given: Control case — only the run on the faulty commit is in the evidence store
+    run: { kind: trace, repo: showcase/fixtures/console-compute, ref: "req:COMPUTE-117", runs: [showcase/fixtures/console-compute/runs/run-faulty.json] }
+    expect: { statuses: { factory.trace: FAIL }, rules: [trace.no-pass-evidence] }
+  - id: implementer-edits-oracle
+    given: The implementer edits the locked scenario test and the AC statement in journeys.yaml
+    run: { kind: integrity, diff: showcase/fixtures/console-compute/oracle-edit.diff }
+    expect: { statuses: { integrity.oracle-lock: FAIL }, rules: [integrity.oracle-lock] }
+  - id: oracle-change-request-returns-to-planned
+    given: The implementer opens an oracle change request during EXECUTING
+    run: { kind: task, events: showcase/fixtures/console-compute/events/oracle-change-request.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: PLANNED }
+  - id: oracle-change-decided-by-requester
+    given: The requester, who did not approve the ACs, accepts the oracle change at tier Medium
+    run: { kind: task, events: showcase/fixtures/console-compute/events/oracle-change-decided-by-requester.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-ORACLE-CHANGE] }
+  - id: oracle-change-decided-by-implementer
+    given: The implementing agent decides its own oracle change request
+    run: { kind: task, events: showcase/fixtures/console-compute/events/oracle-change-decided-by-implementer.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-ORACLE-CHANGE] }
+  - id: oracle-change-decided-by-ac-approver
+    given: Control case — the journey owner who approved the scenario decides (rejects) the request
+    run: { kind: task, events: showcase/fixtures/console-compute/events/oracle-change-decided-by-ac-approver.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: PLANNED }

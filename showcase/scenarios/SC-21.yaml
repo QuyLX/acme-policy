@@ -1,10 +1,24 @@
-# SC-21 — Workflow, checkpoint, handoff and recovery (FE §20.3). Partial: the cases the runtime-neutral task runner
-# covers (M4). Generator design-review and profile-layer resolve come with M7 and later.
+# SC-21 — Workflow, checkpoint, handoff and recovery (FE §20.3). The cases the runtime-neutral task runner covers (M4),
+# the generator design-review (M7), and profile-layer resolution with a trace (tech-design 13 group A; Standard §7.3
+# items 6, 10-16; FE §8.3, Appendix A).
+# Simulated (tech-design 13 §0) for the profile-layers cases:
+#   - the profile layers are synthetic fixtures (showcase/fixtures/profile-layers); the request (input file) names the
+#     layers only. Whether an incomparable conflict blocks is the gate's policy: the clock against the registry entry of
+#     profile.resolve (blockingIncomparableFrom 2027-04-01, phase2Since), FE §8.3 item 4. The request cannot set it.
+#   - `now` in a run definition is the test-harness clock, not request data: lib/resolve.mjs takes it only as a code
+#     option. `acme-policy run` has no clock option and reads the real clock, so a case with `now` runs profile.resolve
+#     in-process and assembles the run's `resolution` with resolutionEvidence (lib/resolve.mjs), the same function
+#     `acme-policy run` uses. A case without `now` runs the real `acme-policy run --checks profile.resolve --input`
+#     on a git copy of the fixture and reads the resolution from the VerificationRun the CLI prints. Both runs are
+#     validated against schemas/verification-run.schema.json; `decision` is projected from the run's `resolution`.
+#   - the task is a recorded event log; the case appends the `profile.resolved` event that the platform binding would
+#     record (the binding stand-in), built from the run's resolution evidence. lib/resolve.mjs, profile.resolve, the
+#     VerificationRun schema check and the task runner are the real code.
 apiVersion: aisf/4.0
 kind: ShowcaseScenario
 id: SC-21
 title: Workflow, checkpoint, handoff and recovery
-demonstrates: [CORE-WRK-07, CORE-WRK-08, CORE-WRK-11, CORE-WRK-12, CORE-REV-07, CORE-MET-03]
+demonstrates: [CORE-WRK-07, CORE-WRK-08, CORE-WRK-11, CORE-WRK-12, CORE-REV-07, CORE-MET-03, CORE-VER-13]
 slice: 1
 cases:
   - id: conditional-step-skipped
@@ -48,5 +62,45 @@ cases:
     run: { kind: generate, repo: showcase/fixtures/ts-repo, generator: package, name: audit-log, checkpoint: checks/generate/fixtures/design-review-passed.json }
     expect: { exitCode: 0, statuses: { factory.generate: PASS } }
   - id: profile-layers-conflict
-    given: Two profile layers pin two different Node versions
-    pending: profile-layer resolve with trace is a Phase 1a follow-up item (FE §8.3)
+    given: The domain profile pins Node 24 and the repository profile pins Node 26; the gate's clock is 2027-04-01, when blocking resolution is in force
+    run: { kind: profile-resolve, input: showcase/fixtures/profile-layers/conflict.yaml, now: "2027-04-01T00:00:00Z", events: showcase/fixtures/profile-layers/task-context-ready.jsonl }
+    expect:
+      statuses: { profile.resolve: FAIL }
+      exitCode: 1
+      rules: [profile.conflict-incomparable]
+      taskState: BLOCKED
+      decision:
+        inEvidence: true
+        layers: ["core:aisf-core@4.0.0", "domain:aisf-frontend@1.1.0", "repository:console-repo@2.3.0"]
+        conflicts: ["quality.test.coverage: stricter", "meta.toolchain-pin.node: blocked", "test.e2e-journeys.requirement: stricter", "test.e2e-journeys.browsers: union"]
+  - id: profile-layers-conflict-request-claims-nonblocking
+    given: The same conflict, from a request that sets blockingIncomparable false and dates itself 2026-01-01; the gate's clock is 2027-04-01
+    run: { kind: profile-resolve, input: showcase/fixtures/profile-layers/conflict-claims-nonblocking.yaml, now: "2027-04-01T00:00:00Z", events: showcase/fixtures/profile-layers/task-context-ready.jsonl }
+    expect:
+      statuses: { profile.resolve: FAIL }
+      exitCode: 1
+      rules: [profile.conflict-incomparable, profile.request-switch-ignored]
+      taskState: BLOCKED
+      decision: { conflicts: ["quality.test.coverage: stricter", "meta.toolchain-pin.node: blocked", "test.e2e-journeys.requirement: stricter", "test.e2e-journeys.browsers: union"] }
+  - id: profile-layers-conflict-interim
+    given: The same conflict; the gate's clock is 2026-11-25, before blocking resolution is enabled (FE §8.3 item 4)
+    run: { kind: profile-resolve, input: showcase/fixtures/profile-layers/conflict.yaml, now: "2026-11-25T00:00:00Z", events: showcase/fixtures/profile-layers/task-context-ready.jsonl }
+    expect:
+      statuses: { profile.resolve: PASS }
+      exitCode: 0
+      rules: [profile.conflict-provisional]
+      taskState: CONTEXT_READY
+      decision: { inEvidence: true, conflicts: ["quality.test.coverage: stricter", "meta.toolchain-pin.node: provisional", "test.e2e-journeys.requirement: stricter", "test.e2e-journeys.browsers: union"] }
+  - id: profile-layers-conflict-decided
+    given: The same conflict with a resolution entry decided by both profile owners, through the real `acme-policy run` (real clock; the decision holds whether or not blocking is in force)
+    run: { kind: profile-resolve, input: showcase/fixtures/profile-layers/conflict-decided.yaml, events: showcase/fixtures/profile-layers/task-context-ready.jsonl }
+    expect:
+      statuses: { profile.resolve: PASS }
+      exitCode: 0
+      rules: [profile.conflict-decided]
+      taskState: CONTEXT_READY
+      decision:
+        inEvidence: true
+        resolvedProfiles: ["aisf-core@4.0.0", "aisf-frontend@1.1.0", "console-repo@2.3.1"]
+        layers: ["core:aisf-core@4.0.0", "domain:aisf-frontend@1.1.0", "repository:console-repo@2.3.1"]
+        conflicts: ["quality.test.coverage: stricter", "meta.toolchain-pin.node: decision (console-repo@2.3.1#resolution-1)", "test.e2e-journeys.requirement: stricter", "test.e2e-journeys.browsers: union"]

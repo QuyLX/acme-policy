@@ -1,0 +1,8 @@
+apiVersion: aisf/4.0
+kind: FactoryConfig
+application: admin
+owner: team-admin
+surfaces:
+  - { id: admin/sessions, owner: team-admin, paths: ["apps/admin/src/sessions/**"] }
+contracts:
+  consumes: ["openapi:iam@1.4.0"]

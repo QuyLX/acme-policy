@@ -1,0 +1,13 @@
+# Clean change (same as e2e-server-change.yaml); staging is healthy before the run and its tenants-api goes down during
+# the admin journey. `healthProbe` is the environment's health document: healthy at the start of the run.
+# `stagingOutage` is read by the SC-17 scenario runner only (never by the check): it configures the staging stand-in
+# (apps/admin/test/support/tenants-api.mjs), which marks tenants-api unhealthy in the health document from its
+# `fromRequest`-th request on and answers 503.
+primary: frontend
+repo: showcase/fixtures/cross-surface/frontend
+change: showcase/fixtures/cross-surface/changes/server-cache.diff
+portfolio: showcase/fixtures/cross-surface/portfolio-index.json
+environment: showcase/fixtures/cross-surface/env/staging-healthy.json
+healthProbe: showcase/fixtures/cross-surface/env/staging-healthy.json
+stagingOutage: { service: tenants-api, fromRequest: 2, detail: "readiness probe failing: upstream database connection refused" }
+tier: R1

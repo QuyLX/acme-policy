@@ -1,0 +1,27 @@
+# RECORDED finding dispositions (synthetic; §7.12 item 1) for surface admin, first 3 weeks in shadow mode.
+dispositions:
+  - {"pr": "PR-700", "finding": "F-000", "authorResponse": "fixed"}
+  - {"pr": "PR-700", "finding": "F-001", "authorResponse": "fixed"}
+  - {"pr": "PR-701", "finding": "F-002", "authorResponse": "fixed"}
+  - {"pr": "PR-701", "finding": "F-003", "authorResponse": "fixed"}
+  - {"pr": "PR-702", "finding": "F-004", "authorResponse": "fixed"}
+  - {"pr": "PR-702", "finding": "F-005", "authorResponse": "fixed"}
+  - {"pr": "PR-703", "finding": "F-006", "authorResponse": "fixed"}
+  - {"pr": "PR-703", "finding": "F-007", "authorResponse": "fixed"}
+  - {"pr": "PR-704", "finding": "F-008", "authorResponse": "fixed"}
+  - {"pr": "PR-704", "finding": "F-009", "authorResponse": "fixed"}
+  - {"pr": "PR-705", "finding": "F-010", "authorResponse": "fixed"}
+  - {"pr": "PR-705", "finding": "F-011", "authorResponse": "fixed"}
+  - {"pr": "PR-706", "finding": "F-012", "authorResponse": "fixed"}
+  - {"pr": "PR-706", "finding": "F-013", "authorResponse": "fixed"}
+  - {"pr": "PR-707", "finding": "F-014", "authorResponse": "fixed"}
+  - {"pr": "PR-707", "finding": "F-015", "authorResponse": "wrong"}
+  - {"pr": "PR-708", "finding": "F-016", "authorResponse": "intentional"}
+  - {"pr": "PR-708", "finding": "F-017", "authorResponse": "didnt-matter"}
+  - {"pr": "PR-709", "finding": "F-018", "authorResponse": "wrong"}
+  - {"pr": "PR-709", "finding": "F-019", "authorResponse": "intentional"}
+  - {"pr": "PR-710", "finding": "F-020", "authorResponse": "didnt-matter"}
+  - {"pr": "PR-710", "finding": "F-021", "authorResponse": "wrong"}
+  - {"pr": "PR-711", "finding": "F-022", "authorResponse": "intentional"}
+  - {"pr": "PR-711", "finding": "F-023", "authorResponse": "didnt-matter"}
+  - {"pr": "PR-712", "finding": "F-024", "authorResponse": "wrong"}

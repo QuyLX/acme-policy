@@ -1,0 +1,5 @@
+# Synthetic flaky registry for SC-06: nothing is registered.
+apiVersion: aisf/4.0
+kind: FlakyRegistry
+window: 30d
+entries: []

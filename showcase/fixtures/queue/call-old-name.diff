@@ -1,0 +1,12 @@
+diff --git a/packages/lib/src/report.ts b/packages/lib/src/report.ts
+new file mode 100644
+index 0000000..bf675c0
+--- /dev/null
++++ b/packages/lib/src/report.ts
+@@ -0,0 +1,6 @@
++// Added by the queued change: reports a value through the shared formatter.
++import { describeValue } from './index';
++
++export function report(value: number): string {
++  return `value: ${describeValue(value)}`;
++}

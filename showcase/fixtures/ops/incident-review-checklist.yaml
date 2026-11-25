@@ -1,0 +1,10 @@
+# ops.incident-review violating input: the review defaults to a checklist, routes nothing to the layer that should have
+# caught the defect and adds no eval case (Standard §12.4 items 4, 7, 8).
+id: "2026-118"
+at: "2026-11-18T17:00:00Z"
+summary: Same defect, reviewed badly.
+rootCause: { implementation: the agent edited a code block }
+shouldHaveCaught: { layer: sensor }
+agentWasMissing: check
+preventiveMechanism: { kind: checklist, layer: human-gate, ref: "add 'check code blocks' to the PR template" }
+attribution: { surface: docs }

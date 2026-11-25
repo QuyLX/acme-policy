@@ -1,0 +1,12 @@
+diff --git a/apps/admin/src/domains/tenants/server/suspend.action.ts b/apps/admin/src/domains/tenants/server/suspend.action.ts
+index ac56d1a..c7f1203 100644
+--- a/apps/admin/src/domains/tenants/server/suspend.action.ts
++++ b/apps/admin/src/domains/tenants/server/suspend.action.ts
+@@ -7,6 +7,6 @@ import { defineMutation } from '../../../platform/mutation.ts';
+ export const suspendTenant = defineMutation({
+   name: 'tenants.suspend',
+   input: (raw: unknown) => (typeof raw === 'object' && raw !== null && typeof (raw as { tenantId?: unknown }).tenantId === 'string' ? { tenantId: (raw as { tenantId: string }).tenantId } : null),
+-  authorize: (ctx) => can(ctx, 'tenants.suspend'),
++  authorize: (ctx) => can(ctx, 'tenants.read'),
+   handler: async (_ctx, input) => ({ tenantId: input.tenantId, status: 'suspended' }),
+ });

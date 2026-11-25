@@ -1,0 +1,13 @@
+# Synthetic flaky registry for SC-06: the LRO polling test is a registered flake, quarantined by its owner.
+apiVersion: aisf/4.0
+kind: FlakyRegistry
+window: 30d
+entries:
+  - testId: "src/poller.test.mjs::LRO polling keeps the newest operation state"
+    checkId: quality.test
+    owner: user:compute-owner
+    quarantineId: Q-2026-001
+    decidedBy: user:compute-owner
+    quarantinedAt: "2026-11-10"
+    fixBy: "2026-12-10"
+    evidence: { window: { from: "2026-10-11", to: "2026-11-10" }, mainFailures: 3 }

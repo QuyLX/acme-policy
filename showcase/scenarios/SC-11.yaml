@@ -1,10 +1,29 @@
-# SC-11 — Seeded product defects (FE §20.3), subset delivered with M6: missing tenant key in the client query cache
-# and in the server data cache. The runtime half (two tenants never share a cached response) is proven by
-# @platform/server tests (cache.test.ts). Remaining defects (UI-only permission, CSV injection, …) need their packs.
+# SC-11 — Seeded product defects (FE §20.3). Tenant scoping (M6): missing tenant key in the client query cache and in
+# the server data cache; the runtime half (two tenants never share a cached response) is proven by @platform/server
+# tests (cache.test.ts). Tech-design 13 §5 adds the UI-only permission and CSV formula injection packs.
+# Pass criterion (FE §20.3): "caught by the corresponding checks; recall is measured on the hold-out set (§12)". The
+# cases below the hold-out case are the dev set: the fixtures the checks were developed against.
+# Simulated (tech-design 13 §0): no IdP — the admin-authz-repo fixture uses a SessionProvider test double and a
+# permission matrix (permissions.yaml `roles` as the IAM stand-in); `noAccess` is a signed-in persona without
+# permissions (forbidden), unlike the current admin app where no-access is a missing session (unauthenticated).
+# authz.* and export.csv-injection are in shadow (observe): a defect is reported FAIL with its rule and does not
+# block (exit 0) until lib/check-lifecycle.mjs `promote` activates the check (SC-10).
+# Hold-out recall (case `holdout-recall`): showcase/holdout/sc-11 holds 19 seeded variants in the 4 defect classes this
+# phase supports, none of them a registry or dev fixture. Each is applied to the clean fixture repo and its check runs
+# through the real `acme-policy run`; recall = caught / total per class and overall (recall measures detection, so a
+# shadow check that FAILs counts as caught). Limitations, stated plainly:
+#   - it is NOT an independent hold-out (FE §12: "held by someone else, rotated each quarter"): the same team wrote it
+#     in the same change, with the check sources in view, so the measured recall is an upper bound, not published recall;
+#   - measured recall: client query cache 4/5, server data cache 4/5, permission only in UI 4/5, CSV formula injection
+#     3/4, overall 15/19 = 0.789. The checks were NOT tuned to the hold-out in this change: `minRecall: 0.75` is the
+#     measured floor, not a target, and the four missed variants are pinned in expect.decision.missed (any further miss
+#     fails the case; a fix to a check that catches one of them must update the expectation in the same review);
+#   - the classes "internal note exposed in the customer-facing API (Desk)" and "XSS through chat markdown (Chat)" are
+#     out of scope: this phase has no Desk or Chat surface, so they are neither seeded nor measured.
 apiVersion: aisf/4.0
 kind: ShowcaseScenario
 id: SC-11
-title: Seeded product defects (tenant scoping subset)
+title: Seeded product defects (tenant scoping, UI-only permission, CSV formula injection)
 demonstrates: [CORE-VER-01]
 slice: 1
 cases:
@@ -21,8 +40,39 @@ cases:
     run: { kind: run, repo: showcase/fixtures/react-repo, checks: [quality.lint], executor: ci }
     expect: { exitCode: 0, statuses: { quality.lint: PASS } }
   - id: permission-only-in-ui
-    given: A permission enforced only in the UI
-    pending: needs authz.permission-matrix / authz.negative (operational pack) and @platform/auth (D-03)
+    given: The server action's authorize becomes `async () => true`; the UI still hides the button for personas without tenants.suspend
+    run: { kind: run, repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/permission-only-in-ui.diff, checks: [authz.permission-matrix, authz.negative], executor: ci }
+    expect: { status: FAIL, exitCode: 0, rules: [authz.authorize-trivial, authz.server-guard-missing, authz.client-only-permission], statuses: { authz.permission-matrix: FAIL, authz.negative: PASS } }
+  - id: negative-test-dropped
+    given: The tagged negative test for the noAccess persona on tenants.suspend is deleted
+    run: { kind: run, repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/negative-test-dropped.diff, checks: [authz.negative, authz.permission-matrix], executor: ci }
+    expect: { status: FAIL, exitCode: 0, rules: [authz.negative-missing], statuses: { authz.negative: FAIL, authz.permission-matrix: PASS } }
+  - id: permission-enforced-on-server-control
+    given: Control case — every matrix entry has a server-side guard, the UI gate only reflects it, every deny persona has a tagged negative test
+    run: { kind: run, repo: showcase/fixtures/admin-authz-repo, checks: [authz.permission-matrix, authz.negative], executor: ci }
+    expect: { exitCode: 0, statuses: { authz.permission-matrix: PASS, authz.negative: PASS } }
   - id: csv-formula-injection
-    given: CSV export with a cell starting with "="
-    pending: needs cap:import-export pack (export.csv-injection)
+    given: The tenant export replaces toCsv(rows) with a manual join; a synthetic tenant named =HYPERLINK(...) reaches the file raw
+    run: { kind: run, repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff, checks: [export.csv-injection], executor: ci }
+    expect: { status: FAIL, exitCode: 0, rules: ["@acme/csv-safe-export"], statuses: { export.csv-injection: FAIL } }
+  - id: csv-through-tocsv-control
+    given: Control case — the export body is built by toCsv, every cell by toCsvCell
+    run: { kind: run, repo: showcase/fixtures/admin-authz-repo, checks: [export.csv-injection], executor: ci }
+    expect: { exitCode: 0, statuses: { export.csv-injection: PASS } }
+  - id: holdout-recall
+    given: The hold-out set (19 seeded variants of the 4 supported defect classes, written differently from the dev fixtures) is applied variant by variant to the clean fixture repos and run through the real checks
+    run: { kind: holdout-recall, manifest: showcase/holdout/sc-11/manifest.yaml, minRecall: 0.75 }
+    expect:
+      statuses: { showcase.holdout-recall: PASS }
+      decision:
+        caught: 15
+        total: 19
+        totals: { tenant-key-client-query-cache: 5, tenant-key-server-data-cache: 5, permission-only-in-ui: 5, csv-formula-injection: 4 }
+        recall.overall: 0.789
+        recall.byClass: { tenant-key-client-query-cache: 0.8, tenant-key-server-data-cache: 0.8, permission-only-in-ui: 0.8, csv-formula-injection: 0.75 }
+        missed:
+          - tenant-key-client-query-cache/regions-hoisted-options
+          - tenant-key-server-data-cache/catalog-shared-fetch-init
+          - permission-only-in-ui/suspend-authorize-or-read
+          - csv-formula-injection/string-concat-shared-headers
+        belowThreshold: []

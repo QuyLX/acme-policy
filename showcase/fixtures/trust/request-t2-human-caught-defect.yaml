@@ -1,0 +1,8 @@
+# SC-13 trust evaluation request (RECORDED data). The evaluator computes every rate and the 95% upper bound itself;
+# the current level (raise or not, §9.10) is read from registry/trust.yaml, never from the request.
+# 60 A1 production merges, 0 escaped defects, one merge whose reviewer had to change logic: only the bound refuses T2.
+taskClass: docs.link-fix
+tasks: showcase/fixtures/trust/tasks-production-60-one-caught.yaml
+evals: showcase/fixtures/trust/common-evals.yaml
+window: { from: "2026-05-25T00:00:00Z", to: "2026-11-20T00:00:00Z" }
+decidedBy: ["user:docs-owner", "user:factory-owner"]

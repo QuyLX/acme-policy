@@ -1,0 +1,4 @@
+# SC-13: a reviewer model snapshot change (RECORDED outputs) scored on the full eval set against the current reviewer.
+evalSet: showcase/fixtures/review/eval-set.yaml
+baseline: showcase/fixtures/review/reviewer-baseline.yaml
+candidate: showcase/fixtures/review/reviewer-candidate.yaml

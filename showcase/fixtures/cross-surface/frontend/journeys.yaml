@@ -1,0 +1,38 @@
+# Journey Registry (FE §7.7), synthetic. Control file: editing an acceptance line is an oracle change.
+- id: admin/tenants.list
+  surface: admin/tenants
+  owner: team-admin
+  criticality: critical
+  personas: [staff, no-access]
+  scenarios:
+    - { id: happy, ac: [AC-TN-1] }
+  acceptance:
+    - { id: AC-TN-1, statement: "A staff session sees only the users of its own tenant" }
+- id: admin/tenants.detail
+  surface: admin/tenants
+  owner: team-admin
+  criticality: high
+  personas: [staff]
+  scenarios:
+    - { id: happy, ac: [AC-TN-4] }
+- id: admin/audit.view
+  surface: admin/audit
+  owner: team-admin
+  criticality: high
+  personas: [staff]
+  scenarios:
+    - { id: happy, ac: [AC-AU-1] }
+- id: console/catalog.browse
+  surface: console/catalog
+  owner: team-console
+  criticality: critical
+  personas: [owner, viewer]
+  scenarios:
+    - { id: happy, ac: [AC-CA-1] }
+- id: console/status.overview
+  surface: console/status
+  owner: team-console
+  criticality: critical
+  personas: [owner]
+  scenarios:
+    - { id: happy, ac: [AC-ST-1] }

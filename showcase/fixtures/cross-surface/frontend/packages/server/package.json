@@ -1,0 +1,7 @@
+{
+  "name": "@platform/server",
+  "version": "2.3.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.mjs" }
+}

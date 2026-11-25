@@ -1,0 +1,17 @@
+diff --git a/packages/ui/src/users.ts b/packages/ui/src/users.ts
+index adb1da7..1f8206b 100644
+--- a/packages/ui/src/users.ts
++++ b/packages/ui/src/users.ts
+@@ -1,7 +1,9 @@
+ // Fixture (synthetic): a tenant-scoped query, the conforming form of FE-CTX-001.
+ declare function useQuery(o: { queryKey: readonly unknown[]; queryFn: () => Promise<unknown> }): unknown;
+-declare function tenantQueryKey(scope: { tenantId: string }, ...parts: string[]): readonly unknown[];
+ 
+-export function useUsers(scope: { tenantId: string }, load: () => Promise<unknown>) {
+-  return useQuery({ queryKey: tenantQueryKey(scope, 'users'), queryFn: load });
++/** One key for the user list, so invalidation and the hook agree. */
++export const USERS_KEY = ['users'] as const;
++
++export function useUsers(_scope: { tenantId: string }, load: () => Promise<unknown>) {
++  return useQuery({ queryKey: USERS_KEY, queryFn: load });
+ }

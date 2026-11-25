@@ -1,0 +1,4 @@
+{"workItemId": "TASK-18", "at": "2026-11-25T08:01:00Z", "actor": {"id": "ci:task-runner", "kind": "ci"}, "type": "task.requested", "data": {"workflow": "bug-fix@1.0.0", "requestedBy": "user:dev-a", "requesterSource": "issue-command", "taskClass": "bug-fix"}}
+{"workItemId": "TASK-18", "at": "2026-11-25T08:02:00Z", "actor": {"id": "ci:policy", "kind": "ci"}, "type": "facts.recorded", "data": {"tier": "Medium", "subTier": "R2", "reversibility": "HIGH", "touches": ["module"]}}
+{"workItemId": "TASK-18", "at": "2026-11-25T08:03:00Z", "actor": {"id": "agent:intake-1", "kind": "agent"}, "type": "step.completed", "data": {"step": "intake", "status": "PASS"}}
+{"workItemId": "TASK-18", "at": "2026-11-25T08:04:00Z", "actor": {"id": "ci:policy", "kind": "ci"}, "type": "step.completed", "data": {"step": "classify", "status": "PASS"}}

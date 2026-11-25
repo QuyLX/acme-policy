@@ -1,0 +1,8 @@
+# SC-13 trust evaluation request (RECORDED data). The evaluator computes every rate and the 95% upper bound itself;
+# the current level (raise or not, §9.10) is read from registry/trust.yaml, never from the request.
+taskClass: docs.link-fix
+tasks: showcase/fixtures/trust/tasks-production-50.yaml
+evals: showcase/fixtures/trust/common-evals.yaml
+window: { from: "2026-05-25T00:00:00Z", to: "2026-11-20T00:00:00Z" }
+decidedBy: ["user:docs-owner", "user:factory-owner"]
+versionChange: { kind: major, what: "model family change provider/model-2026-09-15 → other-provider/model-2026-11-20" }

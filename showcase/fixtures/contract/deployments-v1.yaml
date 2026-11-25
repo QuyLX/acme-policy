@@ -1,0 +1,2 @@
+# RECORDED provider deployment records (schemas/deployment-record.schema.json): v1 runs in production.
+- { apiVersion: aisf/4.0, kind: DeploymentRecord, provider: identity-provider, environment: production, version: 1.4.0, commitSha: "1111111111111111111111111111111111111111", status: deployed, at: "2026-11-12T10:00:00Z", recordedBy: "ci:provider-deploy" }

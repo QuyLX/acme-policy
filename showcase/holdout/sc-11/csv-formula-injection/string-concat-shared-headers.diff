@@ -1,0 +1,28 @@
+diff --git a/apps/admin/src/app/tenants/export/route.ts b/apps/admin/src/app/tenants/export/route.ts
+index 8d2c18b..a14a86c 100644
+--- a/apps/admin/src/app/tenants/export/route.ts
++++ b/apps/admin/src/app/tenants/export/route.ts
+@@ -1,9 +1,10 @@
+ // Route entry `tenants.export`: CSV download of the tenant list. The body is built only through toCsv.
+ import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
+ import { requestContext, UnauthenticatedError } from '../../../platform/session.ts';
+-import { toCsv } from '../../../platform/csv.ts';
+ import { allTenants } from '../../../domains/tenants/server/data.ts';
+ 
++const CSV_HEADERS = { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="tenants.csv"' };
++
+ export async function GET(): Promise<Response> {
+   try {
+     const ctx = await requestContext();
+@@ -13,8 +14,7 @@ export async function GET(): Promise<Response> {
+     if (err instanceof ForbiddenError) return new Response(null, { status: 403 });
+     throw err;
+   }
+-  const rows = allTenants();
+-  return new Response(toCsv(rows, ['id', 'name', 'status', 'balance']), {
+-    headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="tenants.csv"' },
+-  });
++  let body = 'id,name,status,balance\r\n';
++  for (const t of allTenants()) body += t.id + ',' + t.name + ',' + t.status + ',' + t.balance + '\r\n';
++  return new Response(body, { headers: CSV_HEADERS });
+ }

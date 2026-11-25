@@ -1,0 +1,8 @@
+# trust.evaluation violating input: a recorded TrustEvaluation claims T2 with a 1% upper bound from the 30-task
+# assisted record. The evaluator recomputes both: the claim is unsupported and the bound does not match.
+taskClass: docs.link-fix
+tasks: showcase/fixtures/trust/tasks-assisted-30.yaml
+evals: showcase/fixtures/trust/common-evals.yaml
+window: { from: "2026-05-25T00:00:00Z", to: "2026-08-01T00:00:00Z" }
+decidedBy: ["user:docs-owner"]
+claimed: { resultLevel: T2, failureRateUpper95: 0.01 }

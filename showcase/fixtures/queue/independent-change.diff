@@ -1,0 +1,8 @@
+diff --git a/packages/lib/src/label.ts b/packages/lib/src/label.ts
+new file mode 100644
+index 0000000..993740c
+--- /dev/null
++++ b/packages/lib/src/label.ts
+@@ -0,0 +1,2 @@
++// Added by an unrelated queued change: a constant with no dependency on the renamed export.
++export const DEFAULT_LABEL = 'value';

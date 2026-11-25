@@ -1,0 +1,14 @@
+# Facts recorded by the policy step for the reviewed SHA of a docs.link-fix change (synthetic). Surface settings are
+# those of the docs surface's factory.yaml (autonomy.zeroHuman, review.aiMode; FE §10.4 items 2-3).
+subTier: R0
+reversibility: HIGH
+taskClass: docs.link-fix
+requester: { id: "user:docs-dev", source: issue-command, ownsAllSurfaces: true }
+surfaces:
+  - { id: docs, zeroHuman: true, aiMode: blocking }
+aiReview: { openFindings: 0, dismissals: 0 }
+openSecurityFindings: 0
+deterministicGatesPass: true
+controlFilesTouched: []
+integrityBlockingHit: false
+releaseFreeze: false
