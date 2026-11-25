@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/trust-evaluation.schema.json",
+  "title": "TrustEvaluation (Standard Appendix K.3; §9.4 items 11-12). Only T0, T1 and T2 exist",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["taskClass", "agentConfig", "window", "strata", "criticalScenarios", "holdout", "regression", "escapedDefects", "failureRateUpper95", "interventionRate", "resultLevel", "status", "decidedBy", "decidedAt"],
+  "properties": {
+    "taskClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "workflowMajor", "scope", "riskCeiling"],
+      "properties": {
+        "workflow": { "type": "string" },
+        "workflowMajor": { "type": "integer", "minimum": 0 },
+        "scope": { "type": "string" },
+        "riskCeiling": { "enum": ["R0", "R1", "R2", "R3", "Low", "Medium", "High"] }
+      }
+    },
+    "agentConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modelSnapshot", "playbook", "skills"],
+      "properties": {
+        "modelSnapshot": { "type": "string", "description": "Immutable snapshot, never a floating alias (§9.9 item 8)" },
+        "playbook": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": { "from": { "type": "string" }, "to": { "type": "string" } }
+    },
+    "strata": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "tasks", "accepted", "minRequired"],
+        "properties": {
+          "name": { "type": "string" },
+          "tasks": { "type": "integer", "minimum": 0 },
+          "accepted": { "type": "integer", "minimum": 0 },
+          "minRequired": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "criticalScenarios": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "passed"],
+      "properties": { "total": { "type": "integer", "minimum": 0 }, "passed": { "type": "integer", "minimum": 0 } }
+    },
+    "holdout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "seenScore", "maxGap"],
+      "properties": { "score": { "type": "number" }, "seenScore": { "type": "number" }, "maxGap": { "type": "number" } }
+    },
+    "regression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evalSets", "regressions"],
+      "properties": { "evalSets": { "type": "array", "items": { "type": "string" } }, "regressions": { "type": "integer", "minimum": 0 } }
+    },
+    "escapedDefects": { "type": "integer", "minimum": 0 },
+    "failureRateUpper95": { "type": "number", "minimum": 0, "maximum": 1, "description": "Confidence bound computed by the evaluator, not a point estimate (§9.4 item 11.5)" },
+    "interventionRate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "resultLevel": { "enum": ["T0", "T1", "T2"] },
+    "status": { "enum": ["CURRENT", "RE-EVALUATION_REQUIRED"] },
+    "decidedBy": { "type": "array", "items": { "type": "string" }, "description": "Area owner and Factory owner when the level is raised (§9.10)" },
+    "decidedAt": { "type": "string" }
+  }
+}

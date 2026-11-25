@@ -52,7 +52,8 @@
           "type": "string"
         },
         "sodInput": {
-          "type": "string"
+          "type": "string",
+          "description": "Alone: policy.sod input. With repo: passed to the pipeline as --sod-input (the PR approvals of the run)"
         },
         "expect": {
           "type": "object",
@@ -73,6 +74,10 @@
         },
         "playbooks": {
           "type": "string"
+        },
+        "input": {
+          "type": "string",
+          "description": "JSON or YAML input passed to a module check (lib/modules/*) as ctx.input; with `repo`, the trusted repository is passed as ctx.repo"
         }
       },
       "oneOf": [
@@ -84,16 +89,27 @@
         {
           "required": [
             "repo"
-          ]
+          ],
+          "not": {
+            "required": [
+              "input"
+            ]
+          }
         },
         {
           "required": [
             "sodInput"
-          ]
+          ],
+          "not": { "required": ["repo"] }
         },
         {
           "required": [
             "taskEvents"
+          ]
+        },
+        {
+          "required": [
+            "input"
           ]
         }
       ]
@@ -196,7 +212,9 @@
                 "security",
                 "privacy",
                 "wcag",
-                "contract"
+                "contract",
+                "legal",
+                "core"
               ]
             },
             "source": {
@@ -250,6 +268,16 @@
               "type": "string"
             }
           }
+        },
+        "ownership": {
+          "enum": [
+            "local",
+            "cross-team-contract"
+          ],
+          "description": "Standard Appendix K.6; a cross-team-contract check runs in the provider's pipeline (Standard §8.7 rule 8)"
+        },
+        "fixOwner": {
+          "type": "string"
         }
       }
     }

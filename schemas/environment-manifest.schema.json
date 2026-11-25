@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/environment-manifest.schema.json",
+  "title": "EnvironmentManifest — what a preview or staging run was checked against, plus the pre-run health probe (FE §8.8)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "environment", "recordedAt", "services", "dataSeed", "flags"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "EnvironmentManifest" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": { "id": { "type": "string", "minLength": 1 }, "kind": { "enum": ["mock", "preview", "staging", "production-canary"] } }
+    },
+    "recordedAt": { "type": "string" },
+    "services": {
+      "type": "array",
+      "description": "Version of each backend service (part of the digest) and its health at probe time (not part of the digest)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "health"],
+        "properties": {
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "health": { "enum": ["healthy", "degraded", "unhealthy"] },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "dataSeed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status"],
+      "properties": { "id": { "type": "string" }, "version": { "type": "string" }, "status": { "enum": ["ready", "missing", "stale"] } }
+    },
+    "flags": { "type": "object", "description": "Flag configuration the run used" },
+    "auxiliary": {
+      "type": "array",
+      "description": "Simulated auxiliary systems (mail sink, payment sandbox), each with a health probe (FE §8.8)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "health"],
+        "properties": { "name": { "type": "string" }, "health": { "enum": ["healthy", "degraded", "unhealthy"] }, "detail": { "type": "string" } }
+      }
+    }
+  }
+}

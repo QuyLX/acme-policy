@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/knowledge-conflict.schema.json",
+  "title": "KnowledgeConflict (Standard §4.7 items 8-14, Appendix K.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "sources", "affectsCorrectnessOrRisk", "authority"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "workItemId": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "says"],
+        "properties": { "ref": { "type": "string", "minLength": 1 }, "says": { "type": "string" } }
+      }
+    },
+    "affectsCorrectnessOrRisk": { "type": "boolean" },
+    "authority": { "type": "string", "minLength": 1, "description": "Role that decides (Standard §4.7 item 10 table)" },
+    "proposal": { "type": "string" },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "decidedBy", "decidedAt"],
+      "properties": {
+        "decision": { "enum": ["implementation-defect", "intent-changed", "artifact-corrected", "superseded", "no-conflict"] },
+        "decidedBy": { "$ref": "#/$defs/human" },
+        "decidedAt": { "type": "string" },
+        "followUp": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "human": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": { "id": { "type": "string", "minLength": 1 } },
+      "description": "HumanRef: an authenticated identity, never free text"
+    }
+  }
+}

@@ -21,11 +21,27 @@
       }
     },
     "resolvedProfiles": { "type": "array" },
+    "resolution": {
+      "type": "object",
+      "description": "Standard Appendix K.2 ProfileResolution",
+      "required": ["layers", "conflicts"],
+      "properties": { "layers": { "type": "array" }, "conflicts": { "type": "array" } }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Standard Appendix K.1 Extensions (x-* keys only)",
+      "propertyNames": { "pattern": "^x-" }
+    },
     "environment": {
       "type": "object",
       "additionalProperties": false,
       "required": ["executor"],
-      "properties": { "executor": { "type": "string" } }
+      "properties": {
+        "executor": { "type": "string" },
+        "id": { "type": "string" },
+        "kind": { "enum": ["mock", "preview", "staging", "production-canary"] },
+        "manifestDigest": { "type": "string" }
+      }
     },
     "adapters": { "type": "array" },
     "kit": { "type": "object" },

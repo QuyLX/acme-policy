@@ -31,7 +31,7 @@
         "threat-model",
         "policy"
       ],
-      "description": "Standard KnowledgeKind plus kinds registered by aisf-frontend@1.1.0 (FE \u00a718: component, threat-model, policy)."
+      "description": "Standard KnowledgeKind plus kinds registered by aisf-frontend@1.1.0 (FE §18: component, threat-model, policy)."
     },
     "status": {
       "enum": [
@@ -96,6 +96,63 @@
     },
     "deprecationReason": {
       "type": "string"
+    },
+    "x-fe": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "aisf-frontend@1.1.0 profile fields (FE §7.3): where the record applies and who may read it through the Knowledge Index (FE §7.8)",
+      "properties": {
+        "appliesTo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "surfaces": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "packages": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "package name → version range, e.g. \"@platform/server\": \">=3 <4\""
+            },
+            "contracts": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "contract id → version or range"
+            }
+          }
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "internal",
+            "restricted"
+          ]
+        },
+        "readers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Access list inherited from the source (identities or groups); required to read a restricted record"
+        },
+        "indexOptIn": {
+          "type": "boolean",
+          "description": "Owner's explicit opt-in to index a restricted record (FE §7.8 rule 1); without it the record is never indexed"
+        }
+      }
     }
   },
   "allOf": [

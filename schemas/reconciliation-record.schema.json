@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/reconciliation-record.schema.json",
+  "title": "ReconciliationRecord (Standard §5.10, Appendix K.5): one per reconciliation, recorded in the PR under .factory/reconciliation/",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "trigger", "affected", "activeTasksNotified"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "ref"],
+      "properties": {
+        "type": { "enum": ["describes-change", "contract-version", "adr-status", "spec-change", "drift", "incident", "owner-removed"] },
+        "ref": { "type": "string", "minLength": 1 },
+        "workItemId": { "type": "string" }
+      }
+    },
+    "affected": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact", "relation", "decision", "state"],
+        "properties": {
+          "artifact": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(-[A-Z0-9]+)+@.+$", "description": "<id>@<version>" },
+          "relation": { "enum": ["describes", "basedOn", "generatedFrom", "verifiedBy", "implements", "supersedes"] },
+          "decision": { "enum": ["keep", "update", "supersede", "deprecate", "review"] },
+          "state": { "enum": ["proposed", "decided"], "description": "Agent decisions are proposed and never satisfy knowledge.impact (Standard §5.9 item 13)" },
+          "decidedBy": {
+            "oneOf": [
+              { "const": "policy", "description": "Only for `update` on a generatedFrom artifact (Standard §5.10 item 11)" },
+              { "type": "object", "additionalProperties": false, "required": ["id"], "properties": { "id": { "type": "string", "minLength": 1 } } }
+            ]
+          },
+          "newVersion": { "type": "string" },
+          "supersededBy": { "type": "string" },
+          "workItem": { "type": "string" }
+        },
+        "if": { "properties": { "state": { "const": "decided" } } },
+        "then": { "required": ["decidedBy"] }
+      }
+    },
+    "activeTasksNotified": { "type": "array", "items": { "type": "string" } },
+    "completedAt": { "type": "string" }
+  }
+}

@@ -15,7 +15,36 @@
     "gate": { "enum": ["merge", "publish", "post-release"] },
     "status": { "enum": ["PASS", "FAIL", "ERROR", "NOT_ASSESSED"] },
     "reason": { "type": "string", "minLength": 1 },
-    "disposition": { "type": "object" },
+    "disposition": {
+      "description": "Standard Appendix K.2 Disposition (closed set, Standard §7.5 item 7)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "decidedBy", "decidedAt"],
+      "properties": {
+        "type": { "enum": ["not-applicable", "assessed-elsewhere", "baselined", "waived", "deferred"] },
+        "decidedBy": { "type": "string", "description": "\"policy\" or a HumanRef" },
+        "decidedAt": { "type": "string" },
+        "policyRef": { "type": "string" },
+        "waiverId": { "type": "string" },
+        "baselineRef": { "type": "string" },
+        "assessedElsewhere": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["runId", "providerVersion", "validUntil"],
+          "properties": { "runId": { "type": "string" }, "providerVersion": { "type": "string" }, "validUntil": { "type": "string" } }
+        },
+        "deferredTo": { "enum": ["merge", "publish", "post-release"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": ["not-applicable", "assessed-elsewhere", "baselined"] } } },
+          "then": { "properties": { "decidedBy": { "const": "policy" } }, "required": ["policyRef"] }
+        },
+        { "if": { "properties": { "type": { "const": "assessed-elsewhere" } } }, "then": { "required": ["assessedElsewhere"] } },
+        { "if": { "properties": { "type": { "const": "waived" } } }, "then": { "required": ["waiverId"] } },
+        { "if": { "properties": { "type": { "const": "deferred" } } }, "then": { "required": ["deferredTo"] } }
+      ]
+    },
     "command": { "type": "string" },
     "durationMs": { "type": "integer", "minimum": 0 },
     "attempts": { "type": "integer", "minimum": 1 },
