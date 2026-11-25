@@ -39,10 +39,15 @@ tester.run('FE-ARCH-001 no-private-module-import', R['no-private-module-import']
     { code: "import { list } from '../../billing/index';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
     { code: "import { row } from '../ui/row';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
     { code: "import { list } from '@/modules/billing';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
+    { code: "import { readTenant } from '../../tenants';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
+    { code: "import { x } from '../ui/row';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
+    { code: "import { readTenant } from '@/domains/tenants';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
   ],
   invalid: [
     { code: "import { price } from '../../billing/domain/price';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx', errors: [{ messageId: 'private' }] },
     { code: "import { price } from '@/modules/billing/domain/price';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx', errors: [{ messageId: 'private' }] },
+    { code: "import { readTenant } from '../../tenants/server/read';", filename: '/repo/apps/admin/src/domains/users/server/read.ts', errors: [{ messageId: 'private' }] },
+    { code: "import { readTenant } from '@/domains/tenants/server/read';", filename: '/repo/apps/admin/src/domains/users/server/read.ts', errors: [{ messageId: 'private' }] },
   ],
 });
 
@@ -137,5 +142,19 @@ tester.run('export.csv-injection csv-safe-export', R['csv-safe-export'], {
     { code: "const type = 'text/csv'; const line = [name, '=1'].join(';');", errors: [{ messageId: 'join' }] },
     { code: "const file = 'tenants.csv'; const cells = [a, b]; const line = cells.join('\\t');", errors: [{ messageId: 'join' }] },
     { code: "const line = rows.map((r) => r.map((c) => String(c)).join(',')).join('\\r\\n');", errors: [{ messageId: 'join' }] },
+  ],
+});
+
+tester.run('FE-I18N-001 no-literal-jsx-text', R['no-literal-jsx-text'], {
+  valid: [
+    { code: "const C = () => <p>{t('title')}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: 'const C = () => <p> </p>;', filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: "const C = () => <p>{'·'}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: 'const C = () => <p>Tenants</p>;', filename: '/repo/apps/admin/src/app/tenants/page.test.tsx' },
+  ],
+  invalid: [
+    { code: 'const C = () => <p>Tenants</p>;', filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
+    { code: "const C = () => <p>{'No tenants'}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
+    { code: 'const C = () => <EmptyState title="No tenants" />;', filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
   ],
 });
