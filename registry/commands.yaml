@@ -13,6 +13,7 @@ commands:
     - quality.typecheck
     - quality.test
     - arch.cycles
+    - sec.headers-csp
     - integrity.test-count-delta
     - integrity.skip-focus
     - integrity.suppressions

@@ -1366,3 +1366,25 @@ checks:
         - {"repo": "showcase/fixtures/admin-authz-repo", "change": "showcase/fixtures/csv-new-violation.diff"}
       conforming:
         - {"repo": "showcase/fixtures/admin-authz-repo"}
+  - checkId: sec.headers-csp
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: FE Blueprint 4.1 §19.1, §3.5, §6.2
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "checks/sec/fixtures/headers-missing"}
+        - {"repo": "checks/sec/fixtures/headers-unsafe"}
+      conforming:
+        - {"repo": "checks/sec/fixtures/headers-clean"}
