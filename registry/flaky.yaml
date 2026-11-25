@@ -1,0 +1,9 @@
+# Flaky registry (Standard §7.14; FE §8.8; schemas/flaky-registry.schema.json). Only tests listed here count as flaky:
+# a fail-then-pass of any other test is new non-determinism and FAILs (Standard §7.14 item 2). Entries are generated
+# from intermittent failures on main (suggested window 30 days) and quarantined by the owner of the test or check only
+# (decidedBy == owner, Standard §7.14 item 4). The product repos have no registered flake yet; the showcase (SC-06)
+# uses its own fixture registries under showcase/fixtures/flaky/.
+apiVersion: aisf/4.0
+kind: FlakyRegistry
+window: 30d
+entries: []

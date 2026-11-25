@@ -187,7 +187,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -209,7 +209,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -231,7 +231,7 @@ checks:
     implementsRules: [FE-CODE-001]
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -253,7 +253,7 @@ checks:
     implementsRules: [FE-TEST-002]
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -275,7 +275,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -298,7 +298,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -322,7 +322,7 @@ checks:
     implementsRules: [FE-TEST-004]
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -345,7 +345,7 @@ checks:
     implementsRules: [FE-TEST-004]
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -368,7 +368,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -391,7 +391,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -413,7 +413,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -435,7 +435,7 @@ checks:
     implementsRules: [FE-TEST-003]
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: "AISF Standard 4.0 \u00a77.13 (profile addition, FE \u00a78.6)"
@@ -458,7 +458,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §7.13
@@ -475,7 +475,7 @@ checks:
     implementsRules: []
     baselineable: false
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §9.10
@@ -509,7 +509,7 @@ checks:
       conforming:
         - {"repo": "checks/policy-risk/fixtures/repo", "change": "checks/policy-risk/fixtures/docs.diff", "expect": {"tier": "R0"}}
   - checkId: knowledge.impact
-    checkVersion: 1.0.0
+    checkVersion: 2.1.0  # v2 (tech-design 13): reads ReconciliationRecords from .factory/reconciliation/; 2.1: base roster, decider must approve the head
     owner: team-platform
     lifecycle: active
     requirement: required
@@ -520,7 +520,7 @@ checks:
     implementsRules: []
     baselineable: true
     fpSlo: 0.05
-    autoDemote: true
+    autoDemote: false  # Standard §8.7 rule 5: never auto-demoted (core check)
     basis:
       class: standard
       source: AISF Standard 4.0 §5.8-5.10
@@ -530,8 +530,13 @@ checks:
     fixtures:
       violating:
         - {"repo": "checks/knowledge-impact/fixtures/repo", "change": "checks/knowledge-impact/fixtures/retry-change.diff"}
+        - {"repo": "showcase/fixtures/knowledge-change/repo", "change": "showcase/fixtures/knowledge-change/changes/tenants-proposed.diff"}
+        - {"repo": "showcase/fixtures/knowledge-change/repo", "change": "showcase/fixtures/knowledge-change/changes/tenants-wrong-authority.diff", "sodInput": "showcase/fixtures/knowledge-change/approvals/dev-b-approved.json"}
+        - {"repo": "showcase/fixtures/knowledge-change/repo", "change": "showcase/fixtures/knowledge-change/changes/tenants-roster-edit.diff", "sodInput": "showcase/fixtures/knowledge-change/approvals/dev-b-approved.json"}
+        - {"repo": "showcase/fixtures/knowledge-change/repo", "change": "showcase/fixtures/knowledge-change/changes/tenants-keep.diff", "sodInput": "showcase/fixtures/knowledge-change/approvals/keep-po-did-not-approve.json"}
       conforming:
         - {"repo": "checks/knowledge-impact/fixtures/repo"}
+        - {"repo": "showcase/fixtures/knowledge-change/repo", "change": "showcase/fixtures/knowledge-change/changes/tenants-keep.diff", "sodInput": "showcase/fixtures/knowledge-change/approvals/keep-deciders-approved.json"}
   - checkId: knowledge.record-schema
     checkVersion: 1.0.0
     owner: team-platform
@@ -922,3 +927,442 @@ checks:
     evidenceLayer: static
     fixtures:
       proofTest: test/github-binding.test.mjs
+  # --- tech-design 13, group B ---
+  - checkId: test.plan
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.3 item 5; FE Blueprint 4.1 §8.10 (Test Planner floor, rules 1, 2, 5), §8.5 x-fe.testPlan
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/cross-surface/requests/plan-narrowed.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/cross-surface/requests/plan-server-change.yaml"}
+        - {"input": "showcase/fixtures/cross-surface/requests/plan-unmapped.yaml"}
+  - checkId: test.e2e-journeys
+    checkVersion: 1.1.0  # 1.1: live health probe re-read after every test; required with a non-mock environment
+    owner: team-platform
+    lifecycle: active
+    requirement: optional
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    timeoutSeconds: 120
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §7.3 item 5; FE Blueprint 4.1 §8.5 (failureAttribution), §8.8 (environment manifest, pre-run health), §8.10
+    evidenceLayer: runtime-api
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/cross-surface/requests/e2e-seeded-defect.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/cross-surface/requests/e2e-server-change.yaml"}
+  - checkId: knowledge.retrieval
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false  # access leakage is a security property (CORE-SEC-02)
+    basis:
+      class: security
+      source: FE Blueprint 4.1 §7.8 retrieval rules 1-3, §12 knowledge retrieval targets; AISF Standard 4.0 §5.8 item 4
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/knowledge-index/eval/recorded-naive-engine.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/knowledge-index/eval/builtin.yaml"}
+  - checkId: knowledge.basis
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: true
+    basis:
+      class: standard
+      source: AISF Standard 4.0 §5.8 items 4-6, §6.4 item 8, §4.7 items 8-14; FE Blueprint 4.1 §7.3, §7.8
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/knowledge-index/basis/draft-basis.yaml"}
+        - {"input": "showcase/fixtures/knowledge-index/basis/conflicting-basis.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/knowledge-index/basis/active-basis.yaml"}
+  # --- tech-design 13, group A ---
+  - checkId: quality.flaky-policy
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active             # deterministic rules of Standard §7.14 (items 2, 3, 4, 9), not a heuristic sensor
+    requirement: optional         # not in registry/commands.yaml: the product verify is unchanged; the task runner and showcase run it
+    enforcement: blocking
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: standard
+      source: "AISF Standard 4.0 §7.14 items 1-9, Appendix K.2 (CheckResult.attempts, flaky); FE §8.8 Flakiness"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/flaky/policy-new-nondeterminism.yaml"}
+        - {"input": "showcase/fixtures/flaky/policy-agent-quarantines.yaml"}
+        - {"input": "showcase/fixtures/flaky/policy-stress-reproduced.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/flaky/policy-registered-flake.yaml"}
+        - {"input": "showcase/fixtures/flaky/policy-owner-quarantines.yaml"}
+  - checkId: profile.resolve
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: active
+    requirement: optional         # not in registry/commands.yaml; resolution runs before the plan exists
+    enforcement: warn             # FE §8.3 item 4: incomparable conflicts warn until Phase 2 or 2027-04-01
+    targetEnforcement: blocking   # CORE-VER-13 (Standard §20, from 2027-04-01): resolution fails, task BLOCKED
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: standard
+      source: "AISF Standard 4.0 §7.3 items 6, 10-16, Appendix K.2 ProfileResolution; FE §8.3, Appendix A"
+    evidenceLayer: static
+    params:
+      # The blocking switch is this policy plus the clock, never the request (FE §8.3 item 4): blocking from this date,
+      # or from the date Phase 2 started (phase2Since, null until then), whichever comes first.
+      blockingIncomparableFrom: "2027-04-01"
+      phase2Since: null
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/profile-layers/conflict.yaml"}
+        - {"input": "showcase/fixtures/profile-layers/conflict-claims-nonblocking.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/profile-layers/conflict-decided.yaml"}
+
+  # --- tech-design 13, group C ---
+  # Governance checks of SC-05 (egress), SC-07, SC-12, SC-13 and SC-15 (lib/modules/governance.mjs). New checks start
+  # in shadow (Standard §8.7 rule 4); showcase cases evaluate them at targetEnforcement. admin.step-up-auth is the first
+  # cross-team-contract check (FE §8.2): active and required, so its NOT_ASSESSED blocks unless assessed-elsewhere holds.
+  - checkId: sec.sandbox-egress
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: "AISF Standard 4.0 §10.1 items 1, 2, 6-8, 11-12; §10.9 (injection suite is an eval set, not a merge check); FE §9.5"
+    evidenceLayer: runtime-api
+    fixtures:
+      violating:
+        - {"input": "checks/sec/fixtures/egress-unsandboxed.yaml"}
+        - {"input": "checks/sec/fixtures/egress-network-allowed.yaml"}
+      conforming:
+        - {"input": "checks/sec/fixtures/egress-sandboxed.yaml"}
+  - checkId: workflow.merge-queue
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §6.4 items 9-13, 19; §6.5; FE §11.6 (simulated: no merge queue on GitHub Free user repos)"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "checks/workflow/fixtures/queue-semantic-conflict.yaml"}
+      conforming:
+        - {"input": "checks/workflow/fixtures/queue-clean.yaml"}
+  - checkId: admin.step-up-auth
+    checkVersion: 1.0.0
+    owner: team-admin
+    ownership: cross-team-contract
+    fixOwner: team-identity
+    lifecycle: active
+    requirement: required
+    enforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: contract
+      source: "FE Blueprint 4.1 §8.2 (cross-team-contract, x:privileged-admin), §8.3; AISF Standard 4.0 §7.5 items 6-8, §8.7 rule 8"
+    evidenceLayer: runtime-api
+    params:
+      freshnessDays: 7
+      # Trust anchors of the provider evidence (never taken from the evidence bundle). SYNTHETIC: the key pair was
+      # generated once to sign the recorded SC-12 fixtures and the private key discarded; the pinned SHA is synthetic.
+      provider:
+        id: identity-provider
+        pinnedPolicySha: "0123456789abcdef0123456789abcdef01234567"
+        attestationKey: { keyId: identity-provider-ci-2026, alg: ed25519, publicKey: "MCowBQYDK2VwAyEAACIBuV9NN6bC/dpaz4QVFTOB3u7zW/yheT0PaoC7QNw=" }
+    fixtures:
+      # The behavior is verified in the provider's pipeline; the consumer result is always NOT_ASSESSED, so the
+      # conforming side (NOT_ASSESSED + assessed-elsewhere, exit 0) is proven in the proof test, not by registry-proof.
+      violating:
+        - {"input": "showcase/fixtures/contract/unverified-deploy.yaml"}
+        - {"input": "showcase/fixtures/contract/stale.yaml"}
+        - {"input": "showcase/fixtures/contract/forged-run.yaml"}
+      proofTest: test/governance.test.mjs
+  - checkId: review.ai-mode
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §7.9 items 10, 30-31, §7.12; FE §9.9 (recorded reviewer data, D-09 open)"
+    evidenceLayer: static
+    fixtures:
+      # `repo` is the trusted repository whose descriptor holds the surface's current mode (never the request).
+      violating:
+        - {"input": "showcase/fixtures/review/promote-skip.yaml", "repo": "showcase/fixtures/review/repo-shadow"}
+        - {"input": "showcase/fixtures/review/promote-early.yaml", "repo": "showcase/fixtures/review/repo-shadow"}
+        - {"input": "showcase/fixtures/review/promote-skip-claims-advisory.yaml", "repo": "showcase/fixtures/review/repo-shadow"}
+      conforming:
+        - {"input": "showcase/fixtures/review/promote-advisory.yaml", "repo": "showcase/fixtures/review/repo-shadow"}
+        - {"input": "showcase/fixtures/review/promote-blocking.yaml", "repo": "showcase/fixtures/review/repo-advisory"}
+  - checkId: review.reviewer-change
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §7.12 item 5, §9.2 item 12, §9.9 (recorded reviewer outputs)"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/review/reviewer-change-regresses.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/review/reviewer-change-improves.yaml"}
+  - checkId: trust.evaluation
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §9.4, §9.9, §9.10, Appendix K.3 TrustEvaluation; FE §10.3"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/trust/request-t1-claim-unsupported.yaml"}
+        - {"input": "showcase/fixtures/trust/request-t2-claim-bound-unsupported.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/trust/request-t1-after-30.yaml"}
+  - checkId: policy.autonomy
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: merge
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §9.5 items 1-11, §9.9, §9.10, §20.8 item 4.7 (A0 decision only in pilot); FE §10.4, §10.6, §19.4"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/autonomy/request-proposed-a0-after-revert.yaml"}
+        - {"input": "showcase/fixtures/autonomy/request-proposed-a0-claims-pilot-off.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/autonomy/request-proposed-a1-after-revert.yaml"}
+  - checkId: ops.change-shepherd
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: post-release
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §12.2.1 items 8-10, §12.6 item 2.4; FE §11.4, §11.7 (simulated flag provider)"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/ops/shepherd-revert-main.yaml"}
+        - {"input": "showcase/fixtures/ops/shepherd-flag-off-safe-on.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/ops/shepherd-flag-off.yaml"}
+  - checkId: ops.incident-review
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: INFO
+    gate: post-release
+    implementsRules: []
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: core
+      source: "AISF Standard 4.0 §12.4 items 1, 4-8, §9.9 item 7, §7.12 item 4; FE §11.5"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"input": "showcase/fixtures/ops/incident-request-checklist.yaml"}
+      conforming:
+        - {"input": "showcase/fixtures/ops/incident-request.yaml"}
+  # --- tech-design 13, group D ---
+  # SC-11 product defect packs and SC-10 lifecycle. New checks start in shadow (Standard §8.7 rule 4: shadow for at least
+  # the profile period before active; only active may be required). lib/check-lifecycle.mjs `promote` decides activation.
+  - checkId: authz.permission-matrix
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-PERM-001, FE-NEXT-003]
+    baselineable: false
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: "FE Blueprint 4.1 §4.5 FE-PERM-001, FE-NEXT-003; §8.4 operational pack authz.permission-matrix"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/admin-authz-repo", "change": "showcase/fixtures/permission-only-in-ui.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/admin-authz-repo"}
+  - checkId: authz.negative
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: [FE-NEXT-003, FE-PERM-001]
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: "FE Blueprint 4.1 §4.5 FE-NEXT-003, FE-PERM-001; §8.4 operational pack authz.negative; §8.8 personas"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/admin-authz-repo", "change": "showcase/fixtures/negative-test-dropped.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/admin-authz-repo"}
+  - checkId: export.csv-injection
+    checkVersion: 1.0.0
+    owner: team-platform
+    lifecycle: shadow
+    requirement: optional
+    enforcement: observe
+    targetEnforcement: blocking
+    severity: BLOCKER
+    gate: merge
+    implementsRules: []
+    baselineable: true
+    fpSlo: 0.05
+    autoDemote: false
+    basis:
+      class: security
+      source: "FE Blueprint 4.1 §8.4 cap:import-export export.csv-injection; ESLint rule @acme/csv-safe-export (kit)"
+    evidenceLayer: static
+    fixtures:
+      violating:
+        - {"repo": "showcase/fixtures/admin-authz-repo", "change": "showcase/fixtures/csv-formula-injection.diff"}
+        - {"repo": "showcase/fixtures/admin-authz-repo", "change": "showcase/fixtures/csv-new-violation.diff"}
+      conforming:
+        - {"repo": "showcase/fixtures/admin-authz-repo"}

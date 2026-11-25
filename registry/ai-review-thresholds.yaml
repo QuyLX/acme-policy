@@ -1,0 +1,11 @@
+# AI review mode promotion thresholds (CORE-REV-02/06; Standard §7.9 items 30-31, §7.12; FE §9.9).
+# Every surface starts at `shadow`, then `advisory`, then `blocking`, one step at a time. The surface's mode lives in
+# its factory.yaml (`review.aiMode`); raising and lowering it are control-file changes, lowering is loosening.
+# PROPOSED values: Standard §7.9 item 31 requires thresholds agreed with each area owner; these are placeholders used by
+# the showcase until a surface owner agrees them, not decisions.
+apiVersion: aisf/4.0
+kind: AiReviewThresholds
+status: PROPOSED
+promotion:
+  advisory: { minDispositions: 40, minPrecision: 0.6, minCleanPrs: 20, maxHarmfulRate: 0.1, minIncidentCases: 10, minIncidentRecall: 0.5 }
+  blocking: { minDispositions: 80, minPrecision: 0.75, minCleanPrs: 20, maxHarmfulRate: 0.05, minIncidentCases: 10, minIncidentRecall: 0.7 }

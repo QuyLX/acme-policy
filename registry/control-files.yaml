@@ -26,3 +26,4 @@ paths:
   - ".claude/**"
   - ".factory/**"
   - "**/journeys.yaml"
+  - "**/permissions.yaml"

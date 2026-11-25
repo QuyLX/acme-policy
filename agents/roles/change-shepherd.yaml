@@ -1,0 +1,18 @@
+# Change Shepherd (Standard §12.2.1; FE §11.7). Owns the operational follow-through of an approved change: identifies
+# its flags and rollout plan, proposes signals (a human confirms them at R2/R3), reports at each stage and recommends
+# continue / pause / rollback with evidence. It acts only through approved, audited flag and rollout tools (item 8):
+# returning a flag to its declared safeState and pausing a rollout, for Low/Medium tiers, tied to an open alert or
+# incident (item 9, §12.6 item 2.4). Artifact rollback, revert on main and data recovery need a human (item 10).
+apiVersion: aisf/4.0
+kind: AgentRole
+id: change-shepherd
+purpose: "Shepherd an approved change until it is rolled out safely; recommend with evidence; act only via audited flag and rollout tools within policy."
+reads: [operational-readiness-record, rollout-plan, flag-registry, telemetry-view]
+mustNotRead: []
+writes: [rollout-report]
+mustNotWrite: ["**"]
+tools: [telemetry.read, flag.return-to-safe-state, rollout.pause, rollout.report]
+egress: none
+secrets: none
+session: separate
+neverDoes: [artifact-rollback, revert-on-main, data-recovery, move-flag-out-of-safe-state, approve, deploy]

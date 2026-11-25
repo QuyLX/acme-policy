@@ -5,3 +5,5 @@ kind: TaskClassRegistry
 taskClasses:
   - { id: bug-fix, playbook: bug-fix@1, scope: { repositories: [acme-frontend] }, ceiling: R2, budgets: { cost: { limit: 20, unit: usd } } }
   - { id: docs.link-fix, playbook: docs-update@1, scope: { repositories: [acme-frontend], paths: ["docs/**", "**/*.md"] }, ceiling: R0, budgets: { cost: { limit: 5, unit: usd } } }
+  # tech-design 13 group A (SC-19): FE §9.2 playbook regression-from-incident, elaborating bug-fix (PROPOSED, as bug-fix).
+  - { id: regression-from-incident, playbook: regression-from-incident@1, scope: { repositories: [acme-frontend] }, ceiling: R2, budgets: { cost: { limit: 20, unit: usd } } }
