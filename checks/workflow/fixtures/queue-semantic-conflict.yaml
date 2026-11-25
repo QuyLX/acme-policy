@@ -1,0 +1,7 @@
+# workflow.merge-queue violating input (SC-07). Simulated queue: main has just merged a rename of `describeValue` to
+# `formatValue`; the queued change adds a call to the old name. Each passes quality.typecheck alone; combined they fail.
+repo: showcase/fixtures/ts-repo
+main:
+  - { diff: showcase/fixtures/queue/rename-export.diff, owner: "user:dev-c" }
+change: showcase/fixtures/queue/call-old-name.diff
+checks: [quality.typecheck]

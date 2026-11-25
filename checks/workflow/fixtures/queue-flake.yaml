@@ -1,0 +1,8 @@
+# SC-07 flake-candidate input. RECORDED: the queue run reported quality.typecheck FAIL (a nondeterministic failure
+# cannot be produced on demand); both reruns, (a) without and (b) with the change, are real and pass.
+repo: showcase/fixtures/ts-repo
+main:
+  - { diff: showcase/fixtures/queue/rename-export.diff, owner: "user:dev-c" }
+change: showcase/fixtures/queue/independent-change.diff
+checks: [quality.typecheck]
+recordedQueueFailure: { checkId: quality.typecheck }

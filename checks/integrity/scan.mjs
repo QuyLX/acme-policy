@@ -2,6 +2,7 @@
 // stable check IDs (item 38); sensors.mjs turns them into one CheckResult per check.
 // Detectors work on added/removed lines. Where the content of a file at base and head is available (readFile), the
 // control-file sensor classifies package.json by field (items 5-7); without it, it is conservative (whole file).
+import { parse as parseYaml } from 'yaml';
 import { parseUnifiedDiff } from '../../lib/diff.mjs';
 import { matchesAny } from '../../lib/glob.mjs';
 
@@ -33,6 +34,53 @@ function tolerances(lines) {
   return out;
 }
 
+const JOURNEYS_FILE = /(^|\/)journeys\.ya?ml$/;
+const AC_LINE = /\{\s*id:\s*(AC-[A-Z0-9-]+)\s*,\s*statement:\s*"([^"]*)"/;
+
+/** Acceptance criteria of a Journey Registry document: Map<AC id, statement>. Throws on invalid YAML. */
+function acceptanceOf(text) {
+  const out = new Map();
+  const walk = (node) => {
+    if (Array.isArray(node)) node.forEach(walk);
+    else if (node && typeof node === 'object') {
+      for (const ac of Array.isArray(node.acceptance) ? node.acceptance : []) if (ac && typeof ac.id === 'string') out.set(ac.id, String(ac.statement ?? ''));
+      Object.values(node).forEach(walk);
+    }
+  };
+  walk(parseYaml(text));
+  return out;
+}
+
+/**
+ * Approved acceptance criteria the change rewrites or deletes in a journeys.yaml (Standard §4.7 item 10: code ≠ AC).
+ * With base and head content (readFile) the documents are compared by AC id; otherwise the diff lines are read
+ * (inline `{ id: AC-…, statement: "…" }` entries). Added criteria are not edits of an approved one.
+ * @returns {Array<{ id: string, was: string, now: string|null }>}
+ */
+function acceptanceEdits(file, readFile) {
+  if (readFile && file.status === 'modified') {
+    try {
+      const base = readFile('base', file.oldPath ?? file.path);
+      const head = readFile('head', file.path);
+      if (base !== null && head !== null) {
+        const before = acceptanceOf(base);
+        const after = acceptanceOf(head);
+        return [...before].filter(([id, was]) => after.get(id) !== was).map(([id, was]) => ({ id, was, now: after.has(id) ? after.get(id) : null }));
+      }
+    } catch {
+      // unparsable at base or head: fall back to the diff lines
+    }
+  }
+  const before = new Map();
+  const after = new Map();
+  for (const line of file.hunks.flatMap((h) => h.lines)) {
+    const m = AC_LINE.exec(line.text);
+    if (m && line.type === '-') before.set(m[1], m[2]);
+    if (m && line.type === '+') after.set(m[1], m[2]);
+  }
+  return [...before].filter(([id, was]) => after.get(id) !== was).map(([id, was]) => ({ id, was, now: after.has(id) ? after.get(id) : null }));
+}
+
 /** Field-level control analysis for package.json (Standard §7.13 items 5-7). Returns null when undecidable. */
 function packageJsonControlFields(path, readFile, fields) {
   if (!readFile) return null;
@@ -53,7 +101,7 @@ function packageJsonControlFields(path, readFile, fields) {
 /**
  * @param {string} diffText
  * @param {{ params: object, controlFileGlobs: string[], readFile?: (side: 'base'|'head', path: string) => string|null }} config
- * @returns {Array<{ checkId: string, level?: 'observe', ruleId?: string, location: string, message: string }>}
+ * @returns {Array<{ checkId: string, level?: 'observe', ruleId?: string, location: string, message: string, acEdits?: Array<{ id, was, now }> }>}
  */
 export function scanDiff(diffText, { params: p, controlFileGlobs, readFile }) {
   const hits = [];
@@ -72,7 +120,10 @@ export function scanDiff(diffText, { params: p, controlFileGlobs, readFile }) {
       if (changedFields === null) hit('integrity.control-file-change', file.path, `Control file ${file.status}: needs approval from a code owner of this file (Standard §9.10).`);
       else if (changedFields.length) hit('integrity.control-file-change', file.path, `Control fields changed (${changedFields.join(', ')}): needs approval from a code owner of this file (Standard §9.10).`);
     }
-    if (is(p.oracleGlobs)) hit('integrity.oracle-lock', file.path, 'Oracle (verifier-written test or acceptance criteria) changed: only the person who approved the acceptance criteria at requirement-review may change it (Standard §7.13 item 29).');
+    if (is(p.oracleGlobs)) {
+      const acEdits = paths.some((x) => JOURNEYS_FILE.test(x)) && file.status !== 'added' ? acceptanceEdits(file, readFile) : [];
+      hit('integrity.oracle-lock', file.path, 'Oracle (verifier-written test or acceptance criteria) changed: only the person who approved the acceptance criteria at requirement-review may change it (Standard §7.13 item 29).', acEdits.length ? { acEdits } : {});
+    }
     if (is(p.snapshotGlobs) && file.status !== 'added') hit('integrity.snapshot-churn', file.path, `Snapshot or baseline ${file.status}: must be linked to an acceptance criterion; agents never accept baselines (FE-TEST-002).`);
     if (is(p.generatedMockGlobs) && file.status === 'modified') hit('integrity.self-mocking', file.path, 'Generated mock edited by hand (FE-TEST-004): regenerate it from the contract instead.');
     if (isTest && file.status === 'deleted') hit('integrity.test-count-delta', file.path, 'Test file deleted.');
