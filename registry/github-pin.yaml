@@ -2,6 +2,6 @@
 # 000…0 means the pin is not set. meta.workflow-pin FAILs until this is a real commit.
 apiVersion: aisf/4.0
 kind: GithubPin
-policySha: "0000000000000000000000000000000000000000"
+policySha: "165e1c605462ce4316b6d10be8fe0b9ffa49fa42"
 workflow: QuyLX/acme-policy/.github/workflows/verify.yml
 presetsRef: git+https://github.com/QuyLX/acme-policy.git
