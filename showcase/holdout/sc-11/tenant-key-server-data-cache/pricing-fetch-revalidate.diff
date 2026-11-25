@@ -1,0 +1,12 @@
+diff --git a/packages/ui/src/pricing.ts b/packages/ui/src/pricing.ts
+new file mode 100644
+index 0000000..e49920a
+--- /dev/null
++++ b/packages/ui/src/pricing.ts
+@@ -0,0 +1,6 @@
++// Server-side pricing lookup; revalidated every five minutes.
++export async function loadPricing(baseUrl: string) {
++  const res = await fetch(`${baseUrl}/v1/pricing`, { next: { revalidate: 300, tags: ['pricing'] } });
++  if (!res.ok) throw new Error(`pricing ${res.status}`);
++  return res.json();
++}

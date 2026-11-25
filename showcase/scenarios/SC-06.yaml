@@ -1,0 +1,44 @@
+# SC-06 — New non-determinism is not "flaky" (FE §20.3; Standard §7.14; FE §8.8). CORE-VER-09.
+# What is real: every case runs real code. The racy LRO polling test (showcase/fixtures/lro-polling) really runs under
+# `node --test`; its network latency is an iteration-derived jitter on a virtual clock, so the race is deterministic per
+# seed and the automatic retry / stress mode really reproduce it. lib/flaky.mjs classifies the attempts, quality.flaky-policy
+# and the task runner apply the policy.
+# Simulated (tech-design 13 §0): the flaky registry is a fixture registry (showcase/fixtures/flaky/), standing in for one
+# generated from 30 days of main history; the task is a recorded event log; the registry change of `agent-quarantines`
+# is a recorded input with the identity the platform binding would record. No CI runner reruns anything.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-06
+title: Flaky versus new non-determinism
+demonstrates: [CORE-VER-09]
+slice: 1
+mode: pilot
+cases:
+  - id: fail-then-pass-unregistered
+    given: The LRO polling test fails (seed 3), passes on the single automatic retry (seed 4), and is not in the flaky registry
+    run: { kind: flaky-rerun, repo: showcase/fixtures/lro-polling, test: src/poller.test.mjs, testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", seed: 3, registry: showcase/fixtures/flaky/registry-empty.yaml, at: "2026-11-25T10:00:00Z" }
+    expect: { statuses: { quality.flaky-policy: FAIL }, rules: [flaky.new-nondeterminism] }
+  - id: fail-then-pass-registered
+    given: Control case — the same real fail-then-pass on a test its owner quarantined; both attempts are recorded
+    run: { kind: flaky-rerun, repo: showcase/fixtures/lro-polling, test: src/poller.test.mjs, testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", seed: 3, registry: showcase/fixtures/flaky/registry-registered.yaml, at: "2026-11-25T10:00:00Z" }
+    expect: { statuses: { quality.flaky-policy: PASS }, rules: [flaky.registered] }
+  - id: stress-reproduces
+    given: The touched LRO polling code runs 5 times in stress mode before review; a stale poll response overwrites a newer state in one iteration
+    run: { kind: flaky-stress, repo: showcase/fixtures/lro-polling, test: src/poller.test.mjs, testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", iterations: 5 }
+    expect: { statuses: { quality.flaky-policy: FAIL }, rules: [flaky.stress-reproduced] }
+  - id: stress-clean-after-fix
+    given: Control case — the fix ignores stale poll responses; the same 5 stress iterations all pass
+    run: { kind: flaky-stress, repo: showcase/fixtures/lro-polling, change: showcase/fixtures/lro-polling/fix.diff, test: src/poller.test.mjs, testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", iterations: 5 }
+    expect: { statuses: { quality.flaky-policy: PASS } }
+  - id: registered-flake-no-budget
+    given: Verify fails 4 times, only on a registered flake, then passes; the verify budget is 3
+    run: { kind: flaky-task, events: showcase/fixtures/flaky/registered-flake-task.jsonl, flakyRegistry: showcase/fixtures/flaky/registry-registered.yaml }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: MERGED }
+  - id: unregistered-failures-consume-budget
+    given: Control case — the same task log with nothing registered; the 4 failures consume the verify budget
+    run: { kind: flaky-task, events: showcase/fixtures/flaky/registered-flake-task.jsonl, flakyRegistry: showcase/fixtures/flaky/registry-empty.yaml }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-LOOP], taskState: ESCALATED }
+  - id: agent-quarantines
+    given: The implementing agent adds the test it made fail to the flaky registry and records itself as the decider
+    run: { kind: flaky-policy, input: showcase/fixtures/flaky/policy-agent-quarantines.yaml }
+    expect: { statuses: { quality.flaky-policy: FAIL }, rules: [flaky.quarantine-owner] }

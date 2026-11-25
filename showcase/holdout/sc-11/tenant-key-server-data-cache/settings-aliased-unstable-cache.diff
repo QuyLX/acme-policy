@@ -1,0 +1,12 @@
+diff --git a/packages/ui/src/settings-cache.ts b/packages/ui/src/settings-cache.ts
+new file mode 100644
+index 0000000..ef1bd6e
+--- /dev/null
++++ b/packages/ui/src/settings-cache.ts
+@@ -0,0 +1,6 @@
++import { unstable_cache as memoize } from 'next/cache';
++
++declare function fetchSettings(): Promise<Record<string, string>>;
++
++// Account settings are read on every page; memoize them for a minute.
++export const getSettings = memoize(async () => fetchSettings(), ['account-settings'], { revalidate: 60 });

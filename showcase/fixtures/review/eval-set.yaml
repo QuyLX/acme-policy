@@ -1,0 +1,40 @@
+# RECORDED eval set (synthetic; Standard §7.12 items 2-3): incident-derived PRs with the bug location confirmed by
+# engineers, and known-clean PRs. A reviewer change is scored on the full set (§7.12 item 5).
+incidents:
+  - {"id": "INC-01", "pr": "PR-301", "bugLocation": "apps/admin/src/feature-1/handler.ts:11"}
+  - {"id": "INC-02", "pr": "PR-302", "bugLocation": "apps/admin/src/feature-2/handler.ts:12"}
+  - {"id": "INC-03", "pr": "PR-303", "bugLocation": "apps/admin/src/feature-3/handler.ts:13"}
+  - {"id": "INC-04", "pr": "PR-304", "bugLocation": "apps/admin/src/feature-4/handler.ts:14"}
+  - {"id": "INC-05", "pr": "PR-305", "bugLocation": "apps/admin/src/feature-5/handler.ts:15"}
+  - {"id": "INC-06", "pr": "PR-306", "bugLocation": "apps/admin/src/feature-6/handler.ts:16"}
+  - {"id": "INC-07", "pr": "PR-307", "bugLocation": "apps/admin/src/feature-7/handler.ts:17"}
+  - {"id": "INC-08", "pr": "PR-308", "bugLocation": "apps/admin/src/feature-8/handler.ts:18"}
+  - {"id": "INC-09", "pr": "PR-309", "bugLocation": "apps/admin/src/feature-9/handler.ts:19"}
+  - {"id": "INC-10", "pr": "PR-310", "bugLocation": "apps/admin/src/feature-10/handler.ts:20"}
+  - {"id": "INC-11", "pr": "PR-311", "bugLocation": "apps/admin/src/feature-11/handler.ts:21"}
+  - {"id": "INC-12", "pr": "PR-312", "bugLocation": "apps/admin/src/feature-12/handler.ts:22"}
+cleanPrs:
+  - {"id": "CLEAN-01", "pr": "PR-501"}
+  - {"id": "CLEAN-02", "pr": "PR-502"}
+  - {"id": "CLEAN-03", "pr": "PR-503"}
+  - {"id": "CLEAN-04", "pr": "PR-504"}
+  - {"id": "CLEAN-05", "pr": "PR-505"}
+  - {"id": "CLEAN-06", "pr": "PR-506"}
+  - {"id": "CLEAN-07", "pr": "PR-507"}
+  - {"id": "CLEAN-08", "pr": "PR-508"}
+  - {"id": "CLEAN-09", "pr": "PR-509"}
+  - {"id": "CLEAN-10", "pr": "PR-510"}
+  - {"id": "CLEAN-11", "pr": "PR-511"}
+  - {"id": "CLEAN-12", "pr": "PR-512"}
+  - {"id": "CLEAN-13", "pr": "PR-513"}
+  - {"id": "CLEAN-14", "pr": "PR-514"}
+  - {"id": "CLEAN-15", "pr": "PR-515"}
+  - {"id": "CLEAN-16", "pr": "PR-516"}
+  - {"id": "CLEAN-17", "pr": "PR-517"}
+  - {"id": "CLEAN-18", "pr": "PR-518"}
+  - {"id": "CLEAN-19", "pr": "PR-519"}
+  - {"id": "CLEAN-20", "pr": "PR-520"}
+  - {"id": "CLEAN-21", "pr": "PR-521"}
+  - {"id": "CLEAN-22", "pr": "PR-522"}
+  - {"id": "CLEAN-23", "pr": "PR-523"}
+  - {"id": "CLEAN-24", "pr": "PR-524"}

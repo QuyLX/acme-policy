@@ -1,0 +1,2 @@
+# profile.resolve input: the same conflict, with the owners' recorded resolution entry in the repository profile.
+layers: [showcase/fixtures/profile-layers/core.yaml, showcase/fixtures/profile-layers/domain.yaml, showcase/fixtures/profile-layers/repository-node26-decided.yaml]

@@ -1,0 +1,16 @@
+# Retrieval question set (FE §12 knowledge retrieval) answered live by lib/knowledge-index.mjs search.
+sources: showcase/fixtures/knowledge-index/sources.yaml
+repo: showcase/fixtures/knowledge-index/repo
+requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+now: "2026-11-25T08:00:00Z"
+questions:
+  - id: session-decision
+    query: session handling
+    expect: { ids: [ADR-SESSION-0002, CONTRACT-IAM-V1], absent: [ADR-SESSION-0003, ADR-SESSION-0004, RUNBOOK-SESSION-0001, CONTRACT-IAM-V2] }
+  - id: session-with-drafts
+    query: session handling
+    includeDraft: true
+    expect: { ids: [ADR-SESSION-0002, ADR-SESSION-0004, GUIDE-SESSION-0001] }
+  - id: incident-runbook
+    query: session handling incident runbook
+    expect: { absent: [RUNBOOK-SESSION-0001, RUNBOOK-SESSION-0002] }

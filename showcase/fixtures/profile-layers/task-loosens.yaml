@@ -1,0 +1,10 @@
+# Synthetic profile layer for SC-21: a task contract that tries to lower a requirement and a threshold (layer 8).
+apiVersion: aisf/4.0
+kind: ProfileLayer
+layer: task
+id: SC-21-task
+version: "1"
+owner: user:requester-a
+checks:
+  - { id: integrity.oracle-lock, requirement: optional }
+  - { id: quality.test, params: { coverage: { min: 60 } } }

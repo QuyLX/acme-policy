@@ -1,0 +1,6 @@
+# workflow.merge-queue conforming input: an independent change integrates with the same main.
+repo: showcase/fixtures/ts-repo
+main:
+  - { diff: showcase/fixtures/queue/rename-export.diff, owner: "user:dev-c" }
+change: showcase/fixtures/queue/independent-change.diff
+checks: [quality.typecheck]

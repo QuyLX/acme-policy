@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "aisf/4.0",
+  "runId": "run-provider-v1-20261117",
+  "workItemId": "PROVIDER-CONTRACT-NIGHTLY",
+  "channel": "code",
+  "subject": {
+    "repo": "identity-provider",
+    "commitSha": "1111111111111111111111111111111111111111",
+    "baseSha": "1010101010101010101010101010101010101010"
+  },
+  "resolvedProfiles": [
+    {
+      "id": "aisf-frontend",
+      "version": "1.1.0"
+    }
+  ],
+  "environment": {
+    "executor": "ci",
+    "id": "provider-contract",
+    "kind": "staging"
+  },
+  "checks": [
+    {
+      "checkId": "admin.step-up-auth",
+      "checkVersion": "1.0.0",
+      "requiredBy": [
+        "aisf-frontend@1.1.0"
+      ],
+      "requirement": "required",
+      "enforcement": "blocking",
+      "severity": "BLOCKER",
+      "gate": "merge",
+      "status": "PASS",
+      "command": "provider contract test: step-up auth required for privileged admin actions",
+      "durationMs": 4200,
+      "attempts": 1,
+      "findings": [],
+      "evidence": []
+    }
+  ],
+  "summary": {
+    "byStatus": {
+      "PASS": 1,
+      "FAIL": 0,
+      "ERROR": 0,
+      "NOT_ASSESSED": 0
+    },
+    "requiredUnmet": []
+  },
+  "provenance": {
+    "factoryVersion": "0.1.0",
+    "verifierRef": "acme-policy@0123456789ab",
+    "producer": {
+      "ciJob": "provider-contract-tests"
+    },
+    "startedAt": "2026-11-17T08:58:00Z",
+    "finishedAt": "2026-11-17T09:00:00Z"
+  }
+}

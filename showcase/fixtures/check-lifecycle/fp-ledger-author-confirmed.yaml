@@ -1,0 +1,15 @@
+# Recorded data (SC-10): the same volume of reports, but every "false positive" is confirmed by the author of the change
+# (one of them a delegate confirming their own change) or not confirmed at all; one dispute. None counts
+# (Standard §8.7 rule 5; FE §8.2). Synthetic identities.
+apiVersion: aisf/4.0
+kind: FalsePositiveLedger
+checkId: export.csv-injection
+window: { from: "2026-11-01", to: "2026-11-24" }
+findings: 40
+owner: { team: team-platform, members: [owner-1, owner-2] }
+delegates: [delegate-1]
+reports:
+  - { finding: "apps/admin/src/app/reports/route.ts:12", changeAuthor: dev-3, verdict: false-positive, confirmedBy: dev-3 }
+  - { finding: "apps/admin/src/app/audit/route.ts:20", changeAuthor: delegate-1, verdict: false-positive, confirmedBy: delegate-1 }
+  - { finding: "apps/admin/src/lib/ids.ts:8", changeAuthor: dev-4, verdict: false-positive }
+  - { finding: "apps/admin/src/app/export/route.ts:30", changeAuthor: dev-5, verdict: disputed }

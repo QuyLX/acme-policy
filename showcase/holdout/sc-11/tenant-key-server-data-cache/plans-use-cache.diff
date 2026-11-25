@@ -1,0 +1,11 @@
+diff --git a/packages/ui/src/plans.ts b/packages/ui/src/plans.ts
+new file mode 100644
+index 0000000..4351396
+--- /dev/null
++++ b/packages/ui/src/plans.ts
+@@ -0,0 +1,5 @@
++// Plan catalogue for the upgrade dialog, cached on the server between requests.
++export async function listPlans(load: () => Promise<{ id: string; price: number }[]>) {
++  'use cache';
++  return load();
++}

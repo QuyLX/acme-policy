@@ -114,3 +114,28 @@ tester.run('FE-CTX-001 tenant-query-key', R['tenant-query-key'], {
     { code: "queryClient.prefetchQuery({ queryKey: ['tenants'], queryFn });", errors: [{ messageId: 'key' }] },
   ],
 });
+
+// export.csv-injection (FE §8.4 cap:import-export): the rule export.csv-injection runs; not in a PROFILE_RULES kind yet.
+tester.run('export.csv-injection csv-safe-export', R['csv-safe-export'], {
+  valid: [
+    "function GET(rows) { return new Response(toCsv(rows, ['id']), { headers: { 'content-type': 'text/csv' } }); }",
+    "function GET(rows) { const body = toCsv(rows, ['id']); return new Response(body, { headers: { 'content-type': 'text/csv' } }); }",
+    "const line = row.map(toCsvCell).join(',');",
+    "const ids = list.join(',');",
+    "const header = ['id', 'name'].join(','); const type = 'text/csv';",
+    "const lines = rows.map((r) => [toCsvCell(r.a), toCsvCell(r.b)].join(',')).join('\\n');",
+    'const lines = rows.map((r) => `${toCsvCell(r.a)},${toCsvCell(r.b)}`).join("\\n");',
+    "function GET(body) { return new Response(body, { headers: { 'content-type': 'application/json' } }); }",
+  ],
+  invalid: [
+    { code: "const body = rows.map((r) => [r.a, r.b].join(',')).join('\\n');", errors: [{ messageId: 'join' }] },
+    { code: 'const body = rows.map((r) => `${r.a},${r.b}`).join("\\r\\n");', errors: [{ messageId: 'template' }] },
+    {
+      code: "function GET(rows) { const body = rows.join('\\n'); return new Response(body, { headers: { 'Content-Type': 'text/csv; charset=utf-8' } }); }",
+      errors: [{ messageId: 'response' }],
+    },
+    { code: "const type = 'text/csv'; const line = [name, '=1'].join(';');", errors: [{ messageId: 'join' }] },
+    { code: "const file = 'tenants.csv'; const cells = [a, b]; const line = cells.join('\\t');", errors: [{ messageId: 'join' }] },
+    { code: "const line = rows.map((r) => r.map((c) => String(c)).join(',')).join('\\r\\n');", errors: [{ messageId: 'join' }] },
+  ],
+});

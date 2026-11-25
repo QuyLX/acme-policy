@@ -1,0 +1,26 @@
+diff --git a/apps/admin/src/app/tenants/export/route.ts b/apps/admin/src/app/tenants/export/route.ts
+index 8d2c18b..5886a1c 100644
+--- a/apps/admin/src/app/tenants/export/route.ts
++++ b/apps/admin/src/app/tenants/export/route.ts
+@@ -1,7 +1,6 @@
+ // Route entry `tenants.export`: CSV download of the tenant list. The body is built only through toCsv.
+ import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
+ import { requestContext, UnauthenticatedError } from '../../../platform/session.ts';
+-import { toCsv } from '../../../platform/csv.ts';
+ import { allTenants } from '../../../domains/tenants/server/data.ts';
+ 
+ export async function GET(): Promise<Response> {
+@@ -14,7 +13,12 @@ export async function GET(): Promise<Response> {
+     throw err;
+   }
+   const rows = allTenants();
+-  return new Response(toCsv(rows, ['id', 'name', 'status', 'balance']), {
++  // RFC 4180 quoting so names with commas stay in one cell.
++  const quote = (value: unknown) => `"${String(value).replace(/"/g, '""')}"`;
++  const csv = [['id', 'name', 'status', 'balance'], ...rows.map((t) => [t.id, t.name, t.status, t.balance])]
++    .map((cells) => cells.map(quote).join(','))
++    .join('\r\n');
++  return new Response(csv, {
+     headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="tenants.csv"' },
+   });
+ }

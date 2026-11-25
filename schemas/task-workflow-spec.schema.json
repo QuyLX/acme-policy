@@ -137,8 +137,10 @@
                   "plan-review",
                   "independent-verification",
                   "implementation-review",
-                  "release-readiness"
-                ]
+                  "release-readiness",
+                  "scenario-approval"
+                ],
+                "description": "Standard §6.12 checkpoints; scenario-approval is a profile-added checkpoint (FE §9.10 regression item 2, playbook regression-from-incident; Standard §20 allows a profile to add checkpoints)"
               },
               "kind": {
                 "enum": [

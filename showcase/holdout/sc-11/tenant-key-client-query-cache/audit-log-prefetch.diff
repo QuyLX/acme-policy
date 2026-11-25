@@ -1,0 +1,14 @@
+diff --git a/packages/ui/src/audit-log.ts b/packages/ui/src/audit-log.ts
+new file mode 100644
+index 0000000..9bf81f0
+--- /dev/null
++++ b/packages/ui/src/audit-log.ts
+@@ -0,0 +1,8 @@
++// Warms the next page of the audit log while the user reads the current one.
++type QueryClient = {
++  prefetchQuery(options: { queryKey: readonly unknown[]; queryFn: () => Promise<unknown> }): Promise<void>;
++};
++
++export async function prefetchAuditPage(client: QueryClient, page: number, load: (page: number) => Promise<unknown>) {
++  await client.prefetchQuery({ queryKey: ['audit-log', { page: page + 1 }], queryFn: () => load(page + 1) });
++}

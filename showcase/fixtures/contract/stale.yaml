@@ -1,0 +1,6 @@
+# SC-12 input (RECORDED provider data): the version matches production but the attested run is 8 days old (> 7 days).
+providerRun: showcase/fixtures/contract/provider-run-v1-8-days-old.json
+providerAttestation: showcase/fixtures/contract/provider-run-v1-8-days-old.sig.json
+deployments: showcase/fixtures/contract/deployments-v1.yaml
+environment: production
+now: "2026-11-20T12:00:00Z"

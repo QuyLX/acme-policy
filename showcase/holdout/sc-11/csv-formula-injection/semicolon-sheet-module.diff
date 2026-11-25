@@ -1,0 +1,36 @@
+diff --git a/apps/admin/src/app/tenants/export/route.ts b/apps/admin/src/app/tenants/export/route.ts
+index 8d2c18b..285c5da 100644
+--- a/apps/admin/src/app/tenants/export/route.ts
++++ b/apps/admin/src/app/tenants/export/route.ts
+@@ -1,7 +1,7 @@
+ // Route entry `tenants.export`: CSV download of the tenant list. The body is built only through toCsv.
+ import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
+ import { requestContext, UnauthenticatedError } from '../../../platform/session.ts';
+-import { toCsv } from '../../../platform/csv.ts';
++import { tenantSheet } from '../../../domains/tenants/server/export.ts';
+ import { allTenants } from '../../../domains/tenants/server/data.ts';
+ 
+ export async function GET(): Promise<Response> {
+@@ -14,7 +14,7 @@ export async function GET(): Promise<Response> {
+     throw err;
+   }
+   const rows = allTenants();
+-  return new Response(toCsv(rows, ['id', 'name', 'status', 'balance']), {
++  return new Response(tenantSheet(rows), {
+     headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="tenants.csv"' },
+   });
+ }
+diff --git a/apps/admin/src/domains/tenants/server/export.ts b/apps/admin/src/domains/tenants/server/export.ts
+new file mode 100644
+index 0000000..3fec5a8
+--- /dev/null
++++ b/apps/admin/src/domains/tenants/server/export.ts
+@@ -0,0 +1,8 @@
++// Builds the tenant export for spreadsheet tools that expect semicolon-separated values.
++import type { TenantRow } from './data.ts';
++
++export function tenantSheet(rows: TenantRow[]): string {
++  const header = ['id', 'name', 'status', 'balance'].join(';');
++  const body = rows.map((t) => [t.id, t.name, t.status, t.balance.toFixed(2)].join(';'));
++  return [header, ...body].join('\n');
++}

@@ -1,0 +1,13 @@
+diff --git a/packages/ui/src/regions.ts b/packages/ui/src/regions.ts
+new file mode 100644
+index 0000000..c03da38
+--- /dev/null
++++ b/packages/ui/src/regions.ts
+@@ -0,0 +1,7 @@
++// Region picker data. The options object is built once and handed to the hook.
++declare function useQuery(o: { queryKey: readonly unknown[]; queryFn: () => Promise<unknown> }): unknown;
++
++export function useRegions(load: () => Promise<string[]>) {
++  const options = { queryKey: ['regions'], queryFn: load };
++  return useQuery(options);
++}

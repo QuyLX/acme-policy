@@ -1,0 +1,13 @@
+# Synthetic profile layer for SC-21: as repository-node26.yaml, version 2.3.1, with the owners' recorded decision
+# as a versioned resolution entry in this (more specific) profile (Standard §7.3 item 15).
+apiVersion: aisf/4.0
+kind: ProfileLayer
+layer: repository
+id: console-repo
+version: 2.3.1
+owner: team-console
+checks:
+  - { id: meta.toolchain-pin, params: { node: { exact: "26" } } }
+  - { id: test.e2e-journeys, requirement: required, params: { browsers: { set: [chromium, webkit] } } }
+resolutions:
+  - { checkId: meta.toolchain-pin, parameter: node, value: "26", decisionRef: "console-repo@2.3.1#resolution-1", decidedBy: [team-platform, team-console], decidedAt: "2026-11-20" }

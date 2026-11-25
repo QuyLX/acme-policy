@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/test-plan.schema.json",
+  "title": "TestPlan — deterministic output of the Test Planner (FE §8.10); its digest is VerificationRun.extensions[\"x-fe\"].testPlan (FE §8.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "planner", "repo", "tier", "changed", "browsers", "surfaces", "unmapped", "selections", "digest"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "TestPlan" },
+    "planner": { "type": "string", "pattern": "^.+@[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "repo": { "type": "string", "minLength": 1 },
+    "tier": { "enum": ["R0", "R1", "R2", "R3"] },
+    "changed": { "type": "array", "items": { "type": "string" } },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": { "id": { "type": "string" }, "kind": { "enum": ["mock", "preview", "staging", "production-canary"] } }
+    },
+    "browsers": { "type": "array", "items": { "enum": ["chromium", "webkit", "firefox"] }, "minItems": 1 },
+    "surfaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direct", "graph", "sentinel", "consumers"],
+      "description": "Standard §7.3 item 5: direct + via the dependency graph + sentinel set; consumers from the portfolio index (repo:package)",
+      "properties": {
+        "direct": { "type": "array", "items": { "type": "string" } },
+        "graph": { "type": "array", "items": { "type": "string" } },
+        "sentinel": { "type": "array", "items": { "type": "string" } },
+        "consumers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "unmapped": {
+      "type": "array",
+      "description": "Changed files the import graph cannot map: the full suite of each listed surface runs (FE §8.10 rule 2)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "surfaces"],
+        "properties": { "file": { "type": "string" }, "surfaces": { "type": "array", "items": { "type": "string" } } }
+      }
+    },
+    "selections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["repo", "test", "journeys", "reasons"],
+        "properties": {
+          "repo": { "type": "string" },
+          "test": { "type": "string" },
+          "surface": { "type": "string" },
+          "journeys": { "type": "array", "items": { "type": "string" } },
+          "reasons": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Rationale per selection (FE §8.10): every selected test says why it runs",
+            "items": {
+              "type": "string",
+              "pattern": "^(direct|critical-journey|sentinel|include|risk:R2-high-journey|risk:R3-full-suite|import-graph:.+|portfolio-consumer:.+|unmapped→full-suite:.+)$"
+            }
+          }
+        }
+      }
+    },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

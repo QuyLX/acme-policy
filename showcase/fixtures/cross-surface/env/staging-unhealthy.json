@@ -1,0 +1,14 @@
+{
+  "apiVersion": "aisf/4.0",
+  "kind": "EnvironmentManifest",
+  "environment": { "id": "staging-1", "kind": "staging" },
+  "recordedAt": "2026-11-25T09:30:00Z",
+  "services": [
+    { "name": "identity-api", "version": "4.2.0", "health": "healthy" },
+    { "name": "tenants-api", "version": "1.9.3", "health": "unhealthy", "detail": "readiness probe failing for 12 minutes" },
+    { "name": "catalog-api", "version": "3.0.1", "health": "healthy" }
+  ],
+  "dataSeed": { "id": "seed-admin-tenants", "version": "7", "status": "ready" },
+  "flags": { "admin.tenants.v2-list": true, "console.catalog.sorting": "by-name" },
+  "auxiliary": [{ "name": "mail-sink", "health": "healthy" }]
+}

@@ -1,0 +1,13 @@
+# Results recorded from a naive full-text engine under evaluation: it ignores access, lifecycle and pinned versions.
+sources: showcase/fixtures/knowledge-index/sources.yaml
+repo: showcase/fixtures/knowledge-index/repo
+requester: { id: "agent:investigator-1", kind: agent, clearance: [public, internal], groups: [team-admin] }
+questions:
+  - id: session-decision
+    query: session handling
+    expect: { ids: [ADR-SESSION-0002] }
+results:
+  session-decision:
+    - { id: ADR-SESSION-0004, version: "0.1", status: DRAFT, authority: decision, cite: "platform:docs/adr/ADR-SESSION-0004.md@a1f0c3d2e4b5968778695a4b3c2d1e0f9a8b7c6d" }
+    - { id: ADR-SESSION-0003, version: "1", status: ACTIVE, authority: decision, cite: "platform:docs/adr/ADR-SESSION-0003.md@a1f0c3d2e4b5968778695a4b3c2d1e0f9a8b7c6d" }
+    - { id: RUNBOOK-SESSION-0001, version: "4", status: ACTIVE, authority: procedure, cite: "admin-ops:docs/runbooks/RUNBOOK-SESSION-0001.md" }

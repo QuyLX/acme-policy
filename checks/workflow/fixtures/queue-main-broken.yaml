@@ -1,0 +1,7 @@
+# SC-07 main-broken input: a type error already merged to main (owner user:dev-c) fails the queue run for an
+# unrelated change. Rerun (a) on main without the change fails too: the queue pauses and no budget is consumed.
+repo: showcase/fixtures/ts-repo
+main:
+  - { diff: showcase/fixtures/type-error.diff, owner: "user:dev-c" }
+change: showcase/fixtures/queue/independent-change.diff
+checks: [quality.typecheck]

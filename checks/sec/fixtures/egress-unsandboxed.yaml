@@ -1,0 +1,5 @@
+# sec.sandbox-egress violating input (mutation proof): the same step with the sandbox removed and the full host
+# environment, as an unconfined runner would execute it. The host listener receives the canary.
+issue: showcase/fixtures/exfil/issue.md
+step: showcase/fixtures/exfil/compromised-step.mjs
+sandbox: none

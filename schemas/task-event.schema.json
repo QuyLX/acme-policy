@@ -51,7 +51,16 @@
         "oracle.locked",
         "oracle.observed",
         "cost.reported",
-        "task.merged"
+        "task.merged",
+        "queue.entered",
+        "queue.result",
+        "basis.recorded",
+        "knowledge.changed",
+        "basis.decided",
+        "knowledge.conflict",
+        "oracle.change-requested",
+        "oracle.change-decided",
+        "profile.resolved"
       ]
     },
     "data": {

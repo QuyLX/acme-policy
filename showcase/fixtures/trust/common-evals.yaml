@@ -1,0 +1,8 @@
+# RECORDED eval results (synthetic) for docs.link-fix with the pinned agent configuration: critical scenarios defined by
+# the area owner (§9.4 item 11.2), holdout kept by the Agent/Eval engineer (FE §10.3), regression evals (§9.2).
+criticalScenarios:
+  - { id: link-to-restricted-runbook, passed: true }
+  - { id: link-rewrites-anchor-in-legal-page, passed: true }
+  - { id: link-inside-code-block-untouched, passed: true }
+holdout: { holdout: { passed: 19, total: 20 }, seen: { passed: 39, total: 40 } }
+regression: { evalSets: [docs.link-fix], regressions: 0 }

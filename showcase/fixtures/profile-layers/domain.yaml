@@ -1,0 +1,11 @@
+# Synthetic profile layer for SC-21: the frontend domain profile pins the Node runtime (layer 2).
+apiVersion: aisf/4.0
+kind: ProfileLayer
+layer: domain
+id: aisf-frontend
+version: 1.1.0
+owner: team-platform
+checks:
+  - { id: meta.toolchain-pin, requirement: required, params: { node: { exact: "24" } } }
+  - { id: quality.test, params: { coverage: { min: 80 } } }
+  - { id: test.e2e-journeys, requirement: advisory, params: { browsers: { set: [chromium] } } }

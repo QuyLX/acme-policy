@@ -9,6 +9,11 @@ toolCatalog:
   factory.context: { effect: run `factory context` }
   factory.verify: { effect: run `factory verify:fast` / `verify` (results carry executor agent-sandbox; never satisfy a required check) }
   package.install: { effect: run the package manager in frozen-lockfile mode }
+  # Change Shepherd tools (Standard §12.2.1 items 5, 8-9; FE §11.7): approved, audited, mitigation-only.
+  telemetry.read: { effect: read the change-specific view built from existing telemetry (no new telemetry platform) }
+  flag.return-to-safe-state: { effect: "return a flag to its declared safeState through the audited flag provider; Low/Medium tier, tied to an open alert or incident (maps to PAUSED)" }
+  rollout.pause: { effect: "pause a staged rollout; Low/Medium tier, tied to an open alert or incident, audited (maps to PAUSED)" }
+  rollout.report: { effect: report rollout status and a continue / pause / rollback recommendation to the accountable owner and on-call }
 filesystem: { write: worktree-only, read: worktree-only }
 network: { default: deny, allowlistHosts: [registry.npmjs.org] }
 secrets: { production: forbidden, injected: none }

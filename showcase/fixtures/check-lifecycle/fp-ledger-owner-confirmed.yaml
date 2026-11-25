@@ -1,0 +1,14 @@
+# Recorded data (SC-10): false-positive reports on export.csv-injection after activation. Synthetic identities.
+# 3 of 40 findings confirmed as false positives by owner-team members who did not author the change: 0.075 > fpSlo 0.05.
+apiVersion: aisf/4.0
+kind: FalsePositiveLedger
+checkId: export.csv-injection
+window: { from: "2026-11-01", to: "2026-11-24" }
+findings: 40
+owner: { team: team-platform, members: [owner-1, owner-2] }
+delegates: [delegate-1]
+reports:
+  - { finding: "apps/admin/src/app/reports/route.ts:12", changeAuthor: dev-3, verdict: false-positive, confirmedBy: owner-1 }
+  - { finding: "apps/admin/src/app/audit/route.ts:20", changeAuthor: dev-4, verdict: false-positive, confirmedBy: owner-2 }
+  - { finding: "apps/admin/src/lib/ids.ts:8", changeAuthor: dev-3, verdict: false-positive, confirmedBy: delegate-1 }
+  - { finding: "apps/admin/src/app/export/route.ts:30", changeAuthor: dev-5, verdict: true-positive, confirmedBy: owner-1 }

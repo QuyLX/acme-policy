@@ -1,0 +1,62 @@
+# SC-13 — AI review modes and trust upgrade (FE §20.3; Standard §7.9 items 10, 30-31, §7.12, §9.2 item 12, §9.4, §9.9,
+# §9.10, Appendix K.3; FE §9.9, §10.3).
+# Simulated (tech-design 13 §0): `recorded reviewer data`. No reviewer runtime exists (D-09 open): finding
+# dispositions, reviewer outputs on the eval set, task outcomes and eval results are recorded synthetic fixtures.
+# Every rate, the 95% upper bound and the resulting mode or level are computed by lib/review-quality.mjs and
+# lib/trust.mjs; nothing is read from the input. The surface's current AI review mode is read from a synthetic
+# descriptor (`run.repo`, apps/admin/factory.yaml review.aiMode), never from the request. Thresholds in
+# registry/ai-review-thresholds.yaml are PROPOSED (agreed with the surface owner before real use); trust thresholds are
+# the Standard's defaults (FE §10.3). In the T2 bound, A1 merges the human reviewer had to correct count as failures
+# next to escaped defects (lib/trust.mjs header). Shadow checks are evaluated at their targetEnforcement.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-13
+title: AI review modes and trust upgrade
+demonstrates: [CORE-REV-02, CORE-REV-06, CORE-GOV-03]
+slice: 1
+mode: default
+cases:
+  - id: below-threshold-stays-shadow
+    given: After 3 weeks in shadow, admin asks for advisory with 25 dispositions (40 required)
+    run: { kind: review-mode, input: showcase/fixtures/review/promote-early.yaml, repo: showcase/fixtures/review/repo-shadow }
+    expect: { statuses: { review.ai-mode: FAIL }, rules: [review.threshold-unmet], decision: { mode: shadow, changed: false } }
+  - id: promote-to-advisory
+    given: The full shadow period meets the advisory thresholds (precision, harmful rate on known-clean PRs, incident recall)
+    run: { kind: review-mode, input: showcase/fixtures/review/promote-advisory.yaml, repo: showcase/fixtures/review/repo-shadow }
+    expect: { statuses: { review.ai-mode: PASS }, decision: { mode: advisory, changed: true, loosening: false } }
+  - id: promote-to-blocking
+    given: The advisory period meets the blocking thresholds
+    run: { kind: review-mode, input: showcase/fixtures/review/promote-blocking.yaml, repo: showcase/fixtures/review/repo-advisory }
+    expect: { statuses: { review.ai-mode: PASS }, decision: { mode: blocking, changed: true } }
+  - id: mode-skip-refused
+    given: A surface asks to go from shadow straight to blocking, with data that would meet the blocking thresholds
+    run: { kind: review-mode, input: showcase/fixtures/review/promote-skip.yaml, repo: showcase/fixtures/review/repo-shadow }
+    expect: { statuses: { review.ai-mode: FAIL }, rules: [review.mode-skip], decision: { mode: shadow } }
+  - id: mode-skip-with-false-current-refused
+    given: The request claims the surface is already advisory and asks for blocking; its factory.yaml says shadow
+    run: { kind: review-mode, input: showcase/fixtures/review/promote-skip-claims-advisory.yaml, repo: showcase/fixtures/review/repo-shadow }
+    expect: { statuses: { review.ai-mode: FAIL }, rules: [review.mode-skip, review.current-mismatch], decision: { from: shadow, mode: shadow, changed: false, claimedCurrent: advisory } }
+  - id: reviewer-model-change-regresses
+    given: A reviewer model snapshot change scores lower on the full eval set (recall down, harmful findings up)
+    run: { kind: reviewer-change, input: showcase/fixtures/review/reviewer-change-regresses.yaml }
+    expect: { statuses: { review.reviewer-change: FAIL }, rules: [review.eval-regression], decision: { kept: false, pinnedTo: reviewer@1.2.0, autoFixDisabled: true } }
+  - id: docs-link-fix-reaches-t1
+    given: 30 assisted docs.link-fix tasks (93% accepted), plus a near-duplicate and 2 tasks of another class that do not count
+    run: { kind: trust-evaluation, input: showcase/fixtures/trust/request-t1-after-30.yaml }
+    expect: { statuses: { trust.evaluation: PASS }, decision: { resultLevel: T1, status: CURRENT, counts.t1Tasks: 30 } }
+  - id: docs-link-fix-reaches-t2
+    given: 50 docs.link-fix tasks merged to production through A1 at T1 over 10 weeks, 0 escaped defects
+    run: { kind: trust-evaluation, input: showcase/fixtures/trust/request-t2-after-50.yaml }
+    expect: { statuses: { trust.evaluation: PASS }, decision: { resultLevel: T2, status: CURRENT, escapedDefects: 0, counts.t2Tasks: 50 } }
+  - id: forty-nine-stays-t1
+    given: Boundary - the same record with 49 production merges (the 95% upper bound alone would pass)
+    run: { kind: trust-evaluation, input: showcase/fixtures/trust/request-t2-after-49.yaml }
+    expect: { statuses: { trust.evaluation: PASS }, decision: { resultLevel: T1, ruleIds: [trust.other-class-excluded, trust.t2-insufficient-tasks], counts.t2Tasks: 49 } }
+  - id: human-caught-defect-stays-t1
+    given: 60 A1 production merges over 10 weeks with 0 escaped defects, but the reviewer had to change the logic of one; only the 95% upper bound (k=1, n=60 ≈ 7.7% > 6%) refuses T2
+    run: { kind: trust-evaluation, input: showcase/fixtures/trust/request-t2-human-caught-defect.yaml }
+    expect: { statuses: { trust.evaluation: PASS }, decision: { resultLevel: T1, escapedDefects: 0, ruleIds: [trust.other-class-excluded, trust.t2-upper-bound], counts.t2Tasks: 60, counts.t2Failures: 1 } }
+  - id: major-model-change-caps-t1
+    given: The T2 class gets a model family change (major version change)
+    run: { kind: trust-evaluation, input: showcase/fixtures/trust/request-major-model-change.yaml }
+    expect: { statuses: { trust.evaluation: PASS }, decision: { resultLevel: T1, status: RE-EVALUATION_REQUIRED, computedLevel: T1 } }

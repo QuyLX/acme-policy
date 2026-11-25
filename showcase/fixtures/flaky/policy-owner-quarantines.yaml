@@ -1,0 +1,5 @@
+# quality.flaky-policy input (conforming): the owner of the test quarantines it, with evidence from main.
+at: "2026-11-25T10:00:00Z"
+change: { actor: { id: user:compute-owner, kind: human } }
+baseRegistry: showcase/fixtures/flaky/registry-empty.yaml
+headRegistry: showcase/fixtures/flaky/registry-registered.yaml

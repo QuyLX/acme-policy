@@ -1,0 +1,42 @@
+# RECORDED reviewer outputs (synthetic) of the current reviewer on the full eval set.
+version: reviewer@1.2.0
+reviewer: { model: provider/model-2026-09-15, prompt: review@1.2.0 }
+outputs:
+  incidents:
+    - {"id": "INC-01", "flagged": ["apps/admin/src/feature-1/handler.ts:11"]}
+    - {"id": "INC-02", "flagged": ["apps/admin/src/feature-2/handler.ts:12"]}
+    - {"id": "INC-03", "flagged": ["apps/admin/src/feature-3/handler.ts:13"]}
+    - {"id": "INC-04", "flagged": ["apps/admin/src/feature-4/handler.ts:14"]}
+    - {"id": "INC-05", "flagged": ["apps/admin/src/feature-5/handler.ts:15"]}
+    - {"id": "INC-06", "flagged": ["apps/admin/src/feature-6/handler.ts:16"]}
+    - {"id": "INC-07", "flagged": ["apps/admin/src/feature-7/handler.ts:17"]}
+    - {"id": "INC-08", "flagged": ["apps/admin/src/feature-8/handler.ts:18"]}
+    - {"id": "INC-09", "flagged": ["apps/admin/src/feature-9/handler.ts:19"]}
+    - {"id": "INC-10", "flagged": ["apps/admin/src/feature-10/handler.ts:20"]}
+    - {"id": "INC-11", "flagged": ["apps/admin/src/feature-11/view.tsx:3"]}
+    - {"id": "INC-12", "flagged": ["apps/admin/src/feature-12/view.tsx:3"]}
+  cleanPrs:
+    - {"id": "CLEAN-01", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-02", "findings": []}
+    - {"id": "CLEAN-03", "findings": []}
+    - {"id": "CLEAN-04", "findings": []}
+    - {"id": "CLEAN-05", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-06", "findings": []}
+    - {"id": "CLEAN-07", "findings": []}
+    - {"id": "CLEAN-08", "findings": []}
+    - {"id": "CLEAN-09", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-10", "findings": []}
+    - {"id": "CLEAN-11", "findings": []}
+    - {"id": "CLEAN-12", "findings": []}
+    - {"id": "CLEAN-13", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-14", "findings": []}
+    - {"id": "CLEAN-15", "findings": []}
+    - {"id": "CLEAN-16", "findings": []}
+    - {"id": "CLEAN-17", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-18", "findings": []}
+    - {"id": "CLEAN-19", "findings": []}
+    - {"id": "CLEAN-20", "findings": []}
+    - {"id": "CLEAN-21", "findings": [{"location": "apps/admin/src/shared/format.ts:4", "harmful": false}]}
+    - {"id": "CLEAN-22", "findings": []}
+    - {"id": "CLEAN-23", "findings": []}
+    - {"id": "CLEAN-24", "findings": []}

@@ -1,0 +1,18 @@
+# quality.flaky-policy input (violating): the implementing agent adds a quarantine for the test it made fail, and
+# records itself as the decider. Standard §7.14 item 4: quarantine is decided by the owner only.
+at: "2026-11-25T10:00:00Z"
+change: { actor: { id: agent:implementer-1, kind: agent } }
+baseRegistry: showcase/fixtures/flaky/registry-empty.yaml
+headRegistry:
+  apiVersion: aisf/4.0
+  kind: FlakyRegistry
+  window: 30d
+  entries:
+    - testId: "src/poller.test.mjs::LRO polling keeps the newest operation state"
+      checkId: quality.test
+      owner: user:compute-owner
+      quarantineId: Q-2026-002
+      decidedBy: agent:implementer-1
+      quarantinedAt: "2026-11-25"
+      fixBy: "2026-12-25"
+      evidence: { window: { from: "2026-10-26", to: "2026-11-25" }, mainFailures: 1 }

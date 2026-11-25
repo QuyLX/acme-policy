@@ -1,0 +1,5 @@
+# profile.resolve input: the same conflict, from a request that claims blocking is off and dates itself before the
+# switch. The gate ignores both fields (profile.request-switch-ignored): blocking follows its own clock and policy.
+blockingIncomparable: false
+at: "2026-01-01"
+layers: [showcase/fixtures/profile-layers/core.yaml, showcase/fixtures/profile-layers/domain.yaml, showcase/fixtures/profile-layers/repository-node26.yaml]

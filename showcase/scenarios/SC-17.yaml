@@ -1,0 +1,132 @@
+# SC-17 — Cross-surface and cross-repo testing (FE §20.3; Standard §7.3 item 5; FE §8.5, §8.8, §8.10).
+# Simulated: a synthetic monorepo (showcase/fixtures/cross-surface/frontend) with @platform/server, admin and console;
+# console and admin never depend on each other (ADR-FE-0002), so the cross-surface consumer of the console catalog
+# export is a second synthetic repo found through a recorded portfolio index. Journey tests run for real with
+# `node --test` (the stand-in for the Playwright adapter) in a temp git copy whose workspace packages are linked as an
+# install would.
+# Staging does not exist. It is simulated by (1) a recorded EnvironmentManifest (versions, seed, flags, health recorded
+# before the run) and (2) a stand-in in a temp directory: the environment's health document, which the check re-reads
+# as its live probe (`healthProbe`) before the run and after every test, and an optional recorded outage. The fixture's
+# tenants-api client (frontend/apps/admin/test/support/tenants-api.mjs) talks to the stand-in: when the outage starts it
+# marks tenants-api unhealthy in the health document and answers 503, as a dying staging would. The check does not know
+# about the outage; it only sees a failing test and a probe that now reports unhealthy.
+# Cross-repo scope: the plan selects the consumer repo's (partner-portal) tests and they are part of the plan digest,
+# but test.e2e-journeys executes only the primary repo's journey tests; consumer tests run in the consumer's pipeline
+# (not simulated here). FE §8.10 requires the selection, which the test-plan cases prove.
+# Everything else is the real Test Planner, the real `acme-policy run` pipeline and the real task runner.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-17
+title: Cross-surface and cross-repo testing
+demonstrates: [CORE-VER-01]
+slice: 1
+mode: pilot
+cases:
+  - id: server-change-selects-admin-journey
+    given: A change in @platform/server, used by admin and console; nothing in apps changes
+    run: { kind: test-plan, request: showcase/fixtures/cross-surface/requests/plan-server-change.yaml }
+    expect:
+      statuses: { test.plan: PASS }
+      decision:
+        selected:
+          - "frontend apps/admin/test/tenants/tenants-list.journey.test.mjs critical-journey,import-graph:@platform/server"
+          - "frontend apps/console/test/catalog/catalog-browse.journey.test.mjs critical-journey,import-graph:@platform/server"
+          - "frontend apps/console/test/catalog/catalog.test.mjs import-graph:@platform/server"
+          - "frontend apps/console/test/status/status-overview.journey.test.mjs sentinel"
+          - "partner-portal test/catalog-panel.test.mjs portfolio-consumer:partner-portal"
+        surfaces: { direct: [], graph: [admin/tenants, console/catalog], sentinel: [console/status], consumers: ["partner-portal:@console/catalog"] }
+  - id: console-module-reaches-consumer-repo
+    given: A change in the console catalog module, whose export another repo imports
+    run: { kind: test-plan, request: showcase/fixtures/cross-surface/requests/plan-console-module.yaml }
+    expect:
+      statuses: { test.plan: PASS }
+      decision:
+        selected:
+          - "frontend apps/console/test/catalog/catalog-browse.journey.test.mjs critical-journey,direct"
+          - "frontend apps/console/test/catalog/catalog.test.mjs direct"
+          - "partner-portal test/catalog-panel.test.mjs portfolio-consumer:partner-portal"
+  - id: unmapped-file-runs-surface-suite
+    given: A changed file the import graph cannot map (a JSON column definition nobody imports)
+    run: { kind: test-plan, request: showcase/fixtures/cross-surface/requests/plan-unmapped.yaml }
+    expect:
+      statuses: { test.plan: PASS }
+      rules: [TEST-PLAN-UNMAPPED]
+      decision:
+        unmapped: [apps/admin/src/tenants/columns.json]
+        selected:
+          - "frontend apps/admin/test/tenants/tenant-detail.journey.test.mjs unmapped→full-suite:admin/tenants"
+          - "frontend apps/admin/test/tenants/tenants-list.journey.test.mjs critical-journey,unmapped→full-suite:admin/tenants"
+  - id: plan-narrowed-below-floor
+    given: An agent asks to drop the admin journey from the plan of a server change
+    run: { kind: test-plan, request: showcase/fixtures/cross-surface/requests/plan-narrowed.yaml }
+    expect: { statuses: { test.plan: FAIL }, rules: [TEST-PLAN-BELOW-FLOOR] }
+  - id: clean-server-change-passes
+    given: Baseline for the seeded-defect case — the same server package changes without a defect; staging is healthy
+    run: { kind: cross-surface-run, request: showcase/fixtures/cross-surface/requests/e2e-server-change.yaml, events: showcase/fixtures/cross-surface/events/task-head.jsonl }
+    expect:
+      exitCode: 0
+      statuses: { test.plan: PASS, test.e2e-journeys: PASS }
+      taskState: VERIFYING
+      decision:
+        evidence.schemaErrors: []
+        evidence.planMatches: true
+        evidence.failureAttribution: null
+        evidence.failed: []
+        evidence.ran:
+          - apps/admin/test/tenants/tenants-list.journey.test.mjs PASS
+          - apps/console/test/catalog/catalog-browse.journey.test.mjs PASS
+          - apps/console/test/status/status-overview.journey.test.mjs PASS
+        task.verifyFails: 0
+  - id: seeded-admin-defect-caught
+    given: The server cache key drops the tenant; only the admin two-tenant journey can see it; staging is healthy
+    run: { kind: cross-surface-run, request: showcase/fixtures/cross-surface/requests/e2e-seeded-defect.yaml, events: showcase/fixtures/cross-surface/events/task-head.jsonl }
+    expect:
+      exitCode: 1
+      statuses: { test.plan: PASS, test.e2e-journeys: FAIL }
+      rules: [E2E-JOURNEY-FAILED]
+      taskState: REPAIRING
+      decision:
+        evidence.schemaErrors: []
+        evidence.planMatches: true
+        evidence.testPlan: "sha256:3f86e69610c2f73fc11a98c1843769bdaef8323bdb63fa63fa50e9d263942aba"
+        evidence.environment: { executor: ci, id: staging-1, kind: staging, manifestDigest: "sha256:2169afe6c3814805d730734d726bd115f37bea35ea4f6f455383bc09b5aad2ab" }
+        evidence.failureAttribution: product
+        evidence.failed: [admin/tenants.list]
+        evidence.probes:
+          - "pre-run: healthy"
+          - "after apps/admin/test/tenants/tenants-list.journey.test.mjs: healthy"
+          - "after apps/console/test/catalog/catalog-browse.journey.test.mjs: healthy"
+          - "after apps/console/test/status/status-overview.journey.test.mjs: healthy"
+        task.verifyFails: 1
+  - id: staging-unhealthy-is-error
+    given: The same change while staging reports tenants-api unhealthy
+    run: { kind: cross-surface-run, request: showcase/fixtures/cross-surface/requests/e2e-staging-unhealthy.yaml, events: showcase/fixtures/cross-surface/events/task-head.jsonl }
+    expect:
+      exitCode: 2
+      statuses: { test.e2e-journeys: ERROR }
+      rules: [ENV-NOT-READY]
+      decision:
+        evidence.schemaErrors: []
+        evidence.failureAttribution: environment
+        evidence.failed: []
+        task.verifyFails: 0
+        task.state: EXECUTING
+  - id: staging-dies-mid-run-is-error
+    given: The clean change; staging is healthy before the run and tenants-api goes down during the admin journey
+    run: { kind: cross-surface-run, request: showcase/fixtures/cross-surface/requests/e2e-staging-dies-mid-run.yaml, events: showcase/fixtures/cross-surface/events/task-head.jsonl }
+    expect:
+      exitCode: 2
+      statuses: { test.plan: PASS, test.e2e-journeys: ERROR }
+      rules: [ENV-UNHEALTHY-MID-RUN, E2E-JOURNEY-FAILED]
+      taskState: EXECUTING
+      decision:
+        evidence.schemaErrors: []
+        evidence.failureAttribution: environment
+        evidence.failed: [admin/tenants.list]
+        evidence.ran: [apps/admin/test/tenants/tenants-list.journey.test.mjs FAIL environment]
+        evidence.notRun: [apps/console/test/catalog/catalog-browse.journey.test.mjs, apps/console/test/status/status-overview.journey.test.mjs]
+        evidence.probes:
+          - "pre-run: healthy"
+          - "after apps/admin/test/tenants/tenants-list.journey.test.mjs: unhealthy (environment)"
+        task.verifyFails: 0
+        task.state: EXECUTING

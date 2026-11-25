@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/breaker-state.schema.json",
+  "title": "BreakerState — circuit breakers per surface and per task class (Standard §9.9; FE §10.6)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "updatedAt", "breakers"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "BreakerState" },
+    "updatedAt": { "type": "string" },
+    "breakers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "scope", "signal", "state"],
+        "properties": {
+          "id": { "type": "string" },
+          "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "id"],
+            "properties": { "kind": { "enum": ["surface", "taskClass"] }, "id": { "type": "string" } }
+          },
+          "signal": { "enum": ["zero-human-revert", "revert-rate", "early-indicators", "escaped-defect", "error-budget", "break-glass", "version-change", "harmful-review", "policy-violation"] },
+          "state": { "enum": ["closed", "tripped"] },
+          "trippedAt": { "type": "string" },
+          "trippedBy": { "const": "automatic", "description": "Tightening is automatic (§9.9 item 3)" },
+          "reason": { "type": "string" },
+          "effects": { "type": "array", "items": { "enum": ["pause-a0", "signoff-not-counted", "trust-to-t0", "re-evaluation", "pin-reviewer", "disable-auto-fix", "revoke-agent-scopes"] } },
+          "loosenedBy": { "type": "array", "items": { "type": "string" }, "minItems": 2, "description": "Surface owner and Factory owner (§9.10)" },
+          "loosenedAt": { "type": "string" },
+          "evidence": { "type": "string", "minLength": 1 }
+        },
+        "if": { "properties": { "loosenedBy": { "type": "array" } }, "required": ["loosenedBy"] },
+        "then": { "required": ["evidence", "loosenedAt"] }
+      }
+    }
+  }
+}

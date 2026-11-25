@@ -1,0 +1,4 @@
+# RECORDED signal log (synthetic): a docs.link-fix change merged at A0 was reverted (simulated revert; A0 never ran in
+# pilot mode). At low volume any revert of a zero-human merge is an absolute trigger (Standard §9.9 item 5, FE §10.6).
+signals:
+  - { kind: revert, surface: docs, taskClass: docs.link-fix, change: PR-812, mergedVia: A0, at: "2026-11-19T08:00:00Z" }

@@ -1,0 +1,31 @@
+diff --git a/apps/admin/src/domains/tenants/server/delete.action.ts b/apps/admin/src/domains/tenants/server/delete.action.ts
+new file mode 100644
+index 0000000..a489a4e
+--- /dev/null
++++ b/apps/admin/src/domains/tenants/server/delete.action.ts
+@@ -0,0 +1,10 @@
++'use server';
++// Server action: permanently deletes a tenant (synthetic handler).
++import { defineMutation } from '../../../platform/mutation.ts';
++
++export const deleteTenant = defineMutation({
++  name: 'tenants.delete',
++  input: (raw: unknown) => (typeof raw === 'object' && raw !== null && typeof (raw as { tenantId?: unknown }).tenantId === 'string' ? { tenantId: (raw as { tenantId: string }).tenantId } : null),
++  authorize: (ctx) => Boolean(ctx.actor),
++  handler: async (_ctx, input) => ({ tenantId: input.tenantId, deleted: true }),
++});
+diff --git a/apps/admin/src/domains/tenants/ui/DeleteTenantButton.tsx b/apps/admin/src/domains/tenants/ui/DeleteTenantButton.tsx
+new file mode 100644
+index 0000000..ece84c8
+--- /dev/null
++++ b/apps/admin/src/domains/tenants/ui/DeleteTenantButton.tsx
+@@ -0,0 +1,9 @@
++'use client';
++// Danger-zone button; only personas with tenants.delete see it.
++import { can } from '../../../platform/authz.ts';
++import { deleteTenant } from '../server/delete.action.ts';
++
++export function DeleteTenantButton({ tenantId, session }: { tenantId: string; session: { permissions: string[] } | null }) {
++  if (!can(session, 'tenants.delete')) return null;
++  return <button type="button" onClick={() => deleteTenant({ tenantId })}>Delete tenant</button>;
++}

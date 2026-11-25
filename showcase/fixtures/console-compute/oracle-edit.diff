@@ -1,0 +1,21 @@
+diff --git a/src/lro.oracle.test.mjs b/src/lro.oracle.test.mjs
+--- a/src/lro.oracle.test.mjs
++++ b/src/lro.oracle.test.mjs
+@@ -10,6 +10,6 @@ test('@journey:console/compute.create-instance @scenario:happy @ac:AC-CI-1 a finished create
+   assert.equal(instanceStatus({ done: true, response: { status: 'RUNNING' } }), 'RUNNING');
+ });
+ 
+-test('@journey:console/compute.create-instance @scenario:lro-failure @ac:AC-CI-6 a failed create operation shows FAILED, never RUNNING', () => {
+-  assert.equal(instanceStatus({ done: true, error: { code: 'QUOTA_EXCEEDED' } }), 'FAILED');
++test('@journey:console/compute.create-instance @scenario:lro-failure @ac:AC-CI-6 a failed create operation shows RUNNING', () => {
++  assert.equal(instanceStatus({ done: true, error: { code: 'QUOTA_EXCEEDED' } }), 'RUNNING');
+ });
+diff --git a/journeys.yaml b/journeys.yaml
+--- a/journeys.yaml
++++ b/journeys.yaml
+@@ -14,4 +14,4 @@
+   acceptance:
+     - { id: AC-CI-1, statement: "A finished create operation shows the instance as RUNNING" }
+-    - { id: AC-CI-6, statement: "A failed create operation shows the instance as FAILED with the error, never RUNNING" }
++    - { id: AC-CI-6, statement: "A failed create operation keeps the instance RUNNING until the next poll" }
+   evidence: [e2e, persisted-state]

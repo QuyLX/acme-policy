@@ -1,0 +1,8 @@
+# SC-13: the request claims the surface is already at advisory and asks for blocking (RECORDED data that would meet the
+# blocking thresholds). The descriptor (repo fixture) says shadow: the claim is ignored and reported.
+surface: admin/users
+current: advisory
+requested: blocking
+dispositions: showcase/fixtures/review/admin-dispositions-advisory.yaml
+evalSet: showcase/fixtures/review/eval-set.yaml
+reviewerOutputs: showcase/fixtures/review/reviewer-baseline.yaml

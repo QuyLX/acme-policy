@@ -1,0 +1,7 @@
+# SC-12 input (RECORDED provider data): admin.step-up-auth is a cross-team-contract check verified in the provider's
+# pipeline. The attested provider run verified the commit that production runs, 3 days before `now`.
+providerRun: showcase/fixtures/contract/provider-run-v1.json
+providerAttestation: showcase/fixtures/contract/provider-run-v1.sig.json
+deployments: showcase/fixtures/contract/deployments-v1.yaml
+environment: production
+now: "2026-11-20T12:00:00Z"

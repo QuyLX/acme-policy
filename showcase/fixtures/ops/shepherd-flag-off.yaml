@@ -1,0 +1,7 @@
+# SC-15 (SIMULATED flag provider): a regression alert fires during the rollout of an R1 admin change; the Change
+# Shepherd returns its feature flag (safeState: off) to off and pauses the rollout.
+tier: R1
+flags: showcase/fixtures/ops/flags.yaml
+actions:
+  - { tool: flag.return-to-safe-state, flag: admin.export-dialog-v2, value: "off", alert: "ALERT-2207 error rate 4x on /exports", at: "2026-11-20T10:02:00Z" }
+  - { tool: rollout.pause, rollout: admin-web@2026.11.20-1, alert: "ALERT-2207 error rate 4x on /exports", at: "2026-11-20T10:02:30Z" }

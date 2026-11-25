@@ -1,0 +1,5 @@
+# quality.flaky-policy input (conforming): the same fail-then-pass on a registered flake, both results recorded.
+at: "2026-11-25T10:00:00Z"
+baseRegistry: showcase/fixtures/flaky/registry-registered.yaml
+reruns:
+  - { testId: "src/poller.test.mjs::LRO polling keeps the newest operation state", checkId: quality.test, attempts: [FAIL, PASS] }

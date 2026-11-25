@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/check-baseline.schema.json",
+  "title": "CheckBaseline — violations snapshotted when a baselineable check became active (Standard §8.7 rule 7; §7.5 baselined; FE §8.2, §8.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "checkId", "checkVersion", "producer", "ref", "takenAt", "entries"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "CheckBaseline" },
+    "checkId": { "type": "string" },
+    "checkVersion": { "type": "string" },
+    "producer": { "type": "string", "description": "The registered trusted mechanism that wrote the baseline (registry/trusted-mechanisms.yaml)" },
+    "ref": { "type": "string" },
+    "commitSha": { "type": "string" },
+    "takenAt": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["location", "fingerprint"],
+        "properties": {
+          "location": { "type": "string" },
+          "fingerprint": { "type": "string", "pattern": "^[0-9a-f]{16}$" },
+          "ruleId": { "type": "string" }
+        }
+      }
+    }
+  }
+}

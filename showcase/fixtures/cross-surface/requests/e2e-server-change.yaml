@@ -1,0 +1,8 @@
+# Clean change (the server cache gains a size() helper): every selected journey passes on a healthy staging.
+primary: frontend
+repo: showcase/fixtures/cross-surface/frontend
+change: showcase/fixtures/cross-surface/changes/server-cache.diff
+portfolio: showcase/fixtures/cross-surface/portfolio-index.json
+environment: showcase/fixtures/cross-surface/env/staging-healthy.json
+healthProbe: showcase/fixtures/cross-surface/env/staging-healthy.json
+tier: R1

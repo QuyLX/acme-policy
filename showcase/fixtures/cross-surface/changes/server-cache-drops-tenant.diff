@@ -1,0 +1,13 @@
+diff --git a/packages/server/src/cache.mjs b/packages/server/src/cache.mjs
+index 8c13615..d92b7a4 100644
+--- a/packages/server/src/cache.mjs
++++ b/packages/server/src/cache.mjs
+@@ -10,7 +10,7 @@ export function createMemoryCache() {
+ 
+ export function tenantKey(ctx, ...parts) {
+   if (!ctx?.tenantId) throw new Error('tenantKey: tenantId is required');
+-  return JSON.stringify(['tenant', ctx.tenantId, ...parts]);
++  return JSON.stringify(parts); // shorter keys
+ }
+ 
+ export async function cachedForTenant(ctx, parts, load, cache) {

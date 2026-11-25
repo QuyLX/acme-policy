@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/deployment-record.schema.json",
+  "title": "DeploymentRecord — what a provider runs (or is about to run) in an environment (FE §8.2 `can-i-deploy` style broker record; Standard §7.5 item 7, §12.3)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "provider", "environment", "version", "commitSha", "status", "at", "recordedBy"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "DeploymentRecord" },
+    "provider": { "type": "string", "description": "Provider service id (the team owning it is the check's fixOwner)" },
+    "environment": { "type": "string" },
+    "version": { "type": "string" },
+    "commitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "status": { "enum": ["pending", "deployed", "rolled-back"], "description": "pending = about to be deployed" },
+    "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" },
+    "verificationRunId": { "type": "string", "description": "Run the provider claims for this deployment; informational, never trusted on its own" },
+    "recordedBy": { "type": "string", "description": "Broker or deploy pipeline identity (never an agent)" }
+  }
+}

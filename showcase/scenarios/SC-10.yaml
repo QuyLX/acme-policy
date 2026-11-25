@@ -1,0 +1,90 @@
+# SC-10 — Check lifecycle (FE §20.3; Standard §8.7 rules 1, 4, 5, 7; §7.5 dispositions; K.3 Waiver; FE §8.2, §8.5, §10.5).
+# The check under test is export.csv-injection (registered in shadow, tech-design 13 §5), run for real on the
+# admin-authz-repo fixture through `acme-policy run`; authz.permission-matrix stands in for a baselineable: false check.
+# Simulated (tech-design 13 §0): `decision only` — nothing edits registry/checks.yaml, `promote` returns the decision and
+# the entry the check would have; no CI and no target branch — the activation snapshot runs the registered trusted
+# mechanism on a fixture state with a recorded CI context (executor ci, push, refs/heads/main); `recorded data` —
+# false-positive ledgers, waivers, approver roles and the PR-authored baseline are synthetic records.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-10
+title: Check lifecycle — mutation proof, shadow period, activation baseline, false-positive budget, waivers
+demonstrates: [CORE-VER-10, CORE-GOV-09]
+slice: 1
+cases:
+  - id: activate-without-violating-fixture
+    given: The registry change activating export.csv-injection removes its violating fixtures
+    run: { kind: check-lifecycle, op: promote, checkId: export.csv-injection, to: active, shadowSince: "2026-10-20", now: "2026-11-25", fixtures: { conforming: [{ repo: showcase/fixtures/admin-authz-repo }] } }
+    expect: { status: FAIL, rules: [lifecycle.mutation-proof], decision: { allowed: false, lifecycle: shadow } }
+  - id: activate-detector-never-fails
+    given: The only "violating" fixture is the clean repo, so the check has never been seen to fail
+    run: { kind: check-lifecycle, op: promote, checkId: export.csv-injection, to: active, shadowSince: "2026-10-20", now: "2026-11-25", fixtures: { violating: [{ repo: showcase/fixtures/admin-authz-repo }] } }
+    expect: { status: FAIL, rules: [lifecycle.mutation-proof], decision: { allowed: false, proof: [false] } }
+  - id: activate-before-shadow-period
+    given: The check entered shadow 5 days ago; the profile period is at least 14 days
+    run: { kind: check-lifecycle, op: promote, checkId: export.csv-injection, to: active, shadowSince: "2026-11-20", now: "2026-11-25" }
+    expect: { status: FAIL, rules: [lifecycle.shadow-period], decision: { allowed: false, proof: [true, true] } }
+  - id: activate-with-proof
+    given: Both violating fixtures fail now, 36 days in shadow; main still has the raw-join export, so activation needs the CI baseline snapshot
+    run: { kind: check-lifecycle, op: promote, checkId: export.csv-injection, to: active, shadowSince: "2026-10-20", now: "2026-11-25", target: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff } }
+    expect: { status: PASS, decision: { allowed: true, lifecycle: active, enforcement: blocking, requirement: required, requiresBaselineSnapshot: true, violations: 2, proof: [true, true] } }
+  - id: activate-non-baselineable-with-violations
+    given: authz.permission-matrix (baselineable false) would activate while main still has an authorize that returns true
+    run: { kind: check-lifecycle, op: promote, checkId: authz.permission-matrix, to: active, shadowSince: "2026-10-20", now: "2026-11-25", target: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/permission-only-in-ui.diff } }
+    expect: { status: FAIL, rules: [lifecycle.baseline-zero], decision: { allowed: false, requiresBaselineSnapshot: false } }
+  - id: snapshot-by-ci
+    given: On activation, CI on refs/heads/main snapshots the two existing violations
+    run: { kind: check-lifecycle, op: snapshot, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, executor: ci, event: push, ref: refs/heads/main, now: "2026-11-25T08:00:00Z" }
+    expect: { status: PASS, decision: { producer: "trusted:baseline-snapshot", ref: refs/heads/main, entries.0.location: "apps/admin/src/app/tenants/export/route.ts:17", entries.1.location: "apps/admin/src/app/tenants/export/route.ts:18" } }
+  - id: snapshot-from-pull-request
+    given: The same snapshot is attempted from a pull request run
+    run: { kind: check-lifecycle, op: snapshot, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, executor: ci, event: pull_request, ref: refs/pull/42/merge, now: "2026-11-25T08:00:00Z" }
+    expect: { status: FAIL, rules: [baseline.snapshot-not-ci] }
+  - id: old-violation-baselined
+    given: After activation, a PR leaves the baselined export untouched
+    run: { kind: check-lifecycle, op: apply-baseline, checkId: export.csv-injection, activation: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, now: "2026-11-25T08:00:00Z" }
+    expect: { status: FAIL, exitCode: 0, dispositions: { export.csv-injection: baselined } }
+  - id: new-violation-blocks
+    given: A PR adds an audit-export route that builds CSV rows with a template literal
+    run: { kind: check-lifecycle, op: apply-baseline, checkId: export.csv-injection, activation: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-new-violation.diff }, now: "2026-11-25T08:00:00Z" }
+    expect: { status: FAIL, exitCode: 1, rules: [baseline.new-violation], decision: { new.length: 2, matched.length: 2 } }
+  - id: fix-shrinks-baseline
+    given: A PR restores toCsv; the baselined entries no longer fail
+    run: { kind: check-lifecycle, op: apply-baseline, checkId: export.csv-injection, activation: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, state: { repo: showcase/fixtures/admin-authz-repo }, now: "2026-11-25T08:00:00Z" }
+    expect: { status: PASS, exitCode: 0, rules: [baseline.stale], decision: { invalidated.length: 2 } }
+  - id: baseline-added-in-pr
+    given: The PR adding the new violation also commits a baseline file listing it
+    run: { kind: check-lifecycle, op: apply-baseline, checkId: export.csv-injection, baseline: showcase/fixtures/check-lifecycle/baseline-from-pr.yaml, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-new-violation.diff } }
+    expect: { status: FAIL, exitCode: 1, rules: [baseline.untrusted-producer] }
+  - id: owner-confirmed-fp-over-slo
+    given: Owner-team members (not the authors) confirm 3 false positives of 40 findings; fpSlo 0.05, autoDemote false
+    run: { kind: check-lifecycle, op: fp-slo, checkId: export.csv-injection, ledger: showcase/fixtures/check-lifecycle/fp-ledger-owner-confirmed.yaml }
+    expect: { status: FAIL, rules: [fpslo.priority-work-item], decision: { exceeded: true, counted: 3, enforcement: blocking, workItem.priority: P1, waiverMaxDays: 14 } }
+  - id: author-confirmed-fp-not-counted
+    given: The "false positives" are confirmed by the authors of the changes, or not confirmed; one is disputed
+    run: { kind: check-lifecycle, op: fp-slo, checkId: export.csv-injection, ledger: showcase/fixtures/check-lifecycle/fp-ledger-author-confirmed.yaml }
+    expect: { status: PASS, rules: [fpslo.not-counted], decision: { exceeded: false, counted: 0, notCounted: 3, disputed: 1, enforcement: blocking } }
+  - id: self-waiver
+    given: The requester approves their own waiver on the BLOCKER check
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, input: showcase/fixtures/check-lifecycle/waiver-self.yaml }
+    expect: { status: FAIL, exitCode: 1, rules: [policy.sod.waiver-self] }
+  - id: approver-not-permitted
+    given: A peer developer, neither the vertical's tech lead nor a code owner, approves
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, input: showcase/fixtures/check-lifecycle/waiver-peer.yaml }
+    expect: { status: FAIL, exitCode: 1, rules: [waiver.approver-not-permitted] }
+  - id: right-approver-in-scope
+    given: The tech lead approves a 14-day waiver scoped to the export route, which holds every finding
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, input: showcase/fixtures/check-lifecycle/waiver-tech-lead.yaml }
+    expect: { status: PASS, exitCode: 0, statuses: { export.csv-injection: FAIL }, dispositions: { export.csv-injection: waived } }
+  - id: waiver-out-of-scope
+    given: The same waiver, but the change also adds the audit-export route outside its scope
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-new-violation.diff }, input: showcase/fixtures/check-lifecycle/waiver-tech-lead.yaml }
+    expect: { status: FAIL, exitCode: 1, rules: [waiver.out-of-scope] }
+  - id: waiver-30-days-allowed
+    given: Control case — the tech lead approves a 30-day waiver while the check is within its FP SLO
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, input: showcase/fixtures/check-lifecycle/waiver-30-days.yaml }
+    expect: { status: PASS, exitCode: 0, dispositions: { export.csv-injection: waived } }
+  - id: waiver-too-long-over-fp-slo
+    given: The same 30-day waiver while owner-confirmed false positives exceed the FP SLO
+    run: { kind: check-lifecycle, op: waiver, checkId: export.csv-injection, state: { repo: showcase/fixtures/admin-authz-repo, change: showcase/fixtures/csv-formula-injection.diff }, input: showcase/fixtures/check-lifecycle/waiver-30-days.yaml, ledger: showcase/fixtures/check-lifecycle/fp-ledger-owner-confirmed.yaml }
+    expect: { status: FAIL, exitCode: 1, rules: [waiver.expiry-too-long] }

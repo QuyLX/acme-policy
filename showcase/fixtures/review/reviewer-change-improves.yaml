@@ -1,0 +1,4 @@
+# review.reviewer-change conforming input: the candidate is the improved reviewer, the baseline the regressed one.
+evalSet: showcase/fixtures/review/eval-set.yaml
+baseline: showcase/fixtures/review/reviewer-candidate.yaml
+candidate: showcase/fixtures/review/reviewer-baseline.yaml

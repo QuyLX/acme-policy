@@ -1,0 +1,10 @@
+diff --git a/src/lro.mjs b/src/lro.mjs
+--- a/src/lro.mjs
++++ b/src/lro.mjs
+@@ -4,5 +4,6 @@
+ /** @param {{ done: boolean, error?: { code: string }, response?: { status: string } }} op */
+ export function instanceStatus(op) {
+   if (!op.done) return 'PROVISIONING';
++  if (op.error) return 'FAILED';
+   return op.response?.status ?? 'RUNNING';
+ }

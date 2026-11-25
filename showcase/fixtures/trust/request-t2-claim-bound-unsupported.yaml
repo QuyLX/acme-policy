@@ -1,0 +1,9 @@
+# trust.evaluation violating input: a recorded TrustEvaluation claims T2 for the 60-merge record in which the A1 reviewer
+# corrected one change. Count, window and escaped defects would allow T2; the recomputed 95% upper bound (k=1, n=60)
+# does not, so the claim is unsupported.
+taskClass: docs.link-fix
+tasks: showcase/fixtures/trust/tasks-production-60-one-caught.yaml
+evals: showcase/fixtures/trust/common-evals.yaml
+window: { from: "2026-05-25T00:00:00Z", to: "2026-11-20T00:00:00Z" }
+decidedBy: ["user:docs-owner", "user:factory-owner"]
+claimed: { resultLevel: T2 }

@@ -220,21 +220,72 @@
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["kind", "repo", "fix"],
+              "required": [
+                "kind",
+                "repo",
+                "fix"
+              ],
               "properties": {
-                "kind": { "const": "bugfix" },
-                "repo": { "type": "string" },
-                "fix": { "type": "string" }
+                "kind": {
+                  "const": "bugfix"
+                },
+                "repo": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "string"
+                }
               }
             },
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["kind", "op", "fixture"],
+              "required": [
+                "kind",
+                "op",
+                "fixture"
+              ],
               "properties": {
-                "kind": { "const": "binding" },
-                "op": { "enum": ["change-event", "waiver", "attest", "break-glass", "verify-absent"] },
-                "fixture": { "type": "string" }
+                "kind": {
+                  "const": "binding"
+                },
+                "op": {
+                  "enum": [
+                    "change-event",
+                    "waiver",
+                    "attest",
+                    "break-glass",
+                    "verify-absent"
+                  ]
+                },
+                "fixture": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind"
+              ],
+              "description": "A run kind implemented in lib/modules/* (tech-design 13). Unknown kinds are an ERROR at run time.",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$",
+                  "not": {
+                    "enum": [
+                      "integrity",
+                      "sod",
+                      "run",
+                      "task",
+                      "playbook-change",
+                      "generate",
+                      "bugfix",
+                      "binding"
+                    ]
+                  }
+                }
               }
             }
           ]
@@ -283,6 +334,17 @@
             },
             "taskState": {
               "type": "string"
+            },
+            "decision": {
+              "type": "object",
+              "description": "dot-path → expected value in observed.decision (deep equality)"
+            },
+            "dispositions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "checkId → expected disposition type"
             }
           }
         }

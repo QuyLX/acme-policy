@@ -1,0 +1,7 @@
+# sec.sandbox-egress violating input (mutation proof): the same compromised step under the SAME host backend, with the
+# network restriction of agents/sandbox.yaml removed (sandbox-exec profile without `(deny network*)`; docker on the
+# default bridge instead of `--network none`). Everything else stays confined; the host listener must receive a request.
+issue: showcase/fixtures/exfil/issue.md
+step: showcase/fixtures/exfil/compromised-step.mjs
+sandbox: auto
+mutation: network-allowed

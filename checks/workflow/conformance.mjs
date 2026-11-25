@@ -23,7 +23,7 @@ export function loadPlaybook(ref, extraDirs = []) {
   return null;
 }
 
-export function workflowConformanceCheck(def, events, { extraDirs = [] } = {}) {
+export function workflowConformanceCheck(def, events, { extraDirs = [], flakyRegistry, knowledgeIndex } = {}) {
   const started = Date.now();
   const bad = events.flatMap((e, i) => validate('task-event', e).map((m) => `event #${i + 1}: ${m}`));
   if (bad.length) return checkResult(def, { status: 'ERROR', reason: `invalid task events: ${bad.slice(0, 5).join('; ')}` });
@@ -31,7 +31,7 @@ export function workflowConformanceCheck(def, events, { extraDirs = [] } = {}) {
   const playbook = ref && loadPlaybook(ref, extraDirs);
   if (!playbook) return checkResult(def, { status: 'FAIL', reason: `no playbook ${ref ?? '(task.requested missing)'}: a task class runs only on a registered playbook (CORE-WRK-07)` });
   const taskClass = readYaml(policyPath('registry', 'task-classes.yaml')).taskClasses.find((t) => t.playbook.split('@')[0] === playbook.metadata.id);
-  const d = deriveTask(events, playbook, { policyCost: taskClass?.budgets?.cost?.limit });
+  const d = deriveTask(events, playbook, { policyCost: taskClass?.budgets?.cost?.limit, flakyRegistry, knowledgeIndex });
   return checkResult(def, {
     status: d.violations.length && def.enforcement === 'blocking' ? 'FAIL' : 'PASS',
     reason: d.violations.length ? d.violations.map((x) => `${x.code}: ${x.message}`).join('; ') : undefined,
@@ -40,6 +40,6 @@ export function workflowConformanceCheck(def, events, { extraDirs = [] } = {}) {
       ...d.warnings.map((w) => ({ source: 'check', ruleId: 'WF-NOTICE', severity: 'INFO', location: d.task.workItemId, message: w, state: 'open' })),
     ],
     durationMs: Date.now() - started,
-    extensions: { 'x-task': d.task, 'x-handoffs': d.handoffs.map((h) => ({ from: h.from.role, to: h.to.role, status: h.status, problems: h.problems })), 'x-checkpoints': d.checkpoints.length, 'x-recoveries': d.recoveries },
+    extensions: { 'x-task': d.task, 'x-handoffs': d.handoffs.map((h) => ({ from: h.from.role, to: h.to.role, status: h.status, problems: h.problems })), 'x-checkpoints': d.checkpoints.length, 'x-recoveries': d.recoveries, 'x-basis': { basis: d.basis, basisChanges: d.basisChanges, knowledgeConflicts: d.knowledgeConflicts } },
   });
 }

@@ -1,0 +1,12 @@
+diff --git a/packages/server/src/cache.mjs b/packages/server/src/cache.mjs
+index 8c13615..e8fe7e9 100644
+--- a/packages/server/src/cache.mjs
++++ b/packages/server/src/cache.mjs
+@@ -5,6 +5,7 @@ export function createMemoryCache() {
+   return {
+     get: (key) => entries.get(key),
+     set: (key, value) => void entries.set(key, value),
++    size: () => entries.size,
+   };
+ }
+ 

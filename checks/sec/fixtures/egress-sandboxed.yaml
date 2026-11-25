@@ -1,0 +1,4 @@
+# sec.sandbox-egress conforming input: the compromised step runs under the host's sandbox backend (SC-05).
+issue: showcase/fixtures/exfil/issue.md
+step: showcase/fixtures/exfil/compromised-step.mjs
+sandbox: auto

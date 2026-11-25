@@ -1,0 +1,45 @@
+diff --git a/apps/admin/src/app/tenants/audit-export/route.ts b/apps/admin/src/app/tenants/audit-export/route.ts
+new file mode 100644
+index 0000000..6e3b81c
+--- /dev/null
++++ b/apps/admin/src/app/tenants/audit-export/route.ts
+@@ -0,0 +1,15 @@
++// Route: CSV download of tenant status changes (added after export.csv-injection was activated).
++import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
++import { requestContext } from '../../../platform/session.ts';
++import { allTenants } from '../../../domains/tenants/server/data.ts';
++
++export async function GET(): Promise<Response> {
++  try {
++    requirePermission(await requestContext(), 'tenants.export');
++  } catch (err) {
++    if (err instanceof ForbiddenError) return new Response(null, { status: 403 });
++    throw err;
++  }
++  const lines = allTenants().map((t) => `${t.id},${t.name},${t.status}`);
++  return new Response(`tenant,name,status\r\n${lines.join('\r\n')}\r\n`, { headers: { 'content-type': 'text/csv' } });
++}
+diff --git a/apps/admin/src/app/tenants/export/route.ts b/apps/admin/src/app/tenants/export/route.ts
+index 8d2c18b..40a1ff4 100644
+--- a/apps/admin/src/app/tenants/export/route.ts
++++ b/apps/admin/src/app/tenants/export/route.ts
+@@ -1,7 +1,6 @@
+-// Route entry `tenants.export`: CSV download of the tenant list. The body is built only through toCsv.
++// Route entry `tenants.export`: CSV download of the tenant list.
+ import { ForbiddenError, requirePermission } from '../../../platform/authz.ts';
+ import { requestContext, UnauthenticatedError } from '../../../platform/session.ts';
+-import { toCsv } from '../../../platform/csv.ts';
+ import { allTenants } from '../../../domains/tenants/server/data.ts';
+ 
+ export async function GET(): Promise<Response> {
+@@ -14,7 +13,9 @@ export async function GET(): Promise<Response> {
+     throw err;
+   }
+   const rows = allTenants();
+-  return new Response(toCsv(rows, ['id', 'name', 'status', 'balance']), {
++  const header = ['id', 'name', 'status', 'balance'];
++  const body = [header.join(','), ...rows.map((r) => [r.id, r.name, r.status, r.balance].join(','))].join('\r\n');
++  return new Response(body, {
+     headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="tenants.csv"' },
+   });
+ }

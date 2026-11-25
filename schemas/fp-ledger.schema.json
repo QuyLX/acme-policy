@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/fp-ledger.schema.json",
+  "title": "FalsePositiveLedger — reported false positives of one check over a window (Standard §8.7 rule 5; FE §8.2)",
+  "description": "Recorded data. owner.members and delegates come from the check owner's team; a confirmation counts only when made by a member or a delegate who is not the author of the change.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "checkId", "window", "findings", "owner", "reports"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "FalsePositiveLedger" },
+    "checkId": { "type": "string" },
+    "window": { "type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": { "from": { "type": "string" }, "to": { "type": "string" } } },
+    "findings": { "type": "integer", "minimum": 0, "description": "Findings the check reported in the window (the denominator)" },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["team", "members"],
+      "properties": { "team": { "type": "string" }, "members": { "type": "array", "items": { "type": "string" } } }
+    },
+    "delegates": { "type": "array", "items": { "type": "string" } },
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding", "changeAuthor", "verdict"],
+        "properties": {
+          "finding": { "type": "string" },
+          "changeAuthor": { "type": "string" },
+          "verdict": { "enum": ["false-positive", "true-positive", "disputed"] },
+          "confirmedBy": { "type": "string" }
+        }
+      }
+    }
+  }
+}

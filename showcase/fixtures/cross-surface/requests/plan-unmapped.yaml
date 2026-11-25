@@ -1,0 +1,5 @@
+primary: frontend
+repo: showcase/fixtures/cross-surface/frontend
+change: showcase/fixtures/cross-surface/changes/admin-columns.diff
+portfolio: showcase/fixtures/cross-surface/portfolio-index.json
+tier: R1

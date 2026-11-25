@@ -1,0 +1,17 @@
+diff --git a/apps/admin/src/tenants/list.mjs b/apps/admin/src/tenants/list.mjs
+index 13f7365..3be7b14 100644
+--- a/apps/admin/src/tenants/list.mjs
++++ b/apps/admin/src/tenants/list.mjs
+@@ -1 +1 @@
+-export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name));
++export const sortUsers = (users) => [...users].sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+diff --git a/journeys.yaml b/journeys.yaml
+index 1509819..db04721 100644
+--- a/journeys.yaml
++++ b/journeys.yaml
+@@ -5,4 +5,4 @@
+   criticality: critical
+   acceptance:
+     - { id: AC-TN-1, statement: "A staff session sees only the users of its own tenant" }
+-    - { id: AC-TN-5, statement: "Users are sorted by name" }
++    - { id: AC-TN-5, statement: "Users are sorted by name, ignoring case" }

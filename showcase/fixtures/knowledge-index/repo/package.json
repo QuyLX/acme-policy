@@ -1,0 +1,7 @@
+{
+  "name": "admin-legacy",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic requester repo for SC-18: pinned to an older @platform/server major.",
+  "dependencies": { "@platform/server": "2.4.0" }
+}

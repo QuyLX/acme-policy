@@ -1,0 +1,5 @@
+# quality.flaky-policy input (violating): a recorded 5x stress run of touched LRO code with one failing iteration.
+at: "2026-11-25T10:00:00Z"
+stress:
+  - testId: "src/poller.test.mjs::LRO polling keeps the newest operation state"
+    results: [{ iteration: 1, status: PASS }, { iteration: 2, status: PASS }, { iteration: 3, status: PASS }, { iteration: 4, status: FAIL }, { iteration: 5, status: PASS }]

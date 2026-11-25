@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.invalid/schemas/flaky-registry.schema.json",
+  "title": "FlakyRegistry — registered (pre-existing) flaky tests and their quarantines (Standard §7.14; FE §8.8)",
+  "description": "Generated from intermittent failures on main (FE §8.8, suggested window 30 days). A quarantine is decided by the owner of the test or check only (Standard §7.14 item 4): decidedBy must equal owner, enforced by lib/flaky.mjs because JSON Schema cannot compare two fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "entries"],
+  "properties": {
+    "apiVersion": { "const": "aisf/4.0" },
+    "kind": { "const": "FlakyRegistry" },
+    "window": { "type": "string", "pattern": "^[0-9]+d$", "description": "History window on main the registry is generated from" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["testId", "checkId", "owner", "quarantineId", "decidedBy", "quarantinedAt", "fixBy", "evidence"],
+        "properties": {
+          "testId": { "type": "string", "minLength": 1, "description": "<file>::<test title>" },
+          "checkId": { "type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$" },
+          "owner": { "type": "string", "minLength": 1, "description": "Owner of the test or check (a person or team, never an agent)" },
+          "quarantineId": { "type": "string", "pattern": "^Q-[0-9]{4}-[0-9]{3,}$" },
+          "decidedBy": { "type": "string", "minLength": 1, "description": "Must equal owner (Standard §7.14 item 4)" },
+          "quarantinedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}" },
+          "fixBy": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}", "description": "Deadline to fix (Standard §7.14 item 5); after it the quarantine no longer counts" },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["window", "mainFailures"],
+            "properties": {
+              "window": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["from", "to"],
+                "properties": { "from": { "type": "string" }, "to": { "type": "string" } }
+              },
+              "mainFailures": { "type": "integer", "minimum": 1, "description": "Intermittent failures on main inside the window (Standard §7.14 item 1)" },
+              "runs": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "replacementVerifier": { "type": "string", "description": "Required when the test protects a critical acceptance criterion (Standard §7.14 item 6)" }
+        }
+      }
+    }
+  }
+}

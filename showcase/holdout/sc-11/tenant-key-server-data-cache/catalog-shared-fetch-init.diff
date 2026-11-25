@@ -1,0 +1,13 @@
+diff --git a/packages/ui/src/catalog.ts b/packages/ui/src/catalog.ts
+new file mode 100644
+index 0000000..ac2facc
+--- /dev/null
++++ b/packages/ui/src/catalog.ts
+@@ -0,0 +1,7 @@
++// Product catalogue for the marketplace page. Shared request options, cached for an hour.
++const CACHED = { next: { revalidate: 3600 } };
++
++export async function loadCatalog(baseUrl: string) {
++  const res = await fetch(`${baseUrl}/v1/catalog`, CACHED);
++  return res.json();
++}

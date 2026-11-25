@@ -1,0 +1,121 @@
+# SC-20 — Knowledge changes mid-task (FE §20.3; Standard §6.5, §5.8-5.10, §4.7 item 6; FE §7.3, §7.7, §9.10).
+# Simulated: the task is a recorded, platform-neutral event log (the binding would derive it from issue, PR and CI
+# events); identities are recorded strings (no IdP) and the owner catalog is a synthetic `.factory/teams.yaml` /
+# owners.yaml. The ADR supersession arrives as a recorded `knowledge.changed` event from the index. PR approvals are a
+# recorded policy.sod input (`approvals:`, synthetic head SHA) instead of a platform review API. knowledge.impact
+# stays `warn` in the registry (pilot); the impact cases evaluate it at its targetEnforcement (`mode: default`) by calling
+# the check with the pipeline's inputs (base-revision reader of the temp git copy + the approval input).
+# The AC-edit case runs the real `acme-policy run --checks integrity.oracle-lock` on a temp git copy; the conflict record
+# is emitted by that check, and only its hand-off to the task log (the binding's job) is done by the scenario runner.
+# All decisions come from the real task runner, knowledge.impact v2, integrity.oracle-lock and lib/knowledge-gardening.mjs.
+apiVersion: aisf/4.0
+kind: ShowcaseScenario
+id: SC-20
+title: Knowledge changes mid-task
+demonstrates: [CORE-KNW-06, CORE-KNW-07, CORE-KNW-08, CORE-KNW-09, CORE-WRK-10]
+slice: 1
+mode: pilot
+cases:
+  - id: superseded-basis-blocks-merge
+    given: An ADR in the task basis is superseded while the task is VERIFYING; merge approval and merge are attempted
+    run: { kind: task, events: showcase/fixtures/knowledge-change/events/basis-superseded-merge.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-BASIS], taskState: BLOCKED }
+  - id: agent-decides-continue
+    given: The implementing agent records "continue" for the basis change
+    run: { kind: task, events: showcase/fixtures/knowledge-change/events/basis-agent-continue.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-BASIS-AUTHORITY], taskState: BLOCKED }
+  - id: requester-continue-at-medium
+    given: The requester records "continue" on a Medium task (only allowed at Low with no AC or scope touched)
+    run: { kind: task, events: showcase/fixtures/knowledge-change/events/basis-requester-continue.jsonl }
+    expect: { statuses: { workflow.conformance: FAIL }, rules: [WF-BASIS-AUTHORITY] }
+  - id: approver-reapproves
+    given: The design-review approver decides "reapprove" before the next gate
+    run: { kind: task, events: showcase/fixtures/knowledge-change/events/basis-reapprove.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: PLANNED }
+  - id: impact-without-reconciliation
+    given: A change inside the describes scope of an intent spec and an implementation-description guide, no record
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-code.diff, mode: default }
+    expect:
+      statuses: { knowledge.impact: FAIL }
+      rules: [knowledge.impact]
+      decision:
+        enforcement: blocking
+        affected.SPEC-TENANTS-LIST: missing BLOCKER
+        affected.GUIDE-TENANTS-IMPL: missing WARNING
+  - id: impact-proposed-only
+    given: The agent adds a ReconciliationRecord whose decisions are only proposed
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-proposed.diff, mode: default }
+    expect:
+      statuses: { knowledge.impact: FAIL }
+      rules: [knowledge.impact.proposed-only]
+      decision: { affected.SPEC-TENANTS-LIST: proposed BLOCKER, affected.GUIDE-TENANTS-IMPL: proposed WARNING }
+  - id: impact-decided-by-wrong-authority
+    given: The spec's keep decision is recorded by an engineer (who approved the head), not by the product owner
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-wrong-authority.diff, approvals: showcase/fixtures/knowledge-change/approvals/dev-b-approved.json, mode: default }
+    expect:
+      statuses: { knowledge.impact: FAIL }
+      rules: [knowledge.impact.not-authority]
+      decision: { affected.SPEC-TENANTS-LIST: not-authority BLOCKER, affected.GUIDE-TENANTS-IMPL: decided INFO }
+  - id: impact-roster-edited-in-pr
+    given: The same record, and the PR also adds the engineer to the product owner team in .factory/teams.yaml
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-roster-edit.diff, approvals: showcase/fixtures/knowledge-change/approvals/dev-b-approved.json, mode: default }
+    expect:
+      statuses: { knowledge.impact: FAIL }
+      rules: [knowledge.impact.not-authority]
+      decision: { affected.SPEC-TENANTS-LIST: not-authority BLOCKER, affected.GUIDE-TENANTS-IMPL: decided INFO }
+  - id: impact-human-keep
+    given: The product owner keeps the spec and the guide owner keeps the guide (ReconciliationRecord); both approved the head SHA
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-keep.diff, approvals: showcase/fixtures/knowledge-change/approvals/keep-deciders-approved.json, mode: default }
+    expect:
+      statuses: { knowledge.impact: PASS }
+      rules: [knowledge.impact.reconciled]
+      decision:
+        affected.SPEC-TENANTS-LIST: decided INFO
+        affected.GUIDE-TENANTS-IMPL: decided INFO
+        reconciliationRecords: [REC-TASK-20 valid]
+  - id: impact-named-decider-did-not-approve
+    given: The same record names the product owner as decider, but only engineers approved the head SHA
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-keep.diff, approvals: showcase/fixtures/knowledge-change/approvals/keep-po-did-not-approve.json, mode: default }
+    expect:
+      statuses: { knowledge.impact: FAIL }
+      rules: [knowledge.impact.unapproved]
+      decision: { affected.SPEC-TENANTS-LIST: unapproved BLOCKER, affected.GUIDE-TENANTS-IMPL: decided INFO }
+  - id: impact-keep-without-approval-input
+    given: The same record with no PR approval input available to the run
+    run: { kind: knowledge-impact, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-keep.diff, mode: default }
+    expect:
+      statuses: { knowledge.impact: NOT_ASSESSED }
+      rules: [knowledge.impact.unverified]
+      decision: { affected.SPEC-TENANTS-LIST: unverified WARNING, affected.GUIDE-TENANTS-IMPL: unverified WARNING }
+  - id: agent-edits-acceptance-criterion
+    given: The implementing agent rewrites AC-TN-5 in journeys.yaml to match its code
+    run: { kind: knowledge-ac-edit, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/ac-edit.diff, events: showcase/fixtures/knowledge-change/events/ac-edit.jsonl }
+    expect:
+      exitCode: 1
+      statuses: { integrity.oracle-lock: FAIL, workflow.conformance: PASS }
+      rules: [integrity.oracle-lock, KNW-CONFLICT]
+      taskState: BLOCKED
+      decision: { conflicts: [KC-TASK-20-AC-TN-5], conflictRecordErrors: [], taskConflicts: [KC-TASK-20-AC-TN-5] }
+  - id: code-only-change-no-conflict
+    given: Control case — the same code change without the AC edit; oracle-lock emits no conflict and the task proceeds
+    run: { kind: knowledge-ac-edit, repo: showcase/fixtures/knowledge-change/repo, change: showcase/fixtures/knowledge-change/changes/tenants-code.diff, events: showcase/fixtures/knowledge-change/events/ac-edit.jsonl }
+    expect:
+      exitCode: 0
+      statuses: { integrity.oracle-lock: PASS, workflow.conformance: PASS }
+      taskState: EXECUTING
+      decision: { conflicts: [], taskConflicts: [] }
+  - id: gardening-ownerless-runbook-r2
+    given: Gardening finds a runbook whose owner is gone; an R2 task cites it in its basis
+    run: { kind: knowledge-gardening, records: showcase/fixtures/knowledge-change/gardening, owners: showcase/fixtures/knowledge-change/gardening/owners.yaml, events: showcase/fixtures/knowledge-change/events/gardened-runbook-r2.jsonl }
+    expect:
+      statuses: { workflow.conformance: FAIL }
+      rules: [KNW-GARDEN-NEEDS-REVALIDATION, WF-BASIS-INELIGIBLE]
+      decision:
+        transitions: ["RUNBOOK-TENANTS-0001@2 ACTIVE→NEEDS_REVALIDATION"]
+        statuses: { ADR-TENANTS-0007: ACTIVE, RUNBOOK-TENANTS-0001: NEEDS_REVALIDATION }
+        reconciliation: ["REC-garden-1-RUNBOOK-TENANTS-0001 review/proposed"]
+        proposals: ["ADR-TENANTS-0007@1 periodic-review"]
+  - id: gardening-runbook-r1-allowed
+    given: Control case — an R1 (Low) task may still use the NEEDS_REVALIDATION runbook, marked
+    run: { kind: knowledge-gardening, records: showcase/fixtures/knowledge-change/gardening, owners: showcase/fixtures/knowledge-change/gardening/owners.yaml, events: showcase/fixtures/knowledge-change/events/gardened-runbook-r1.jsonl }
+    expect: { statuses: { workflow.conformance: PASS }, taskState: CONTEXT_READY }

@@ -1,0 +1,10 @@
+# Synthetic profile layer for SC-21 (Standard §7.3 item 10, layer 1).
+apiVersion: aisf/4.0
+kind: ProfileLayer
+layer: core
+id: aisf-core
+version: 4.0.0
+owner: team-platform
+checks:
+  - { id: integrity.oracle-lock, requirement: required }
+  - { id: quality.test, requirement: required, params: { coverage: { min: 70 } } }

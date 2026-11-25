@@ -1,0 +1,16 @@
+# Application descriptor (FE §7.2), synthetic.
+apiVersion: aisf/4.0
+kind: FactoryConfig
+application: console
+owner: team-console
+surfaces:
+  - id: console/catalog
+    owner: team-console
+    paths: ["apps/console/src/modules/catalog/**", "apps/console/test/catalog/**"]
+    archetypes: [catalog]
+    criticality: critical
+  - id: console/status
+    owner: team-console
+    paths: ["apps/console/src/status/**", "apps/console/test/status/**"]
+    archetypes: [dashboard]
+    criticality: critical

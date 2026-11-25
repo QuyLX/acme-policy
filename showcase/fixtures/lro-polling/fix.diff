@@ -1,0 +1,21 @@
+diff --git a/src/poller.mjs b/src/poller.mjs
+index 703d825..6f66137 100644
+--- a/src/poller.mjs
++++ b/src/poller.mjs
+@@ -32,12 +32,15 @@ export function latency(seed, n) {
+  */
+ export function pollOperation({ clock, server, seed, interval = 10, polls = 3 }) {
+   let state = 'PENDING';
++  let newest = -1; // sequence number of the newest request whose response was applied
+   for (let n = 0; n < polls; n++) {
+     const sentAt = n * interval;
+     clock.at(sentAt, () => {
+       const snapshot = server(sentAt);
+       clock.at(sentAt + latency(seed, n), () => {
+-        state = snapshot; // applies responses in arrival order
++        if (n < newest) return; // a stale response never overwrites a newer state
++        newest = n;
++        state = snapshot;
+       });
+     });
+   }

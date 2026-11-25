@@ -1,0 +1,7 @@
+# SC-12 input (RECORDED provider data): the provider deployed v1.5.0 without a verification run; the only attested run
+# verified v1.4.0.
+providerRun: showcase/fixtures/contract/provider-run-v1.json
+providerAttestation: showcase/fixtures/contract/provider-run-v1.sig.json
+deployments: showcase/fixtures/contract/deployments-v2-unverified.yaml
+environment: production
+now: "2026-11-20T12:00:00Z"

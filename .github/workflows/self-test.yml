@@ -6,6 +6,12 @@ on:
 jobs:
   harness:
     runs-on: ubuntu-latest
+    env:
+      # SC-05 egress (tech-design 13 §4, AC-5): the agent-step sandbox is docker --network none on Linux. Requiring the
+      # backend turns a missing Docker into an ERROR instead of an allowed NOT_ASSESSED.
+      FACTORY_SANDBOX_BACKEND: docker
+      # TODO(supply chain): pin by digest, node:26-slim@sha256:<digest> (not resolvable offline when this was written).
+      FACTORY_SANDBOX_IMAGE: node:26-slim
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -13,9 +19,13 @@ jobs:
           node-version: 26
       - name: Install
         run: corepack enable && pnpm install --frozen-lockfile
+      - name: Pull the sandbox image (the sandboxed step itself runs with --network none)
+        run: docker pull "$FACTORY_SANDBOX_IMAGE"
       - run: pnpm test
       - run: pnpm validate
       - run: pnpm showcase
+      - name: SC-05 exfiltration blocked by egress (Docker sandbox, must PASS)
+        run: node bin/acme-policy.mjs showcase --only SC-05
   generate:
     runs-on: ubuntu-latest
     steps:

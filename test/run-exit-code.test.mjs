@@ -16,6 +16,19 @@ test('regression: required blocking NOT_ASSESSED → 1 (VER-03: NOT_ASSESSED is 
 test('optional NOT_ASSESSED does not block → 0', () =>
   assert.equal(runExitCode([check('NOT_ASSESSED', { requirement: 'optional' })]), 0));
 
+// Review finding (2026-11-25): any `assessed-elsewhere` disposition used to exempt any required check.
+const ae = { type: 'assessed-elsewhere', decidedBy: 'policy', decidedAt: '2026-11-20T12:00:00Z', policyRef: 'Standard §7.5 item 7', assessedElsewhere: { runId: 'r', providerVersion: '1.4.0', validUntil: '2030-01-01T00:00:00Z' } };
+const na = (checkId, disposition) => ({ ...check('NOT_ASSESSED'), checkId, disposition });
+const at = { now: Date.parse('2029-01-01T00:00:00Z') };
+test('assessed-elsewhere exempts a required NOT_ASSESSED only for a registry cross-team-contract check → 0', () =>
+  assert.equal(runExitCode([na('admin.step-up-auth', ae)], at), 0));
+test('assessed-elsewhere on a non-contract required check (policy.sod) still blocks → 1', () =>
+  assert.equal(runExitCode([na('policy.sod', ae)], at), 1));
+test('assessed-elsewhere not decided by policy, or without policyRef, blocks → 1', () => {
+  assert.equal(runExitCode([na('admin.step-up-auth', { ...ae, decidedBy: 'user:someone' })], at), 1);
+  assert.equal(runExitCode([na('admin.step-up-auth', { ...ae, policyRef: undefined })], at), 1);
+});
+
 const probe = {
   checkId: 'test.env-probe', checkVersion: '1.0.0', requirement: 'required', enforcement: 'blocking', severity: 'BLOCKER', gate: 'merge',
   command: ['node', '-e', 'process.exit(process.env.NX_SKIP_NX_CACHE === "true" ? 0 : 1)'], timeoutSeconds: 10,

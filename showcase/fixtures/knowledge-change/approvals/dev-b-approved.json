@@ -1,0 +1,34 @@
+{
+  "workItemId": "TASK-20",
+  "tier": "Medium",
+  "headSha": "9f3c2e17a4b5d6c7e8f9a0b1c2d3e4f5a6b7c8d9",
+  "requester": {
+    "id": "user:dev-a",
+    "source": "issue-command"
+  },
+  "requesterSignedOff": false,
+  "author": "agent:implementer-1",
+  "pushers": [
+    "agent:implementer-1"
+  ],
+  "approvals": [
+    {
+      "by": "user:dev-b",
+      "commitSha": "9f3c2e17a4b5d6c7e8f9a0b1c2d3e4f5a6b7c8d9"
+    }
+  ],
+  "areas": [
+    {
+      "id": "apps/admin",
+      "teamMembers": [
+        "user:dev-b",
+        "user:dev-c"
+      ],
+      "codeOwners": [
+        "user:dev-b",
+        "user:dev-c"
+      ]
+    }
+  ],
+  "controlFilesTouched": []
+}

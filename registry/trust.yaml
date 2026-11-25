@@ -1,0 +1,23 @@
+# Trust registry (CORE-GOV-03; Standard §9.4, §9.9, §9.10; FE §10.3, §10.6). Control file: raising a level or loosening
+# a breaker needs the area (surface) owner AND the Factory owner (§9.10). Only T0, T1 and T2 exist.
+# Thresholds: the Standard's suggested defaults, mandatory in this profile (FE §10.3). Values marked PROPOSED are not
+# set by the Standard; the area owner agrees them before they gate a real promotion.
+apiVersion: aisf/4.0
+kind: TrustRegistry
+owners: { factoryOwner: "user:factory-owner" }
+thresholds:
+  maxWindowMonths: 6                  # §9.4 item 8
+  holdoutMaxGap: 0.05                 # PROPOSED (§9.4 item 11.3: "the profile's threshold")
+  T1: { minTasksPerStratum: 30, minAcceptance: 0.9, maxEscapedBlockers: 0 }   # FE §10.3: the count applies per tier
+  T2: { minTasksPerStratum: 50, maxEscapedDefects: 0, minWeeks: 8, maxUpper95: 0.06, maxInterventionRate: 0.1 }  # maxInterventionRate PROPOSED
+# Circuit breaker policy (Standard §9.9; FE §10.6). Thresholds are set after a baseline exists (§9.9 item 4): the rate
+# values are PROPOSED placeholders; the absolute A0-revert trigger and the 2-early-indicator pause are FE §10.6.
+breakerPolicy: { windowDays: 30, minSample: 20, revertRateMax: 0.05, earlyIndicatorsToPause: 2 }
+classes:
+  - taskClass: docs.link-fix
+    areaOwner: "user:docs-owner"
+    # PROPOSED: docs.link-fix is homogeneous (link edits in docs only, R0), so it declares one difficulty tier.
+    strata: [link-edit]
+    agentConfig: { modelSnapshot: provider/model-2026-09-15, playbook: docs-update@1.0.0, skills: [] }
+    level: T0
+    status: CURRENT

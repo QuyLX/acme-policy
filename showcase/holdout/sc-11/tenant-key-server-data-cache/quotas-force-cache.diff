@@ -1,0 +1,14 @@
+diff --git a/packages/ui/src/quotas.ts b/packages/ui/src/quotas.ts
+new file mode 100644
+index 0000000..2848785
+--- /dev/null
++++ b/packages/ui/src/quotas.ts
+@@ -0,0 +1,8 @@
++// Quota limits rarely change, so the response is kept in the data cache.
++export async function loadQuotas(baseUrl: string, token: string) {
++  const res = await fetch(baseUrl + '/v1/quotas', {
++    headers: { authorization: `Bearer ${token}` },
++    cache: 'force-cache',
++  });
++  return res.json();
++}

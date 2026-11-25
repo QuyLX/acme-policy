@@ -1,0 +1,23 @@
+# Trusted mechanisms (Standard §7.13 items 31, 36, 37; §8.7 rule 7; FE §8.2, §8.5; CORE-VER-10).
+# A trusted mechanism is a registered automation whose output only tightens: it MAY merge without human approval when
+# the output is verified to be of exactly its kind and the change contains nothing else. Registering or changing an
+# entry here is a control file change (Standard §7.13 item 37). Validated by schemas/trusted-mechanism.schema.json.
+apiVersion: aisf/4.0
+kind: TrustedMechanismRegistry
+mechanisms:
+  - id: trusted:baseline-snapshot
+    owner: team-platform
+    produces: check-baseline
+    direction: neutral
+    description: >-
+      When a baselineable check moves shadow → active, CI snapshots the violations that already exist on the target
+      branch into a baseline (Standard §8.7 rule 7; FE §8.2 "snapshotted by CI … not via anyone's PR").
+    runsOn: { executor: ci, event: push, ref: refs/heads/main }
+  - id: trusted:baseline-shrink
+    owner: team-platform
+    produces: check-baseline
+    direction: tightening
+    description: >-
+      After merge, removes baseline entries that no longer fail (stale) in an automated commit; it never adds an
+      entry (FE §8.5; Standard §7.5 `baselined`).
+    runsOn: { executor: ci, event: push, ref: refs/heads/main }

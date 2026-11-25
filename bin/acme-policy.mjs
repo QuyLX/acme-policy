@@ -6,7 +6,7 @@ import { parseArgs } from 'node:util';
 import { readJson, readYaml, readText, policyPath, POLICY_ROOT } from '../lib/io.mjs';
 import { validate } from '../lib/schema.mjs';
 import { checkDef, checkRegistry, controlFileGlobs, integrityParams } from '../lib/registry.mjs';
-import { exitCodeFor, runExitCode } from '../lib/result.mjs';
+import { assessedElsewhere, exitCodeFor, runExitCode } from '../lib/result.mjs';
 import { scanDiff } from '../checks/integrity/scan.mjs';
 import { sensorCheck, mutationScoreCheck } from '../checks/integrity/sensors.mjs';
 import { injectionHits, injectionPrescanCheck } from '../checks/review/injection-prescan.mjs';
@@ -25,6 +25,7 @@ import { knowledgeImpactCheck } from '../checks/knowledge-impact/impact.mjs';
 import { runCommandCheck, ADAPTER } from '../adapters/command-adapter.mjs';
 import { createContext, disposeContext, lintCheck, typecheckCheck, testCheck, buildCheck, storyInteractionCheck, visualStoriesCheck } from '../adapters/tools.mjs';
 import { kit, readProjectConfig } from '../lib/kit.mjs';
+import { resolutionEvidence } from '../lib/resolve.mjs';
 import { discoverProjects } from '../lib/workspace.mjs';
 import { checkResult } from '../lib/result.mjs';
 import { configParityCheck, parityProblems } from '../checks/meta/config-parity.mjs';
@@ -38,6 +39,9 @@ import { parse as parseYaml } from 'yaml';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { loadScenarios, runShowcase, showcaseExitCode } from '../lib/showcase.mjs';
+import { MODULE_CHECKS } from '../lib/modules/index.mjs';
+import { search } from '../lib/knowledge-index.mjs';
+import { loadKnowledgeInput } from '../checks/knowledge/index-input.mjs';
 import { runDiffChecks } from '../lib/fixture-run.mjs';
 import { registryProblems } from '../lib/registry-rules.mjs';
 import { lockfilePackages } from '../lib/lockfile.mjs';
@@ -48,6 +52,7 @@ import { extractApi } from '../checks/ds/api.mjs';
 import { consumerVerificationCheck, tokenUsage } from '../checks/ds/token-usage.mjs';
 import { bundleBudgetCheck } from '../checks/ds/bundle-budget.mjs';
 import { planApp, planPackage, planDsComponent, verifyCheckpoint } from '../lib/generate.mjs';
+import { readTestFiles, trace } from '../lib/trace.mjs';
 
 const USAGE = `Usage: acme-policy <command> [options]
 
@@ -55,6 +60,8 @@ const USAGE = `Usage: acme-policy <command> [options]
   integrity --diff <file|->               Run the diff-based checks (integrity sensors, injection pre-scan, secrets)
   sod --input <file>                      Run policy.sod on a platform-neutral input
   knowledge-impact --repo <dir> --changed <file|->   List knowledge artifacts affected by changed paths
+  knowledge-search --input <spec.yaml> <query...> [--include-draft]
+                                          Query the Knowledge Index (FE §7.8): sources, pinned repo and requester from the spec
   run --repo <dir> [--base <ref>] [--checks a,b | --command verify:fast] [--sod-input <file> | --github-payload <event.json>]
   attest --run <VerificationRun.json> --head <sha>
                                           Run registered checks and print a VerificationRun
@@ -64,6 +71,8 @@ const USAGE = `Usage: acme-policy <command> [options]
   ds api --repo <dir> [--write]           Print or write public API snapshots (projects with publicApi)
   ds token-usage --repo <dir>             Token Usage Index: design token → files using it (FE §5.5)
   task derive --events <file.jsonl>        Derive Task state, transitions, checkpoints, handoffs from a task event log
+  trace <req:KEY|journey|AC> --repo <dir> [--journeys <file>] [--tests <dir>] [--runs <file|dir,...>]
+                                          Requirement → journey → AC → scenario → test → PASS evidence (FE §7.7)
   sync --repo <dir> [--check]             Generate lint/TS/test config from the pinned presets + factory.config.yaml
   showcase [--only SC-xx] [--json]        Run the Factory's acceptance scenarios (FE §20.1)
   validate-self                           Validate this policy repo's own registries`;
@@ -189,6 +198,20 @@ function commandRun(values) {
     });
     return (memo = { hits, risk });
   };
+  // PR approvals of the head SHA and the PR author (the policy.sod input), for checks that bind a recorded human
+  // decision to an approval (knowledge.impact) or name the change author (oracle-lock conflicts). undefined without PR input.
+  const prInput = (() => {
+    if (values['github-payload']) {
+      const event = toChangeEvent(readJson(resolve(values['github-payload'])), { agentLogins: readYaml(policyPath('registry', 'agent-accounts.yaml')).logins });
+      return { headSha: event.headSha, author: event.author, approvals: event.reviews.filter((r) => r.state === 'approved').map(({ by, commitSha, isAgent }) => ({ by, commitSha, isAgent })) };
+    }
+    if (values['sod-input']) {
+      const input = readJson(values['sod-input']);
+      return { headSha: input.headSha, author: input.author, approvals: input.approvals ?? [] };
+    }
+    return undefined;
+  })();
+  const sensorCtx = { workItemId: process.env.FACTORY_WORK_ITEM, change: prInput?.author ? `change by ${prInput.author} (head ${prInput.headSha})` : undefined };
   const baseLock = readFile('base', 'pnpm-lock.yaml');
   const baseKeys = baseLock ? new Set(Object.keys(lockfilePackages(baseLock))) : null;
   const isNew = (name, version) => !baseKeys || !baseKeys.has(`${name}@${version}`);
@@ -219,7 +242,7 @@ function commandRun(values) {
     }
     else if (id === 'meta.descriptor-drift') checks.push(descriptorDriftCheck(def, repo));
     else if (id === 'integrity.mutation-score') checks.push(mutationScoreCheck(def));
-    else if (id.startsWith('integrity.')) checks.push(sensorCheck(def, shared().hits));
+    else if (id.startsWith('integrity.')) checks.push(sensorCheck(def, shared().hits, sensorCtx));
     else if (id === 'review.injection-prescan') checks.push(injectionPrescanCheck(def, diff, [...controlGlobs, ...promptAssets]));
     else if (id === 'sec.secrets') checks.push(secretsCheck(def, diff));
     else if (id === 'policy.risk') checks.push(riskCheck(def, shared().risk));
@@ -233,7 +256,7 @@ function commandRun(values) {
       checks.push((id === 'ds.api-compat' ? apiCompatCheck : id === 'ds.semver-changelog' ? semverChangelogCheck : docsApiSyncCheck)(def, dsCtx));
     } else if (id === 'workflow.conformance') {
       checks.push(values['task-events'] ? workflowConformanceCheck(def, readEvents(resolve(values['task-events']))) : checkResult(def, { status: 'NOT_ASSESSED', reason: 'no task event log (produced by the platform binding, M3)' }));
-    } else if (id === 'knowledge.impact') checks.push(knowledgeImpactCheck(def, repo, changed));
+    } else if (id === 'knowledge.impact') checks.push(knowledgeImpactCheck(def, repo, changed, { readFile, approvals: prInput && { headSha: prInput.headSha, approvals: prInput.approvals } }));
     else if (id === 'knowledge.record-schema') checks.push(recordSchemaCheck(def, repo));
     else if (id === 'knowledge.references') checks.push(referencesCheck(def, repo));
     else if (id === 'policy.sod') {
@@ -257,6 +280,8 @@ function commandRun(values) {
         }
         checks.push(result);
       }
+    } else if (MODULE_CHECKS[id]) {
+      checks.push(MODULE_CHECKS[id](def, { repo, base, changed, diff, readFile, config, executor, input: values.input ? resolve(values.input) : undefined }));
     } else throw new Error(`No runner for ${id}`);
   }
   disposeContext(ctx);
@@ -265,17 +290,25 @@ function commandRun(values) {
   for (const c of checks) byStatus[c.status]++;
   // NOT_ASSESSED is never PASS (VER-03); `local` evidence never satisfies a required check (VER-14).
   const requiredUnmet = checks
-    .filter((c) => c.requirement === 'required' && (c.status !== 'PASS' || executor === 'local'))
+    .filter((c) => c.requirement === 'required' && ((c.status !== 'PASS' && !assessedElsewhere(c)) || executor === 'local'))
     .map((c) => c.checkId);
 
+  // FE §8.5, §8.8: a check that planned the tests or resolved the test environment reports them as `x-fe-run`; the run
+  // carries the plan digest (extensions["x-fe"].testPlan) and environment.{id, kind, manifestDigest}.
+  const feRun = Object.assign({}, ...checks.map((c) => c.extensions?.['x-fe-run'] ?? {}));
+  // Standard §7.3 item 16, Appendix K.2; FE §8.3 item 5: when profile.resolve ran, its resolution trace (layers and
+  // versions, conflicts and how each was resolved) is the run's `resolution`, and the resolved layers its resolvedProfiles.
+  const resolved = resolutionEvidence(checks);
   const run = {
     schemaVersion: 'aisf/4.0',
     runId: `run-${Date.now()}`,
     workItemId: process.env.FACTORY_WORK_ITEM ?? 'local',
     channel: 'code',
     subject: { repo, commitSha: headSha, baseSha: base },
-    resolvedProfiles: [{ id: 'aisf-frontend', version: '1.1.0' }],
-    environment: { executor },
+    resolvedProfiles: resolved.resolvedProfiles ?? [{ id: 'aisf-frontend', version: '1.1.0' }],
+    ...(resolved.resolution ? { resolution: resolved.resolution } : {}),
+    environment: { executor, ...(feRun.environment ?? {}) },
+    ...(Object.keys(feRun).length ? { extensions: { 'x-fe': feRun } } : {}),
     adapters: [ADAPTER, ...readYaml(policyPath('registry', 'adapters.yaml')).adapters.map(({ adapterId, version }) => ({ id: adapterId, version }))],
     kit: { package: '@acme/presets', version: pinned.version },
     checks,
@@ -366,7 +399,7 @@ function main() {
   const { values, positionals } = parseArgs({
     args: rest,
     allowPositionals: true,
-    options: { schema: { type: 'string' }, diff: { type: 'string' }, input: { type: 'string' }, repo: { type: 'string' }, changed: { type: 'string' }, base: { type: 'string' }, checks: { type: 'string' }, 'sod-input': { type: 'string' }, 'github-payload': { type: 'string' }, head: { type: 'string' }, only: { type: 'string' }, json: { type: 'boolean' }, check: { type: 'boolean' }, write: { type: 'boolean' }, kind: { type: 'string' }, description: { type: 'string' }, checkpoint: { type: 'string' }, 'dry-run': { type: 'boolean' }, port: { type: 'string' }, 'privileged-admin': { type: 'boolean' }, command: { type: 'string' }, events: { type: 'string' }, 'task-events': { type: 'string' } },
+    options: { schema: { type: 'string' }, diff: { type: 'string' }, input: { type: 'string' }, repo: { type: 'string' }, changed: { type: 'string' }, base: { type: 'string' }, checks: { type: 'string' }, 'sod-input': { type: 'string' }, 'github-payload': { type: 'string' }, head: { type: 'string' }, only: { type: 'string' }, json: { type: 'boolean' }, check: { type: 'boolean' }, write: { type: 'boolean' }, kind: { type: 'string' }, description: { type: 'string' }, checkpoint: { type: 'string' }, 'dry-run': { type: 'boolean' }, port: { type: 'string' }, 'privileged-admin': { type: 'boolean' }, command: { type: 'string' }, events: { type: 'string' }, 'task-events': { type: 'string' }, journeys: { type: 'string' }, tests: { type: 'string' }, runs: { type: 'string' }, 'include-draft': { type: 'boolean' } },
   });
   switch (command) {
     case 'validate':
@@ -386,6 +419,14 @@ function main() {
       const result = knowledgeImpactCheck(checkDef('knowledge.impact'), resolve(values.repo), changed);
       print(result);
       return exitCodeFor(result.status);
+    }
+    case 'knowledge-search': {
+      // FE §7.8 `factory search`: access-filtered, ACTIVE + pinned versions by default, URI@SHA citations, conflicts.
+      if (!values.input || !positionals.length) { console.log(USAGE); return 2; }
+      const { index, pins, requester } = loadKnowledgeInput(resolve(values.input));
+      const answer = search(index, positionals.join(' '), { requester, pins, includeDraft: Boolean(values['include-draft']) });
+      print(answer);
+      return answer.conflicts.length ? 1 : 0;
     }
     case 'attest': {
       if (!values.run || !values.head) { console.log(USAGE); return 2; }
@@ -452,6 +493,20 @@ function main() {
       const d = deriveTask(events, playbook);
       print(d);
       return d.violations.length ? 1 : 0;
+    }
+    case 'trace': {
+      // trace <ref> --repo <dir>: traceability report from journeys.yaml, tagged tests and VerificationRuns (FE §7.7)
+      if (!positionals[0] || !values.repo) { console.log(USAGE); return 2; }
+      const repo = resolve(values.repo);
+      const runFiles = (values.runs ?? '').split(',').filter(Boolean).map((p) => resolve(p))
+        .flatMap((p) => (existsSync(p) && !p.endsWith('.json') ? readdirSync(p).filter((f) => f.endsWith('.json')).map((f) => join(p, f)) : [p]));
+      const t = trace(positionals[0], {
+        journeys: readYaml(values.journeys ? resolve(values.journeys) : join(repo, 'journeys.yaml')),
+        testFiles: readTestFiles([values.tests ? resolve(values.tests) : repo], repo),
+        runs: runFiles.map((f) => readJson(f)),
+      });
+      print(t);
+      return t.complete ? 0 : 1;
     }
     case 'sync':
       return commandSync(values);

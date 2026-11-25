@@ -1,0 +1,16 @@
+# Application descriptor (FE §7.2), synthetic.
+apiVersion: aisf/4.0
+kind: FactoryConfig
+application: admin
+owner: team-admin
+surfaces:
+  - id: admin/tenants
+    owner: team-admin
+    paths: ["apps/admin/src/tenants/**", "apps/admin/test/tenants/**"]
+    archetypes: [operational]
+    criticality: critical
+  - id: admin/audit
+    owner: team-admin
+    paths: ["apps/admin/src/audit/**", "apps/admin/test/audit/**"]
+    archetypes: [operational]
+    criticality: high

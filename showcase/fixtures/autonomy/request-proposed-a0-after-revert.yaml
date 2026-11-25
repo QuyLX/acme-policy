@@ -1,0 +1,8 @@
+# SC-15 autonomy request (DECISION ONLY: nothing merges; A0 is forbidden in pilot mode, Standard §20.8 item 4.7).
+# Trust is recomputed from the SC-13 production record; breakers are tightened from the recorded signals.
+facts: showcase/fixtures/autonomy/facts-docs-link-fix.yaml
+trustFrom: showcase/fixtures/trust/request-t2-after-50.yaml
+breakers: showcase/fixtures/autonomy/breakers-closed.yaml
+signals: showcase/fixtures/autonomy/signals-a0-revert.yaml
+now: "2026-11-20T12:00:00Z"
+proposed: A0

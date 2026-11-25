@@ -1,0 +1,18 @@
+# Recorded data (SC-10): the requester approves their own waiver on a BLOCKER check (FE §10.5).
+requesterId: dev-1
+waiver:
+  id: WVR-2026-0101
+  checkId: export.csv-injection
+  scope: apps/admin/src/app/tenants/export
+  reason: "Export rewrite to toCsv is scheduled in the next sprint"
+  owner: { id: dev-1 }
+  approvedBy: { id: dev-1 }
+  createdAt: "2026-11-25"
+  expiresAt: "2026-12-09"
+approvers:            # recorded org data (stand-in for CODEOWNERS and FE §10.5 roles); synthetic identities
+  techLead: lead-1
+  dsOwner: ds-owner-1
+  securityOwner: sec-owner-1
+  platformOwner: platform-owner-1
+  codeOwners: [lead-1, dev-1, sec-owner-1]
+now: "2026-11-25"
