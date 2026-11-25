@@ -144,3 +144,17 @@ tester.run('export.csv-injection csv-safe-export', R['csv-safe-export'], {
     { code: "const line = rows.map((r) => r.map((c) => String(c)).join(',')).join('\\r\\n');", errors: [{ messageId: 'join' }] },
   ],
 });
+
+tester.run('FE-I18N-001 no-literal-jsx-text', R['no-literal-jsx-text'], {
+  valid: [
+    { code: "const C = () => <p>{t('title')}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: 'const C = () => <p> </p>;', filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: "const C = () => <p>{'·'}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx' },
+    { code: 'const C = () => <p>Tenants</p>;', filename: '/repo/apps/admin/src/app/tenants/page.test.tsx' },
+  ],
+  invalid: [
+    { code: 'const C = () => <p>Tenants</p>;', filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
+    { code: "const C = () => <p>{'No tenants'}</p>;", filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
+    { code: 'const C = () => <EmptyState title="No tenants" />;', filename: '/repo/apps/admin/src/app/tenants/page.tsx', errors: [{ messageId: 'literal' }] },
+  ],
+});

@@ -16,7 +16,7 @@ checks:
     enforcement: blocking
     severity: BLOCKER
     gate: merge
-    implementsRules: [FE-ARCH-001, FE-ARCH-006, FE-DS-001, FE-STATE-002, FE-UX-001]
+    implementsRules: [FE-API-001, FE-ARCH-001, FE-ARCH-006, FE-CTX-001, FE-DS-001, FE-I18N-001, FE-NEXT-005, FE-STATE-002, FE-UX-001]
     baselineable: true
     fpSlo: 0.05
     autoDemote: true

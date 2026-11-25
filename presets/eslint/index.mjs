@@ -20,6 +20,7 @@ const PROFILE_RULES = {
     '@acme/wrapped-server-actions': 'error',
     '@acme/no-direct-data-cache': 'error',
     '@acme/tenant-query-key': 'error',
+    '@acme/no-literal-jsx-text': 'error',
     ...jsxA11y.flatConfigs.strict.rules,
   },
   'react-lib': {
