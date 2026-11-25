@@ -28,6 +28,9 @@ test('deps.policy: a reviewed exception covers only its package pattern AND the 
   assert.equal(evaluateDeps({ packages: [pkg('@img/sharp-libvips-linux-x64', 'LGPL-3.0-or-later')], advisories: [], policy, isNew: () => true }).fail, false);
   assert.equal(evaluateDeps({ packages: [pkg('@img/sharp-libvips-linux-x64', 'GPL-3.0')], advisories: [], policy, isNew: () => true }).fail, true);
   assert.equal(evaluateDeps({ packages: [pkg('some-mpl-lib', 'MPL-2.0')], advisories: [], policy, isNew: () => true }).fail, true);
+  assert.equal(evaluateDeps({ packages: [pkg('@acme/presets', null)], advisories: [], policy, isNew: () => true }).fail, false, 'first-party kit with no license is a reviewed exception (D-29)');
+  assert.equal(evaluateDeps({ packages: [pkg('@acme/presets', 'GPL-3.0')], advisories: [], policy, isNew: () => true }).fail, true);
+  assert.equal(evaluateDeps({ packages: [pkg('other-pkg', null)], advisories: [], policy, isNew: () => true }).fail, true);
 });
 test('deps.policy: a high advisory introduced by the change blocks; a pre-existing one is a warning with its SLA', () => {
   assert.equal(evaluateDeps({ packages: [], advisories: [adv('high')], policy, isNew: () => true }).fail, true);

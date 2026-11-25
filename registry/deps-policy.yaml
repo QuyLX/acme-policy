@@ -11,6 +11,7 @@ licenses:
     - { name: "lightningcss", license: MPL-2.0, owner: team-platform, reason: "CSS compiler used by Tailwind v4 at build time; not modified or redistributed in source form" }
     - { name: "lightningcss-*", license: MPL-2.0, owner: team-platform, reason: "platform binary of lightningcss (see above)" }
     - { name: "axe-core", license: MPL-2.0, owner: team-platform, reason: "accessibility test engine used only in DS tests and Storybook (devDependency); not shipped" }
+    - { name: "@acme/presets", license: null, owner: team-platform, reason: "first-party verification kit from this policy repo; private, never published; vendored as a tarball (D-29). Its package.json declares no license (reported as unknown); choosing one is a separate decision" }
 advisories:
   blockAtMerge: [critical, high]     # only for packages the change introduces or changes
   remediationDays: { critical: 7, high: 30, moderate: 90, low: 180 }   # CORE-DEP-02; overdue blocks release
