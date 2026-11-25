@@ -10,7 +10,7 @@ test('every runnable showcase case passes; pending cases are NOT_ASSESSED, never
 });
 
 // The runner itself must be able to fail: a wrong expectation is reported, not swallowed (mutation proof).
-test('an unexpected pending case fails the suite; the five known cases do not', () => {
+test('an unexpected pending case fails the suite; the allowed cases do not', () => {
   const known = [...ALLOWED_PENDING].map((id) => {
     const [scenario, ...rest] = id.split('.');
     return { scenario, case: rest.join('.'), status: 'NOT_ASSESSED' };
