@@ -39,10 +39,15 @@ tester.run('FE-ARCH-001 no-private-module-import', R['no-private-module-import']
     { code: "import { list } from '../../billing/index';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
     { code: "import { row } from '../ui/row';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
     { code: "import { list } from '@/modules/billing';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx' },
+    { code: "import { readTenant } from '../../tenants';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
+    { code: "import { x } from '../ui/row';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
+    { code: "import { readTenant } from '@/domains/tenants';", filename: '/repo/apps/admin/src/domains/users/server/read.ts' },
   ],
   invalid: [
     { code: "import { price } from '../../billing/domain/price';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx', errors: [{ messageId: 'private' }] },
     { code: "import { price } from '@/modules/billing/domain/price';", filename: '/repo/apps/console/src/modules/compute/features/list.tsx', errors: [{ messageId: 'private' }] },
+    { code: "import { readTenant } from '../../tenants/server/read';", filename: '/repo/apps/admin/src/domains/users/server/read.ts', errors: [{ messageId: 'private' }] },
+    { code: "import { readTenant } from '@/domains/tenants/server/read';", filename: '/repo/apps/admin/src/domains/users/server/read.ts', errors: [{ messageId: 'private' }] },
   ],
 });
 
